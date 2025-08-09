@@ -1,32 +1,21 @@
-import { parseArgs } from 'node:util';
 import Koa from 'koa';
 import Router from '@koa/router';
 
-import { parametersSchema } from './schemas/parameters.js';
 import errorHandler from './middleware/error.js';
-import infoHandlerFactory from './handlers/info.factory.js';
-import uploadHandlerFactory from './handlers/upload.factory.js';
-
-const { values } = parseArgs({
-    options: {
-        port: { type: 'string' },
-        screen_width: { type: 'string' },
-        screen_height: { type: 'string' },
-        size_limit: { type: 'string' },
-        work_directory: { type: 'string' },
-    },
-});
-
-const parameters = parametersSchema.parse(values);
+import infoHandler from './handlers/info.js';
+import uploadHandler from './handlers/upload.js';
+import config from './utils/config.js';
 
 const app = new Koa();
 const router = new Router();
 
 app.use(errorHandler);
-router.get('/info', infoHandlerFactory(parameters));
-router.post('/upload', uploadHandlerFactory(parameters));
+
+router.get('/info', infoHandler);
+router.post('/upload', uploadHandler);
 
 app.use(router.routes());
-app.listen(parameters.port, () =>
-    console.log(`Server listening on port ${parameters.port}`)
+
+app.listen(config.port, () =>
+    console.log(`Server listening on port ${config.port}`)
 )

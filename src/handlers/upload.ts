@@ -3,16 +3,16 @@ import { getStreamAsBuffer, MaxBufferError } from 'get-stream';
 import { PayloadTooLargeError, BadRequestError } from 'http-errors-enhanced';
 import sharp from 'sharp';
 
-import type { Parameters } from '../schemas/parameters.js';
+import config from '../utils/config.js';
+import '../services/imageRepository.js';
 
-export default (parameters: Parameters) =>
-    async (ctx: Context) => {
+export default async (ctx: Context) => {
         let buf: Buffer;
         try {
-            buf = await getStreamAsBuffer(ctx.req, { maxBuffer: parameters.size_limit });
+            buf = await getStreamAsBuffer(ctx.req, { maxBuffer: config.size_limit });
         } catch (err) {
             if (err instanceof MaxBufferError)
-                throw new PayloadTooLargeError(`Max ${parameters.size_limit} bytes`);
+                throw new PayloadTooLargeError(`Max ${config.size_limit} bytes`);
             throw err;
         }
 
