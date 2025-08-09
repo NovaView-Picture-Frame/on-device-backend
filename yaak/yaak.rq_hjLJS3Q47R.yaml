@@ -1,0 +1,23 @@
+type: http_request
+model: http_request
+id: rq_hjLJS3Q47R
+createdAt: 2025-08-09T03:53:06.495113
+updatedAt: 2025-08-09T04:10:17.293676
+workspaceId: wk_mjUiWLAinj
+folderId: fl_AFPznEpWr2
+authentication: {}
+authenticationType: apikey
+body:
+  filePath: /Users/carson/Library/Mobile Documents/com~apple~Preview/Documents/Campus Map.pdf
+bodyType: binary
+description: ''
+headers:
+- enabled: true
+  name: ''
+  value: ''
+  id: X47WaizVNq
+method: POST
+name: Wrong Data
+sortPriority: 1000.0
+url: localhost:3000/upload
+urlParameters: []

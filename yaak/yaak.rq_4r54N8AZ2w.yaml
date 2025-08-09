@@ -1,0 +1,23 @@
+type: http_request
+model: http_request
+id: rq_4r54N8AZ2w
+createdAt: 2025-08-09T03:53:44.743937
+updatedAt: 2025-08-09T13:14:52.906754
+workspaceId: wk_mjUiWLAinj
+folderId: fl_AFPznEpWr2
+authentication: {}
+authenticationType: apikey
+body:
+  filePath: /Users/carson/Desktop/NovaView/images/IMG_0187.HEIC
+bodyType: binary
+description: ''
+headers:
+- enabled: true
+  name: ''
+  value: ''
+  id: X47WaizVNq
+method: POST
+name: Normal
+sortPriority: 3000.0
+url: localhost:3000/upload
+urlParameters: []

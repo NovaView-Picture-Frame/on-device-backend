@@ -10,6 +10,9 @@ export default defineConfig({
         target: 'esnext',
         minify: true,
     },
+    esbuild: {
+        legalComments: 'none',
+    },
     plugins: [
         viteStaticCopy({
             targets: [

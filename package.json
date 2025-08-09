@@ -1,16 +1,24 @@
 {
 	"type": "module",
 	"scripts": {
-		"dev": "concurrently -k 'vite build -w' 'wait-on dist/index.js && node --watch $_'",
+		"dev:node": "wait-on dist/index.js && node --watch $_ --port 3000 --screen_width 1920 --screen_height 1080 --size_limit 10485760 --work_directory ./data",
+		"dev": "concurrently -k 'vite build -w' 'npm:dev:node'",
 		"build": "vite build"
 	},
 	"devDependencies": {
+		"@koa/router": "^14.0.0",
+		"@types/koa": "^3.0.0",
+		"@types/koa__router": "^12.0.4",
 		"@types/node": "^24.2.1",
 		"concurrently": "^9.2.0",
+		"get-stream": "^9.0.1",
+		"http-errors-enhanced": "^3.0.2",
+		"koa": "^3.0.1",
 		"rolldown-vite": "^7.1.0",
 		"sharp": "^0.34.3",
 		"typescript": "^5.9.2",
 		"vite-plugin-static-copy": "^3.1.1",
-		"wait-on": "^8.0.4"
+		"wait-on": "^8.0.4",
+		"zod": "^4.0.15"
 	}
 }

@@ -1,0 +1,23 @@
+type: http_request
+model: http_request
+id: rq_qMtcqga8UR
+createdAt: 2025-08-09T00:58:36.693769
+updatedAt: 2025-08-09T03:54:05.653028
+workspaceId: wk_mjUiWLAinj
+folderId: fl_AFPznEpWr2
+authentication: {}
+authenticationType: apikey
+body:
+  filePath: /Users/carson/Library/Mobile Documents/com~apple~CloudDocs/Downloads/united-kingdom.png
+bodyType: null
+description: ''
+headers:
+- enabled: true
+  name: ''
+  value: ''
+  id: SkT2pjxKWS
+method: POST
+name: Wrong Type
+sortPriority: 0.0
+url: localhost:3000/upload
+urlParameters: []
