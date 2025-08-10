@@ -12,8 +12,9 @@ const db: InstanceType<typeof Database> = new Database(
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS ${NAME} (
-        sha256 BLOB NOT NULL UNIQUE
+        id INTEGER PRIMARY KEY,
+        sha256 BLOB NOT NULL UNIQUE CHECK(length(sha256)=32)
     )
 `).run();
 
-export default db;
+export default db

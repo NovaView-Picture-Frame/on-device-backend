@@ -1,5 +1,5 @@
 import path from 'node:path';
-import fs from 'node:fs';
+import fs from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { z } from 'zod';
 
@@ -10,16 +10,19 @@ const configSchema = z.object({
     size_limit: z.coerce.number().int().positive(),
     work_directory: z.string().nonempty()
         .transform(dir => path.resolve(dir)).refine(
-            dir => {
+            async dir => {
                 try {
-                    fs.mkdirSync(dir, { recursive: true });
-                    fs.accessSync(dir, fs.constants.R_OK | fs.constants.W_OK);
+                    await Promise.all([
+                        fs.mkdir(`${dir}/originals`, { recursive: true }),
+                        fs.rm(`${dir}/tmp`, { recursive: true, force: true })
+                    ]);
+                    await fs.mkdir(`${dir}/tmp`, { recursive: true })
                     return true;
                 } catch {
                     return false;
                 }
             },
-            { message: "Directory is not readable or writable." }
+            { message: "Failed to initialize the working directory" }
         ),
 });
 
@@ -33,4 +36,4 @@ const { values } = parseArgs({
     },
 });
 
-export default configSchema.parse(values);
+export default await configSchema.parseAsync(values);
