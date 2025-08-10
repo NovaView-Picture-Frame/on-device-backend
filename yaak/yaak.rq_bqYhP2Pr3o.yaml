@@ -1,0 +1,30 @@
+type: http_request
+model: http_request
+id: rq_bqYhP2Pr3o
+createdAt: 2025-08-10T20:06:49.616240
+updatedAt: 2025-08-10T20:21:53.432759
+workspaceId: wk_mjUiWLAinj
+folderId: fl_MS45psLEZr
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: GET
+name: Normal
+sortPriority: 2000.0
+url: localhost:3000/upload/check/22cad22852bfc92f8c1bfb40973ec06da54cf84282d4a729c312aef0e8df760a
+urlParameters:
+- enabled: true
+  name: '11231'
+  value: XXXX
+  id: X5VhXaBZMm
+- enabled: true
+  name: ''
+  value: ''
+  id: 6PuJPBkBHj
+- enabled: true
+  name: ''
+  value: ''
+  id: U3sfFHQzEa

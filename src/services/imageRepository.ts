@@ -23,3 +23,6 @@ export const insert: (sha256: Buffer) => { id: number; inserted: boolean } =
                 inserted: false
             };
     }).immediate;
+
+export const getId = (sha256: Buffer) =>
+    getIdStmt.get(sha256) as number | undefined;

@@ -1,0 +1,13 @@
+type: folder
+model: folder
+id: fl_MS45psLEZr
+createdAt: 2025-08-10T12:56:10.211806
+updatedAt: 2025-08-10T20:04:39.315334
+workspaceId: wk_mjUiWLAinj
+folderId: null
+authentication: {}
+authenticationType: null
+description: ''
+headers: []
+name: /upload/check/:hash
+sortPriority: -438674460000.0
