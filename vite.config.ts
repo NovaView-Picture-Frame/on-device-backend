@@ -17,6 +17,10 @@ export default defineConfig({
         viteStaticCopy({
             targets: [
                 {
+                    src: 'config.yaml',
+                    dest: '.',
+                },
+                {
                     src: 'node_modules/**/@img/sharp-*/lib/sharp-*.node',
                     dest: 'dependencies/@img',
                     rename: (_name, _ext, path) => {
