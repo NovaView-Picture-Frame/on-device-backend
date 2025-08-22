@@ -1,5 +1,5 @@
 import type { Context } from 'koa';
-import config from '../utils/config.js';
+import config from '../utils/config';
 
 export default (ctx: Context) =>
     ctx.body = {
@@ -8,4 +8,4 @@ export default (ctx: Context) =>
             screen_height: config.screen_height,
             size_limit: config.size_limit,
         }
-    }
+    };

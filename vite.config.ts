@@ -17,26 +17,17 @@ export default defineConfig({
         viteStaticCopy({
             targets: [
                 {
-                    src: 'node_modules/**/@img/sharp-*/lib/sharp-*.node',
-                    dest: 'dependencies/@img',
-                    rename: (_name, _ext, path) => {
-                        const ver = path.match(/@img\/(sharp-[^/]+)/)?.[1];
-                        if (!ver) throw new Error(`Bad sharp path: ${path}`);
-                        return `${ver}/sharp.node`;
-                    }
+                    src: 'config.yaml',
+                    dest: '.',
                 },
                 {
-                    src: 'node_modules/**/@img/sharp-*/lib/libvips-cpp.*',
-                    dest: 'dependencies/@img',
-                    rename: (name, ext, path) => {
-                        const ver = path.match(/@img\/(sharp-[^/]+)/)?.[1];
-                        if (!ver) throw new Error(`Bad sharp path: ${path}`);
-                        return `${ver}/lib/${name}.${ext}`;
-                    }
+                    src: 'node_modules/sharp/src/build/Release/sharp-*.node',
+                    dest: 'node_modules/@img',
+                    rename: (name, _ext, _path) => `${name}/sharp.node`,
                 },
                 {
                     src: 'node_modules/better-sqlite3/build/Release/better_sqlite3.node',
-                    dest: 'dependencies',
+                    dest: 'node_modules/better-sqlite3',
                 },
             ],
         }),
