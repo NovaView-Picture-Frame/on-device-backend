@@ -1,20 +1,28 @@
 type: http_request
 model: http_request
-id: rq_fjqTEqeAwY
-createdAt: 2025-08-10T20:21:51.416918
-updatedAt: 2025-08-10T20:22:50.620938
+id: rq_BDRKB688Ca
+createdAt: 2025-08-17T23:05:55.962837
+updatedAt: 2025-08-18T00:45:43.731300
 workspaceId: wk_mjUiWLAinj
 folderId: fl_MS45psLEZr
 authentication: {}
 authenticationType: null
-body: {}
-bodyType: null
+body:
+  text: |-
+    {
+      "sha256": "1234123412341234123412341234123412341234123412341234123412341234"
+    }
+bodyType: application/json
 description: ''
-headers: []
-method: GET
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: IjzuygQvGg
+method: POST
 name: Wrong Hash
 sortPriority: 1000.0
-url: localhost:3000/upload/check/1234123412341234123412341234123412341234123412341234123412341234
+url: localhost:3000/query/hash
 urlParameters:
 - enabled: true
   name: '11231'

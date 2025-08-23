@@ -1,28 +1,25 @@
 type: http_request
 model: http_request
-id: rq_fXUSFp6WKj
-createdAt: 2025-08-10T12:56:46.311027
-updatedAt: 2025-08-18T00:46:01.900080
+id: rq_gASTPaTzLR
+createdAt: 2025-08-23T16:55:07.641746
+updatedAt: 2025-08-23T16:58:00.957560
 workspaceId: wk_mjUiWLAinj
-folderId: fl_MS45psLEZr
+folderId: fl_q69sSjq45q
 authentication: {}
 authenticationType: null
 body:
-  text: |-
-    {
-      "sha256": "1234"
-    }
+  text: Hello, world!
 bodyType: application/json
 description: ''
 headers:
 - enabled: true
   name: Content-Type
   value: application/json
-  id: IjzuygQvGg
+  id: 76u33zmpzC
 method: POST
-name: Invalid Hash
-sortPriority: 750.0
-url: localhost:3000/query/hash
+name: Invalid JSON
+sortPriority: 0.0
+url: localhost:3000/upload
 urlParameters:
 - enabled: true
   name: '11231'

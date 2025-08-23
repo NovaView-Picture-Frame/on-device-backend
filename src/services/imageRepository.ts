@@ -1,28 +1,48 @@
-import db from '../utils/db.js';
+import db from '../utils/db';
 
-const insertStmt = db.prepare(`
-    INSERT INTO images (sha256) VALUES (?)
+const getByHashStmt = db.prepare<
+    Buffer,
+    { id: number; cover_left: number; cover_top: number }
+>(`
+    SELECT id, cover_left, cover_top FROM images WHERE sha256 = ?
+`);
+
+export const getByHash = (hash: Buffer) => getByHashStmt.get(hash);
+
+const insertStmt = db.prepare<
+    { hash: Buffer, cover_left: number, cover_top: number },
+    { id: number, cover_left: number, cover_top: number }
+>(`
+    INSERT INTO images (
+        sha256, cover_left, cover_top
+    ) VALUES (:hash, :cover_left, :cover_top)
     ON CONFLICT(sha256) DO NOTHING
-    RETURNING id
-`).pluck();
+    RETURNING id, cover_left, cover_top
+`);
 
-const getIdStmt = db.prepare(
-    'SELECT id FROM images WHERE sha256 = ?'
-).pluck();
+export const upsert = db.transaction((
+    hash: Buffer,
+    cover_left: number,
+    cover_top: number,
+) => {
+    const record = insertStmt.get({ hash, cover_left, cover_top });
+    
+    if (record) {
+        return {
+            id: record.id,
+            created: true,
+            cover_left: record.cover_left,
+            cover_top: record.cover_top,
+        }
+    } else {
+        const existing = getByHash(hash);
+        if (!existing) throw new Error("Database exception");
 
-export const insert: (sha256: Buffer) => { id: number; inserted: boolean } =
-    db.transaction(sha256 => {
-        const id = insertStmt.get(sha256) as number | undefined;
-        return id !== undefined
-            ? {
-                id,
-                inserted: true
-            }
-            : {
-                id: getIdStmt.get(sha256) as number,
-                inserted: false
-            };
-    }).immediate;
-
-export const getId = (sha256: Buffer) =>
-    getIdStmt.get(sha256) as number | undefined;
+        return {
+            id: existing.id,
+            created: false,
+            cover_left: existing.cover_left,
+            cover_top: existing.cover_top,
+        }
+    }
+}).immediate;

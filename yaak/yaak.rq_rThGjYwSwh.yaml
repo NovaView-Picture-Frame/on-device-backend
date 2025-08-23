@@ -1,8 +1,8 @@
 type: http_request
 model: http_request
-id: rq_fXUSFp6WKj
-createdAt: 2025-08-10T12:56:46.311027
-updatedAt: 2025-08-18T00:46:01.900080
+id: rq_rThGjYwSwh
+createdAt: 2025-08-17T23:18:46.947871
+updatedAt: 2025-08-18T00:46:31.503496
 workspaceId: wk_mjUiWLAinj
 folderId: fl_MS45psLEZr
 authentication: {}
@@ -10,7 +10,8 @@ authenticationType: null
 body:
   text: |-
     {
-      "sha256": "1234"
+      "sha256": "c52d2e0e5fbe3f2c9d23d4964729d238d0f7dc35b9bbe05ee8acf050390ff579",
+      "hello": "world"
     }
 bodyType: application/json
 description: ''
@@ -20,8 +21,8 @@ headers:
   value: application/json
   id: IjzuygQvGg
 method: POST
-name: Invalid Hash
-sortPriority: 750.0
+name: Extra Keys
+sortPriority: 500.0
 url: localhost:3000/query/hash
 urlParameters:
 - enabled: true

@@ -1,20 +1,28 @@
 import Koa from 'koa';
+import bodyParser from '@koa/bodyparser';
 import Router from '@koa/router';
 
-import errorHandler from './middleware/error.js';
-import infoHandler from './handlers/info.js';
-import uploadHandler from './handlers/upload.js';
-import uploadCheckHandler from './handlers/uploadCheck.js';
-import config from './utils/config.js';
+import errorHandlingMiddleware, { BadRequestError } from './middleware/error';
+import infoHandler from './handlers/info';
+import queryByHashHandler from './handlers/queryByHash';
+import uploadHandler from './handlers/upload';
+
+import config from './utils/config';
 
 const app = new Koa();
+
+app.use(errorHandlingMiddleware);
+app.use(bodyParser({
+    onError: () => {
+        throw new BadRequestError("Invalid JSON body");
+    },
+}));
+
 const router = new Router();
 
-app.use(errorHandler);
-
 router.get('/info', infoHandler);
+router.post('/query/hash', queryByHashHandler);
 router.post('/upload', uploadHandler);
-router.get('/upload/check/:hash', uploadCheckHandler);
 
 app.use(router.routes());
 
