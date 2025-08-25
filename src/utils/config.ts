@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import { z } from 'zod';
 import yaml from 'yaml';
-import { initDirs, type DirTree } from './initDirs';
+import initDirs, { type DirTree } from './initDirs';
 
 const configSchema = z.object({
     port: z.coerce.number().int().positive().max(65535),
@@ -17,7 +17,13 @@ const dirTree = {
 } satisfies DirTree;
 
 const file = await fs.readFile('config.yaml', 'utf8');
-const { work_dir, ...rest } = await configSchema.parseAsync(yaml.parse(file));
-const paths = await initDirs(work_dir, dirTree);
+const config = await configSchema.parseAsync(yaml.parse(file));
+const paths = await initDirs(config.work_dir, dirTree);
 
-export default { ...rest, paths };
+export default { 
+    port: config.port,
+    screen_width: config.screen_width,
+    screen_height: config.screen_height,
+    size_limit: config.size_limit,
+    paths,
+};

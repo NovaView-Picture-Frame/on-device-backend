@@ -50,26 +50,25 @@ function assertPaths<T extends DirTree>(paths: NodePaths, tree: T):
         }
     }
 
-export const initDirs =
-    async <const T extends DirTree>(root: string, tree: T) => {
-        const tmpRoot = `${root}/.tmp`;
-        await fs.rm(tmpRoot, { recursive: true, force: true });
+export default async <const T extends DirTree>(root: string, tree: T) => {
+    const tmpRoot = `${root}/.tmp`;
+    await fs.rm(tmpRoot, { recursive: true, force: true });
 
-        const paths: NodePaths = {};
-        const promises: ReturnType<typeof fs.mkdir>[] = [];
-        for (const [path, node] of walkTree(tree)) {
-            const cur = getNodeAtPath(paths, path);
-            const relPath = path ? `/${path}` : '';
+    const paths: NodePaths = {};
+    const promises: ReturnType<typeof fs.mkdir>[] = [];
+    for (const [path, node] of walkTree(tree)) {
+        const cur = getNodeAtPath(paths, path);
+        const relPath = path ? `/${path}` : '';
 
-            promises.push(fs.mkdir(
-                cur._base = root + relPath, { recursive: true }
-            ));
-            node._withTmp && promises.push(fs.mkdir(
-                cur._tmp = tmpRoot + relPath, { recursive: true }
-            ));
-        }
+        promises.push(fs.mkdir(
+            cur._base = root + relPath, { recursive: true }
+        ));
+        node._withTmp && promises.push(fs.mkdir(
+            cur._tmp = tmpRoot + relPath, { recursive: true }
+        ));
+    }
 
-        await Promise.all(promises);
-        assertPaths(paths, tree);
-        return paths;
-    };
+    await Promise.all(promises);
+    assertPaths(paths, tree);
+    return paths;
+};

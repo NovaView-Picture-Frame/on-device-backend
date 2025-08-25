@@ -2,13 +2,13 @@ type: http_request
 model: http_request
 id: rq_hjLJS3Q47R
 createdAt: 2025-08-09T03:53:06.495113
-updatedAt: 2025-08-09T04:10:17.293676
+updatedAt: 2025-08-23T16:46:50.987932
 workspaceId: wk_mjUiWLAinj
 folderId: fl_AFPznEpWr2
 authentication: {}
 authenticationType: apikey
 body:
-  filePath: /Users/carson/Library/Mobile Documents/com~apple~Preview/Documents/Campus Map.pdf
+  filePath: /Users/carson/Desktop/NovaView/sharp metadata.rtf
 bodyType: binary
 description: ''
 headers:
@@ -18,6 +18,6 @@ headers:
   id: X47WaizVNq
 method: POST
 name: Wrong Data
-sortPriority: 1000.0
+sortPriority: 2000.0
 url: localhost:3000/upload
 urlParameters: []

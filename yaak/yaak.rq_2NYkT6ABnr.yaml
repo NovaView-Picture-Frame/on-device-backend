@@ -1,8 +1,8 @@
 type: http_request
 model: http_request
-id: rq_qMtcqga8UR
-createdAt: 2025-08-09T00:58:36.693769
-updatedAt: 2025-08-23T17:58:16.534466
+id: rq_2NYkT6ABnr
+createdAt: 2025-08-23T16:46:48.187155
+updatedAt: 2025-08-23T17:51:47.386612
 workspaceId: wk_mjUiWLAinj
 folderId: fl_AFPznEpWr2
 authentication: {}
@@ -12,19 +12,15 @@ body:
     {
       "hello": "world"
     }
-bodyType: application/json
+bodyType: null
 description: ''
 headers:
 - enabled: true
   name: ''
   value: ''
   id: SkT2pjxKWS
-- enabled: true
-  name: Content-Type
-  value: application/json
-  id: VbnEz44QwW
 method: POST
-name: Wrong Type
-sortPriority: 1000.0
+name: No Body
+sortPriority: 0.0
 url: localhost:3000/upload
 urlParameters: []
