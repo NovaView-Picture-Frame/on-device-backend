@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_fXUSFp6WKj
 createdAt: 2025-08-10T12:56:46.311027
-updatedAt: 2025-08-18T00:46:01.900080
+updatedAt: 2025-08-27T19:37:46.915010
 workspaceId: wk_mjUiWLAinj
 folderId: fl_MS45psLEZr
 authentication: {}
@@ -10,7 +10,7 @@ authenticationType: null
 body:
   text: |-
     {
-      "sha256": "1234"
+      "hash": "1234"
     }
 bodyType: application/json
 description: ''
@@ -22,7 +22,7 @@ headers:
 method: POST
 name: Invalid Hash
 sortPriority: 750.0
-url: localhost:3000/query/hash
+url: localhost:3000/image/query/hash
 urlParameters:
 - enabled: true
   name: '11231'

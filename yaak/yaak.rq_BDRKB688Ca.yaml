@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_BDRKB688Ca
 createdAt: 2025-08-17T23:05:55.962837
-updatedAt: 2025-08-18T00:45:43.731300
+updatedAt: 2025-08-27T19:37:49.715865
 workspaceId: wk_mjUiWLAinj
 folderId: fl_MS45psLEZr
 authentication: {}
@@ -10,7 +10,7 @@ authenticationType: null
 body:
   text: |-
     {
-      "sha256": "1234123412341234123412341234123412341234123412341234123412341234"
+      "hash": "1234123412341234123412341234123412341234123412341234123412341234"
     }
 bodyType: application/json
 description: ''
@@ -20,9 +20,9 @@ headers:
   value: application/json
   id: IjzuygQvGg
 method: POST
-name: Wrong Hash
-sortPriority: 1000.0
-url: localhost:3000/query/hash
+name: Nonexistent Hash
+sortPriority: 1875.0
+url: localhost:3000/image/query/hash
 urlParameters:
 - enabled: true
   name: '11231'

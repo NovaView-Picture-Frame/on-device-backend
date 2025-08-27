@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_iAzG7x6U5T
 createdAt: 2025-08-17T23:19:50.359855
-updatedAt: 2025-08-18T00:45:35.735307
+updatedAt: 2025-08-27T19:38:16.692086
 workspaceId: wk_mjUiWLAinj
 folderId: fl_MS45psLEZr
 authentication: {}
@@ -10,7 +10,7 @@ authenticationType: null
 body:
   text: |-
     {
-      "sha256": "c52d2e0e5fbe3f2c9d23d4964729d238d0f7dc35b9bbe05ee8acf050390ff579"
+      "hash": "17767c0a2d61cd63b698bc34f7e07074f9fcd969eb1d0751cecc3c7f40936ed8"
     }
 bodyType: application/json
 description: ''
@@ -22,7 +22,7 @@ headers:
 method: POST
 name: Normal
 sortPriority: 3000.0
-url: localhost:3000/query/hash
+url: localhost:3000/image/query/hash
 urlParameters:
 - enabled: true
   name: '11231'

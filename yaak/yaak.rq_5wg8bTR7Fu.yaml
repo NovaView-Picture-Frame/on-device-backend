@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_5wg8bTR7Fu
 createdAt: 2025-08-23T16:50:41.964590
-updatedAt: 2025-08-23T17:51:43.135557
+updatedAt: 2025-08-27T19:37:42.003946
 workspaceId: wk_mjUiWLAinj
 folderId: fl_MS45psLEZr
 authentication: {}
@@ -10,16 +10,16 @@ authenticationType: null
 body:
   text: |-
     {
-      "sha256": "c52d2e0e5fbe3f2c9d23d4964729d238d0f7dc35b9bbe05ee8acf050390ff579",
+      "hash": "c52d2e0e5fbe3f2c9d23d4964729d238d0f7dc35b9bbe05ee8acf050390ff579",
       "hello": "world"
     }
 bodyType: null
 description: ''
 headers: []
 method: POST
-name: No Body
+name: Wrong Body
 sortPriority: 250.0
-url: localhost:3000/query/hash
+url: localhost:3000/image/query/hash
 urlParameters:
 - enabled: true
   name: '11231'

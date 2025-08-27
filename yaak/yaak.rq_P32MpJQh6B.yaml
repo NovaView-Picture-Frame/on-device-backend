@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_P32MpJQh6B
+createdAt: 2025-08-25T18:48:25.655728
+updatedAt: 2025-08-27T19:38:26.934083
+workspaceId: wk_mjUiWLAinj
+folderId: fl_u4tr8bfKfv
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "x": 0.5,
+      "y": 0.5,
+      "scale": 0.5
+    }
+bodyType: null
+description: ''
+headers:
+- enabled: true
+  name: ''
+  value: ''
+  id: GPGHBYIHT8
+method: PATCH
+name: Invalid Params
+sortPriority: 500.0
+url: localhost:3000/image/0/offset
+urlParameters: []

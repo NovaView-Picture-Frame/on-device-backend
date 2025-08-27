@@ -1,0 +1,31 @@
+type: http_request
+model: http_request
+id: rq_UaJq32jwjf
+createdAt: 2025-08-25T18:33:58.354331
+updatedAt: 2025-08-27T19:38:31.543611
+workspaceId: wk_mjUiWLAinj
+folderId: fl_u4tr8bfKfv
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "extract_left_ratio": 0,
+      "extract_top_ratio": 0.1
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: ''
+  value: ''
+  id: GPGHBYIHT8
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: EuCHVQZu3P
+method: PATCH
+name: Nonexistent ID
+sortPriority: 1125.0
+url: localhost:3000/image/99/offset
+urlParameters: []

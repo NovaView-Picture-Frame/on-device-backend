@@ -2,13 +2,13 @@ type: http_request
 model: http_request
 id: rq_4r54N8AZ2w
 createdAt: 2025-08-09T03:53:44.743937
-updatedAt: 2025-08-24T22:53:06.524830
+updatedAt: 2025-08-27T19:37:40.001112
 workspaceId: wk_mjUiWLAinj
 folderId: fl_AFPznEpWr2
 authentication: {}
 authenticationType: apikey
 body:
-  filePath: /Users/carson/Desktop/NovaView/images/IMG_0382.HEIC
+  filePath: /Users/carson/Desktop/NovaView/images/IMG_0187.HEIC
 bodyType: binary
 description: ''
 headers:
@@ -19,5 +19,5 @@ headers:
 method: POST
 name: Normal
 sortPriority: 4000.0
-url: localhost:3000/upload
+url: localhost:3000/image
 urlParameters: []

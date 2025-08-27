@@ -4,10 +4,20 @@ import type { Context } from 'koa';
 import { getStreamAsBuffer, MaxBufferError } from 'get-stream';
 import sharp from 'sharp';
 
+import type { ExtractRegionWithID } from '../services/imageRepository';
 import config from '../utils/config';
 import { BadRequestError } from '../middleware/error';
 import { getByHash, upsert } from '../services/imageRepository';
 import ignoreErrorCode from '../utils/ignoreErrorCode';
+
+const buildResponse = (created: boolean, region: ExtractRegionWithID) => ({
+    data: {
+        id: region.id,
+        created,
+        extract_left_ratio: region.extract_left / region.extract_width,
+        extract_top_ratio: region.extract_top / region.extract_height,
+    }
+});
 
 export default async (ctx: Context) => {
     const buf = await getStreamAsBuffer(ctx.req, {
@@ -15,7 +25,7 @@ export default async (ctx: Context) => {
     }).catch(err => {
         if (err instanceof MaxBufferError)
             throw new BadRequestError(`Max ${config.size_limit} bytes`);
-        
+
         throw err;
     });
     if (buf.length === 0) throw new BadRequestError("Invalid request body");
@@ -23,31 +33,28 @@ export default async (ctx: Context) => {
     const hash = createHash('sha256').update(buf).digest();
     const existing = getByHash(hash);
     if (existing) {
-        ctx.body = {
-            data: {
-                id: existing.id,
-                created: false,
-                cover_left: existing.cover_left,
-                cover_top: existing.cover_top,
-            }
-        };
-
+        ctx.body = buildResponse(false, existing);
         return;
     }
+
+    const meta = await sharp(buf)
+        .metadata()
+        .catch(() => {
+            throw new BadRequestError("Invalid image buffer")
+        });
 
     const uuid = randomUUID();
     const originalTmp = `${config.paths.originals._tmp}/${uuid}`;
     const croppedTmp = `${config.paths.cropped._tmp}/${uuid}`;
+
     try {
         const [{ cropOffsetLeft, cropOffsetTop }] = await Promise.all([
             sharp(buf)
                 .resize(config.screen_width, config.screen_height, {
-                    position: 'entropy'
+                    fit: 'cover',
+                    position: 'entropy',
                 })
-                .toFile(croppedTmp)
-                .catch(() => {
-                    throw new BadRequestError("Invalid image buffer")
-                }),
+                .toFile(croppedTmp),
             fs.writeFile(originalTmp, buf),
         ]);
 
@@ -56,21 +63,20 @@ export default async (ctx: Context) => {
             fs.link(originalTmp, `${config.paths.originals._base}/${hashHex}`),
             fs.link(croppedTmp, `${config.paths.cropped._base}/${hashHex}`),
         ], 'EEXIST');
-        
-        const record = upsert(
-            hash,
-            Math.abs(cropOffsetLeft ?? 0),
-            Math.abs(cropOffsetTop ?? 0)
-        );
 
-        ctx.body = {
-            data: {
-                id: record.id,
-                created: record.created,
-                cover_left: record.cover_left,
-                cover_top: record.cover_top,
-            }
-        };
+        const scale = Math.max(
+            config.screen_width / meta.width,
+            config.screen_height / meta.height
+        );
+        const record = upsert({
+            hash,
+            extract_left: Math.abs(cropOffsetLeft ?? 0),
+            extract_top: Math.abs(cropOffsetTop ?? 0),
+            extract_width: Math.round(meta.width * scale),
+            extract_height: Math.round(meta.height * scale),
+        });
+
+        ctx.body = buildResponse(record.created, record);
     } finally {
         await ignoreErrorCode([
             fs.unlink(originalTmp),

@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_hjLJS3Q47R
 createdAt: 2025-08-09T03:53:06.495113
-updatedAt: 2025-08-23T16:46:50.987932
+updatedAt: 2025-08-27T19:37:36.426753
 workspaceId: wk_mjUiWLAinj
 folderId: fl_AFPznEpWr2
 authentication: {}
@@ -17,7 +17,7 @@ headers:
   value: ''
   id: X47WaizVNq
 method: POST
-name: Wrong Data
+name: Wrong File
 sortPriority: 2000.0
-url: localhost:3000/upload
+url: localhost:3000/image
 urlParameters: []

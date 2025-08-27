@@ -1,48 +1,85 @@
 import db from '../utils/db';
 
-const getByHashStmt = db.prepare<
-    Buffer,
-    { id: number; cover_left: number; cover_top: number }
->(`
-    SELECT id, cover_left, cover_top FROM images WHERE sha256 = ?
+type ExtractRegion = {
+    extract_left: number;
+    extract_top: number;
+    extract_width: number;
+    extract_height: number;
+}
+
+export type ExtractRegionWithID = Prettify<{ id: number } & ExtractRegion>;
+type ExtractRegionWithHash = Prettify<{ hash: Buffer } & ExtractRegion>;
+
+const getByIDStmt = db.prepare<number, ExtractRegionWithHash>(`
+    SELECT hash, extract_left, extract_top, extract_width, extract_height
+    FROM images WHERE id = ?
+`);
+
+export const getByID = (id: number) => getByIDStmt.get(id);
+
+const getByHashStmt = db.prepare<Buffer, ExtractRegionWithID>(`
+    SELECT id, extract_left, extract_top, extract_width, extract_height
+    FROM images WHERE hash = ?
 `);
 
 export const getByHash = (hash: Buffer) => getByHashStmt.get(hash);
 
 const insertStmt = db.prepare<
-    { hash: Buffer, cover_left: number, cover_top: number },
-    { id: number, cover_left: number, cover_top: number }
+    ExtractRegionWithHash,
+    ExtractRegionWithID
 >(`
     INSERT INTO images (
-        sha256, cover_left, cover_top
-    ) VALUES (:hash, :cover_left, :cover_top)
-    ON CONFLICT(sha256) DO NOTHING
-    RETURNING id, cover_left, cover_top
+        hash, extract_left, extract_top, extract_width, extract_height
+    ) VALUES (
+        :hash, :extract_left, :extract_top, :extract_width, :extract_height
+    ) ON CONFLICT(hash) DO NOTHING
+    RETURNING id, extract_left, extract_top, extract_width, extract_height
 `);
 
-export const upsert = db.transaction((
-    hash: Buffer,
-    cover_left: number,
-    cover_top: number,
-) => {
-    const record = insertStmt.get({ hash, cover_left, cover_top });
+export const upsert = db.transaction((input: ExtractRegionWithHash) => {
+    const record = insertStmt.get(input);
     
     if (record) {
         return {
             id: record.id,
             created: true,
-            cover_left: record.cover_left,
-            cover_top: record.cover_top,
+            extract_left: record.extract_left,
+            extract_top: record.extract_top,
+            extract_width: record.extract_width,
+            extract_height: record.extract_height,
         }
     } else {
-        const existing = getByHash(hash);
+        const existing = getByHash(input.hash);
         if (!existing) throw new Error("Database exception");
 
         return {
             id: existing.id,
             created: false,
-            cover_left: existing.cover_left,
-            cover_top: existing.cover_top,
+            extract_left: existing.extract_left,
+            extract_top: existing.extract_top,
+            extract_width: existing.extract_width,
+            extract_height: existing.extract_height,
         }
     }
 }).immediate;
+
+const updateOffsetStmt = db.prepare<{
+    id: number;
+    extract_left: number;
+    extract_top: number;
+}>(`
+    UPDATE images SET extract_left = :extract_left, extract_top = :extract_top
+    WHERE id = :id
+`);
+
+export const updateOffset = (input: {
+    id: number;
+    extract_left: number;
+    extract_top: number;
+}) => updateOffsetStmt.run(input).changes > 0;    
+
+const deleteByIDStmt = db.prepare<number, Buffer>(`
+    DELETE FROM images WHERE id = ? RETURNING hash
+`).pluck();
+
+export const deleteByID = (id: number) => deleteByIDStmt.get(id);

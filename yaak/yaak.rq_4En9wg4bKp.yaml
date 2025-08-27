@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_4En9wg4bKp
 createdAt: 2025-08-09T01:34:34.462288
-updatedAt: 2025-08-23T16:46:50.989485
+updatedAt: 2025-08-27T19:37:38.017431
 workspaceId: wk_mjUiWLAinj
 folderId: fl_AFPznEpWr2
 authentication: {}
@@ -19,5 +19,5 @@ headers:
 method: POST
 name: Too Large
 sortPriority: 3000.0
-url: localhost:3000/upload
+url: localhost:3000/image
 urlParameters: []

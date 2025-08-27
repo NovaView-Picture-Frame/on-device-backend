@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_gASTPaTzLR
 createdAt: 2025-08-23T16:55:07.641746
-updatedAt: 2025-08-23T17:45:52.958641
+updatedAt: 2025-08-27T19:39:03.380009
 workspaceId: wk_mjUiWLAinj
 folderId: fl_q69sSjq45q
 authentication: {}
@@ -19,7 +19,7 @@ headers:
 method: POST
 name: Invalid JSON
 sortPriority: 0.0
-url: localhost:3000/upload
+url: localhost:3000/image
 urlParameters:
 - enabled: true
   name: '11231'

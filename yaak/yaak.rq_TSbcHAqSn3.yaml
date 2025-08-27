@@ -1,0 +1,18 @@
+type: http_request
+model: http_request
+id: rq_TSbcHAqSn3
+createdAt: 2025-08-27T18:16:10.993302
+updatedAt: 2025-08-27T19:38:44.988605
+workspaceId: wk_mjUiWLAinj
+folderId: fl_fVkmPQNyFY
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers: []
+method: DELETE
+name: Invalid Params
+sortPriority: 499.9999
+url: localhost:3000/image/0
+urlParameters: []

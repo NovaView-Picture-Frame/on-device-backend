@@ -26,12 +26,11 @@ const getNodeAtPath = (root: NodePaths, path: string) => path
     }, root)
     : root;
 
-type Simplify<T> = { [K in keyof T]: T[K] } & {};
 type BasePaths<T> = { readonly _base: string } & (
     T extends { _withTmp: true } ? { readonly _tmp: string } : {}
 );
 
-type Node<T> = Simplify<BasePaths<T> & {
+type Node<T> = Prettify<BasePaths<T> & {
     readonly [K in keyof Omit<T, '_withTmp' | '_base' | '_tmp'>]:
     T[K] extends object ? Node<T[K]> : never;
 }>;
