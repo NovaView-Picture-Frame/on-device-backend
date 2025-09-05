@@ -11,6 +11,7 @@ const configSchema = z.object({
     port: z.number().int().min(1024).max(65535),
     screen_width: z.number().int().positive(),
     screen_height: z.number().int().positive(),
+    size_limit: z.number().int().positive(),
 }).strict();
 
 const args = argsSchema.parse(process.argv.slice(2));
@@ -21,4 +22,5 @@ export default {
     port: yamlConfig.port,
     screenWidth: yamlConfig.screen_width,
     screenHeight: yamlConfig.screen_height,
+    sizeLimit: yamlConfig.size_limit,
 }
