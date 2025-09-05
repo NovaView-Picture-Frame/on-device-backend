@@ -1,0 +1,16 @@
+{
+	"type": "module",
+	"scripts": {
+		"dev:node": "wait-on dist/index.js && node --watch dist/index.js",
+		"dev": "concurrently -k 'vite build -w' 'npm:dev:node'",
+		"build": "vite build",
+		"start": "node dist/index.js"
+	},
+	"devDependencies": {
+		"typescript": "^5.9.2",
+		"rolldown-vite": "^7.1.5",
+		"concurrently": "^9.2.1",
+		"wait-on": "^8.0.4",
+		"@types/node": "^24.3.1"
+	}
+}
