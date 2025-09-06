@@ -12,6 +12,7 @@
 		"@types/koa__router": "^12.0.4",
 		"@types/node": "^24.3.1",
 		"concurrently": "^9.2.1",
+		"get-stream": "^9.0.1",
 		"koa": "^3.0.1",
 		"rolldown-vite": "^7.1.5",
 		"typescript": "^5.9.2",
