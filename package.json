@@ -1,6 +1,7 @@
 {
 	"type": "module",
 	"scripts": {
+		"postinstall": "$npm_execpath rebuild sharp",
 		"dev:node": "wait-on dist/index.js && node --watch dist/index.js -c config.yaml",
 		"dev": "concurrently -k 'vite build -w' 'npm:dev:node'",
 		"build": "vite build",
@@ -14,8 +15,12 @@
 		"concurrently": "^9.2.1",
 		"get-stream": "^9.0.1",
 		"koa": "^3.0.1",
+		"node-addon-api": "^8.5.0",
+		"node-gyp": "^11.4.2",
 		"rolldown-vite": "^7.1.5",
+		"sharp": "^0.34.3",
 		"typescript": "^5.9.2",
+		"vite-plugin-static-copy": "^3.1.2",
 		"wait-on": "^8.0.4",
 		"yaml": "^2.8.1",
 		"zod": "^4.1.5"

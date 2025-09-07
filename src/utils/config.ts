@@ -12,6 +12,7 @@ const configSchema = z.object({
     screen_width: z.number().int().positive(),
     screen_height: z.number().int().positive(),
     size_limit: z.number().int().positive(),
+    sse_keepalive_interval: z.number().int().positive(),
 }).strict();
 
 const args = argsSchema.parse(process.argv.slice(2));
@@ -22,5 +23,6 @@ export default {
     port: yamlConfig.port,
     screenWidth: yamlConfig.screen_width,
     screenHeight: yamlConfig.screen_height,
+    sseKeepaliveInterval: yamlConfig.sse_keepalive_interval,
     sizeLimit: yamlConfig.size_limit,
 }
