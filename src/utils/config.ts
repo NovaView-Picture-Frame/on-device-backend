@@ -16,6 +16,7 @@ const configSchema = z.object({
     preview_max_height: z.number().int().positive(),
 
     data_dir: z.string().nonempty(),
+    database: z.string().nonempty(),
     size_limit: z.number().int().positive(),
 
     port: z.number().int().min(1024).max(65535),
@@ -41,6 +42,7 @@ export default {
     previewMaxHeight: yamlConfig.preview_max_height,
 
     paths,
+    database: yamlConfig.database,
     sizeLimit: yamlConfig.size_limit,
 
     port: yamlConfig.port,

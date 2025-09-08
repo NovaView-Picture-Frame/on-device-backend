@@ -54,7 +54,7 @@ export default async (ctx: Context) => {
         ctx.body = { data: { taskId } };
     } catch (err) {
         if (signal.aborted) throw new HttpBadRequestError(
-            "Request timeout"
+            "Request aborted"
         );
 
         if (err instanceof MaxSizeError) throw new HttpBadRequestError(
