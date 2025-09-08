@@ -8,8 +8,8 @@ abstract class HttpError extends Error {
     }
 }
 
-export class HttpBadRequestError extends HttpError { status = 400; }
-export class HttpNotFoundError extends HttpError { status = 404; }
+export class HttpBadRequestError extends HttpError { status = 400; };
+export class HttpNotFoundError extends HttpError { status = 404; };
 
 export const errorHandler = async (ctx: Context, next: Next) => {
     try {

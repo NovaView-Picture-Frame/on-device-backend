@@ -5,7 +5,7 @@
 		"dev:node": "wait-on dist/index.js && node --watch dist/index.js -c config.yaml",
 		"dev": "concurrently -k 'vite build -w' 'npm:dev:node'",
 		"build": "vite build",
-		"start": "node dist/index.js"
+		"start": "node dist/index.js -c config.yaml"
 	},
 	"devDependencies": {
 		"@koa/router": "^14.0.0",
@@ -13,7 +13,6 @@
 		"@types/koa__router": "^12.0.4",
 		"@types/node": "^24.3.1",
 		"concurrently": "^9.2.1",
-		"get-stream": "^9.0.1",
 		"koa": "^3.0.1",
 		"node-addon-api": "^8.5.0",
 		"node-gyp": "^11.4.2",

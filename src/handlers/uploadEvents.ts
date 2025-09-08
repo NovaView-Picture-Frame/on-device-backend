@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import { processing } from '../services/initiate';
+import { tasksMap } from '../services/initiate';
 import config from '../utils/config';
 
 const paramsSchema = z.object({
@@ -16,8 +16,8 @@ export default async (ctx: RouterContext) => {
         "Invalid URL parameters"
     );
 
-    const process = processing.get(paramsResult.data.taskId);
-    if (!process) throw new HttpNotFoundError(
+    const tasks = tasksMap.get(paramsResult.data.taskId);
+    if (!tasks) throw new HttpNotFoundError(
         "Task not found"
     );
 
@@ -26,18 +26,38 @@ export default async (ctx: RouterContext) => {
     const keepAlive = setInterval(
         () => sse.write(':\n\n'),
         config.sseKeepaliveInterval
-    );
-    keepAlive.unref();
+    ).unref();
 
-    process.step1.then(uuid => sse.write(
-        `event: step1Complete\ndata: ${JSON.stringify({
-            data: { uuid }
+    tasks.crop.then(result => sse.write(
+        `event: resizeComplete\ndata: ${JSON.stringify({
+            data: {
+                extract_left_ratio: result.extract_left / result.extract_width,
+                extract_top_ratio: result.extract_top / result.extract_height,
+            }
         })}\n\n`
     ));
 
-    process.step2.then(uuid => sse.write(
-        `event: step2Complete\ndata: ${JSON.stringify({
-            data: { uuid }
+    tasks.crop.catch(() => sse.write(
+        `event: cropError\ndata: ${JSON.stringify({
+            data: {
+                message: "Failed to create cropped image"
+            }
+        })}\n\n`
+    ));
+
+    tasks.saveOriginal.catch(() => sse.write(
+        `event: saveOriginalError\ndata: ${JSON.stringify({
+            data: {
+                message: "Failed to save original image"
+            }
+        })}\n\n`
+    ));
+
+    tasks.optimize.catch(() => sse.write(
+        `event: optimizeError\ndata: ${JSON.stringify({
+            data: {
+                message: "Failed to create optimized image"
+            }
         })}\n\n`
     ));
 
@@ -46,7 +66,7 @@ export default async (ctx: RouterContext) => {
         sse.end();
     }
 
-    Promise.allSettled([process.step1, process.step2]).finally(() => {
+    Promise.allSettled(Object.values(tasks)).finally(() => {
         sse.write(`event: done\ndata:\n\n`);
         finish();
     });
