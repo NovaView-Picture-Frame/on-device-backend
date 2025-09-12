@@ -7,7 +7,7 @@ import initDirs, { type DirTree } from './initDirs';
 const argsSchema = z.tuple([
     z.literal('-c'),
     z.string().regex(/\.yaml$/),
-])
+]);
 
 const configSchema = z.object({
     screen_width: z.number().int().positive(),
@@ -22,6 +22,7 @@ const configSchema = z.object({
     port: z.number().int().min(1024).max(65535),
     upload_timeout: z.number().int().positive(),
     sse_keepalive_interval: z.number().int().positive(),
+    tasks_resuls_ttl: z.number().int().positive(),
 }).strict();
 
 const dirTree = {
@@ -48,5 +49,5 @@ export default {
     port: yamlConfig.port,
     uploadTimeout: yamlConfig.upload_timeout,
     sseKeepaliveInterval: yamlConfig.sse_keepalive_interval,
-
+    tasksResultsTTL: yamlConfig.tasks_resuls_ttl,
 };
