@@ -8,6 +8,7 @@ import { InvalidBufferError } from '.';
 import config from '../../utils/config';
 import { createHashTransformer } from '../transformers';
 import { upsert } from '../../repositories/images';
+import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 import type { ExtractRegion } from '../../repositories/images';
 
 class StreamAbortedError extends Error {}
@@ -104,7 +105,7 @@ export const resizeToInside = async (
         .finally(() => signal.removeEventListener('abort', onAbort));
 }
 
-export const moveAndInsert = async (input: {
+export const insertAndMove = async (input: {
     originalTmp: string;
     croppedTmp: string;
     optimizedTmp: string;
@@ -119,7 +120,10 @@ export const moveAndInsert = async (input: {
             [input.optimizedTmp, `${config.paths.optimized._base}/${id}`],
         ];
 
-        await Promise.all(moves.map((move) => fs.rename(...move)));
+        await Promise.all(
+            ignoreErrorCodes(moves.map(move => fs.link(...move)),
+            'EEXIST'
+        ));
     }
 
     return id;

@@ -9,6 +9,7 @@ import uploadEventsHandler from './handlers/uploadEvents';
 import listHandler from './handlers/list';
 import previewHandler from './handlers/preview';
 import cropHandler from './handlers/crop';
+import cropEventsHandler from './handlers/cropEvents';
 
 import config from './utils/config';
 
@@ -23,6 +24,7 @@ router.get('/upload/:taskId/events', uploadEventsHandler);
 router.get('/list', listHandler);
 router.get('/preview/:id', previewHandler);
 router.post('/crop/:id', cropHandler);
+router.get('/crop/:taskId/events', cropEventsHandler);
 
 app.use(router.routes());
 app.listen(config.port, () =>

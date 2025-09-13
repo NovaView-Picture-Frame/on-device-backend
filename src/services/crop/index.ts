@@ -10,7 +10,7 @@ const getTaskKey = (offset: ExtractOffsetWithID):
     `${ExtractOffsetWithID['id']}-${ExtractOffsetWithID['extract_left']}-${ExtractOffsetWithID['extract_top']}` =>
         `${offset.id}-${offset.extract_left}-${offset.extract_top}`;
 
-const tasksMap = new Map<ReturnType<typeof randomUUID>, {
+export const tasksMap = new Map<string, {
     key: ReturnType<typeof getTaskKey> | null;
     tasks: {
         crop: ReturnType<typeof resizeAndExtract>;
@@ -49,7 +49,8 @@ export const cropProcessor = (input: ExtractOffsetWithID) => {
         setTimeout(() => tasksMap.delete(taskId), config.tasksResultsTTL);
 
         await Promise.all([
-            ignoreErrorCodes(fs.unlink(croppedTmp), 'ENOENT')
+            ignoreErrorCodes(fs.unlink(croppedTmp),
+            'ENOENT')
         ]);
     });
 

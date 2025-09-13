@@ -9,7 +9,7 @@ import {
     saveStream,
     resizeToCover,
     resizeToInside,
-    moveAndInsert,
+    insertAndMove,
 } from './pipeline';
 import config from '../../utils/config';
 import { createHashTransformer } from '../transformers';
@@ -20,10 +20,10 @@ export class InvalidBufferError extends Error {}
 export const tasksMap = new Map<string, {
     saveOriginal: ReturnType<typeof saveStream>,
     crop: Promise<
-        Parameters<typeof moveAndInsert>[0]['cropResult']
+        Parameters<typeof insertAndMove>[0]['cropResult']
     >,
 	optimize: ReturnType<typeof resizeToInside>,
-    persist: ReturnType<typeof moveAndInsert>,
+    persist: ReturnType<typeof insertAndMove>,
 }>();
 
 export const uploadProcessor = (
@@ -66,7 +66,7 @@ export const uploadProcessor = (
     const optimize = resizeToInside(transformer.clone(), optimizedTmp, signal);
     const persist = Promise.all([hash, saveOriginal, crop, optimize])
         .then(([hash, _, cropResult]) => {
-            return moveAndInsert({
+            return insertAndMove({
                 originalTmp,
                 croppedTmp,
                 optimizedTmp,
