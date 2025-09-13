@@ -5,6 +5,7 @@ import { errorHandler } from './middleware/errorHandler';
 import infoHandler from './handlers/info';
 import uploadHandler from './handlers/upload';
 import uploadEventsHandler from './handlers/uploadEvents';
+import listHandler from './handlers/list';
 
 import config from './utils/config';
 
@@ -15,6 +16,7 @@ const router = new Router();
 router.get('/info', infoHandler);
 router.post('/upload', uploadHandler);
 router.get('/upload/:taskId/events', uploadEventsHandler);
+router.get('/list', listHandler);
 
 app.use(router.routes());
 app.listen(config.port, () =>

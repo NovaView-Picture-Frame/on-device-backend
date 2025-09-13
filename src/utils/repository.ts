@@ -11,13 +11,15 @@ interface NewImage extends ExtractRegion {
     hash: Buffer;
 }
 
-interface ImageRecord extends ExtractRegion {
+interface ImageRecord extends NewImage {
     id: number;
 }
 
+type ExtractRegionWithID = Pick<ImageRecord, 'id' | 'extract_left' | 'extract_top' | 'extract_width' | 'extract_height'>;
+
 class DatabaseError extends Error {};
 
-const getByHashStmt = db.prepare<Buffer, ImageRecord>(`
+const getByHashStmt = db.prepare<NewImage['hash'], ExtractRegionWithID>(`
     SELECT
         id,
         extract_left,
@@ -28,7 +30,7 @@ const getByHashStmt = db.prepare<Buffer, ImageRecord>(`
     WHERE hash = ?
 `);
 
-export const getByHash = (hash: Buffer) => getByHashStmt.get(hash);
+export const getByHash = (hash: Parameters<typeof getByHashStmt.get>[0]) => getByHashStmt.get(hash);
 
 const insertStmt = db.prepare<NewImage, ImageRecord['id']>(`
     INSERT INTO images (
@@ -49,7 +51,7 @@ const insertStmt = db.prepare<NewImage, ImageRecord['id']>(`
     RETURNING id
 `).pluck();
 
-export const upsert = db.transaction((image: NewImage) => {
+export const upsert = db.transaction((image: Parameters<typeof insertStmt.get>[0]) => {
     const id = insertStmt.get(image);
     if (id) return { id, created: true };
 
@@ -58,3 +60,21 @@ export const upsert = db.transaction((image: NewImage) => {
 
     throw new DatabaseError()
 });
+
+const listStmt = db.prepare<
+    { cursor: ImageRecord['id'] | null; size: number },
+    ExtractRegionWithID
+>(`
+    SELECT
+        id,
+        extract_left,
+        extract_top,
+        extract_width,
+        extract_height
+    FROM images
+    WHERE (:cursor IS NULL OR id > :cursor)
+    ORDER BY id DESC
+    LIMIT :size
+`);
+
+export const list = (input: Parameters<typeof listStmt.all>[0]) => listStmt.all(input);

@@ -48,7 +48,7 @@ export default async (ctx: Context) => {
                 data: {
                     type: 'existing',
                     record,
-                }
+                },
             };
         });
 
@@ -68,7 +68,7 @@ export default async (ctx: Context) => {
             data: {
                 type: 'processing',
                 taskId
-            }
+            },
         };
     } catch (err) {
         if (existingController.signal.aborted) return;
