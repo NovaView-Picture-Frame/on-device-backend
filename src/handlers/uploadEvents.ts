@@ -39,8 +39,8 @@ export default async (ctx: RouterContext) => {
         () => sse.write(
             `event: saveOriginalError\ndata: ${JSON.stringify({
                 data: {
-                    message: "Failed to save original image"
-                }
+                    message: "Failed to save original image",
+                },
             })}\n\n`
         )
     );
@@ -48,14 +48,14 @@ export default async (ctx: RouterContext) => {
     tasks.crop.then(
         cropResult => sse.write(
             `event: cropComplete\ndata: ${JSON.stringify({
-                data: { cropResult }
+                data: { cropResult },
             })}\n\n`
         ),
         () => sse.write(
             `event: cropError\ndata: ${JSON.stringify({
                 data: {
-                    message: "Failed to create cropped image"
-                }
+                    message: "Failed to create cropped image",
+                },
             })}\n\n`
         )
     );
@@ -65,8 +65,8 @@ export default async (ctx: RouterContext) => {
         () => sse.write(
             `event: optimizeError\ndata: ${JSON.stringify({
                     data: {
-                        message: "Failed to create optimized image"
-                    }
+                        message: "Failed to create optimized image",
+                    },
             })}\n\n`
         )
     );
@@ -81,8 +81,8 @@ export default async (ctx: RouterContext) => {
             () => sse.write(
                 `event: persistError\ndata: ${JSON.stringify({
                     data: {
-                        message: "Failed to persist image data"
-                    }
+                        message: "Failed to persist image data",
+                    },
                 })}\n\n`
             )
         ).finally(() => {

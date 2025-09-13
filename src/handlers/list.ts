@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError } from '../middleware/errorHandler';
-import { list } from '../utils/repository';
+import { list } from '../repositories/images';
 
 const querySchema = z.object({
     cursor: z.coerce.number().int().positive().optional(),

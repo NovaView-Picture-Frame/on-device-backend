@@ -3,7 +3,7 @@ import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import { exists } from '../utils/repository';
+import { getByID } from '../repositories/images';
 import config from '../utils/config';
 
 const paramsSchema = z.object({
@@ -15,7 +15,7 @@ export default async (ctx: RouterContext) => {
     if (!paramsResult.success) throw new HttpBadRequestError("Invalid URL parameters");
 
     const id = paramsResult.data.id;
-    if (!exists(id)) throw new HttpNotFoundError("Image not found");
+    if (!getByID(id)) throw new HttpNotFoundError("Image not found");
 
     const handle = await fs.open(`${config.paths.optimized._base}/${id}`, 'r');
     const stats = await handle.stat();

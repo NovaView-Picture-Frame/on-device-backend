@@ -7,7 +7,7 @@ import type { Context } from 'koa';
 import config from '../utils/config';
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { uploadProcessor, InvalidBufferError } from '../services/upload';
-import { getByHash } from '../utils/repository';
+import { getByHash } from '../repositories/images';
 import { createMaxSizeTransform, MaxSizeError } from '../services/transformers';
 
 const headerSchema = z.object({
@@ -67,7 +67,7 @@ export default async (ctx: Context) => {
         ctx.body = {
             data: {
                 type: 'processing',
-                taskId
+                taskId,
             },
         };
     } catch (err) {

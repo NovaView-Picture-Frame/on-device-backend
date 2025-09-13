@@ -7,8 +7,8 @@ import type { Sharp, Metadata, OutputInfo } from 'sharp';
 import { InvalidBufferError } from '.';
 import config from '../../utils/config';
 import { createHashTransformer } from '../transformers';
-import { upsert } from '../../utils/repository';
-import type { ExtractRegion } from '../../utils/repository';
+import { upsert } from '../../repositories/images';
+import type { ExtractRegion } from '../../repositories/images';
 
 class StreamAbortedError extends Error {}
 

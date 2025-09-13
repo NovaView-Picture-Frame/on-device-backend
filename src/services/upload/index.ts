@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { PassThrough } from 'node:stream';
 import fs from 'fs/promises';
 import sharp from 'sharp';
@@ -26,7 +27,7 @@ export const tasksMap = new Map<string, {
 }>();
 
 export const uploadProcessor = (
-    id: string,
+    id: ReturnType<typeof randomUUID>,
     stream: Readable,
     signal: AbortSignal,
 ) => {

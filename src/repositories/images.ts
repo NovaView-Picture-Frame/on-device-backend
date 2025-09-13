@@ -1,4 +1,4 @@
-import db from './db';
+import db from '../utils/db';
 
 export interface ExtractRegion {
     extract_left: number;
@@ -31,6 +31,18 @@ const getByHashStmt = db.prepare<NewImage['hash'], ExtractRegionWithID>(`
 `);
 
 export const getByHash = (hash: Parameters<typeof getByHashStmt.get>[0]) => getByHashStmt.get(hash);
+
+const getByIDStmt = db.prepare<ImageRecord['id'], ExtractRegion>(`
+    SELECT
+        extract_left,
+        extract_top,
+        extract_width,
+        extract_height
+    FROM images
+    WHERE id = ?
+`);
+
+export const getByID = (id: Parameters<typeof getByIDStmt.get>[0]) => getByIDStmt.get(id);
 
 const insertStmt = db.prepare<NewImage, ImageRecord['id']>(`
     INSERT INTO images (
@@ -79,12 +91,10 @@ const listStmt = db.prepare<
 
 export const list = (input: Parameters<typeof listStmt.all>[0]) => listStmt.all(input);
 
-const existsStmt = db.prepare<ImageRecord['id'], number>(`
-    SELECT EXISTS(
-        SELECT 1
-        FROM images
-        WHERE id = ?
-    )
-`).pluck();
+const deleteByIDStmt = db.prepare<ImageRecord['id']>(`
+    DELETE FROM images
+    WHERE id = ?
+`);
 
-export const exists = (id: Parameters<typeof existsStmt.get>[0]) => !!existsStmt.get(id);
+export const deleteByID = (id: Parameters<typeof deleteByIDStmt.run>[0]) =>
+    deleteByIDStmt.run(id).changes > 0;
