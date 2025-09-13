@@ -32,8 +32,9 @@ const getByHashStmt = db.prepare<NewImage['hash'], ExtractRegionWithID>(`
 
 export const getByHash = (hash: Parameters<typeof getByHashStmt.get>[0]) => getByHashStmt.get(hash);
 
-const getByIDStmt = db.prepare<ImageRecord['id'], ExtractRegion>(`
+const getByIDStmt = db.prepare<ImageRecord['id'], ExtractRegionWithID>(`
     SELECT
+        id,
         extract_left,
         extract_top,
         extract_width,

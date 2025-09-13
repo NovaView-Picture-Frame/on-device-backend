@@ -14,10 +14,12 @@ export default async (ctx: RouterContext) => {
     const paramsResult = paramsSchema.safeParse(ctx.params);
     if (!paramsResult.success) throw new HttpBadRequestError("Invalid URL parameters");
 
-    const id = paramsResult.data.id;
-    if (!getByID(id)) throw new HttpNotFoundError("Image not found");
+    const extractRegionWithID = getByID(paramsResult.data.id);
+    if (!extractRegionWithID) throw new HttpNotFoundError("Image not found");
 
-    const handle = await fs.open(`${config.paths.optimized._base}/${id}`, 'r');
+    const handle = await fs.open(
+        `${config.paths.optimized._base}/${extractRegionWithID.id}`
+    );
     const stats = await handle.stat();
 
     ctx.set('Content-Length', stats.size.toString());
