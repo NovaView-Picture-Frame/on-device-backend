@@ -6,6 +6,7 @@ import infoHandler from './handlers/info';
 import uploadHandler from './handlers/upload';
 import uploadEventsHandler from './handlers/uploadEvents';
 import listHandler from './handlers/list';
+import previewHandler from './handlers/preview';
 
 import config from './utils/config';
 
@@ -17,6 +18,7 @@ router.get('/info', infoHandler);
 router.post('/upload', uploadHandler);
 router.get('/upload/:taskId/events', uploadEventsHandler);
 router.get('/list', listHandler);
+router.get('/preview/:id', previewHandler);
 
 app.use(router.routes());
 app.listen(config.port, () =>

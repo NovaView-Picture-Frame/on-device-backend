@@ -78,3 +78,13 @@ const listStmt = db.prepare<
 `);
 
 export const list = (input: Parameters<typeof listStmt.all>[0]) => listStmt.all(input);
+
+const existsStmt = db.prepare<ImageRecord['id'], number>(`
+    SELECT EXISTS(
+        SELECT 1
+        FROM images
+        WHERE id = ?
+    )
+`).pluck();
+
+export const exists = (id: Parameters<typeof existsStmt.get>[0]) => !!existsStmt.get(id);
