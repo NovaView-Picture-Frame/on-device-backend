@@ -7,7 +7,7 @@ import { tasksMap } from '../services/upload';
 import config from '../utils/config';
 
 const paramsSchema = z.object({
-    taskId: z.uuid(),
+    taskId: z.uuidv4(),
 });
 
 export default async (ctx: RouterContext) => {

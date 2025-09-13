@@ -54,17 +54,23 @@ export default (ctx: RouterContext) => {
         extract_top === extractRegionWithID.extract_top
     ) {
         ctx.body = {
-            status: "unchanged",
+            data: {
+                type: "unchanged",
+            }
         };
 
         return;
     }
 
-    cropProcessor(extractRegionWithID);
+    const taskId = cropProcessor({
+        id: extractRegionWithID.id,
+        extract_top, extract_left
+    });
 
     ctx.body = {
         data: {
-            taskId: extractRegionWithID.id,
+            type: "processing",
+            taskId,
         },
     }
 }

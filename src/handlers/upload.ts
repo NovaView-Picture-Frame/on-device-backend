@@ -46,7 +46,7 @@ export default async (ctx: Context) => {
             existingController.abort();
             ctx.body = {
                 data: {
-                    type: 'existing',
+                    type: "existing",
                     record,
                 },
             };
@@ -66,7 +66,7 @@ export default async (ctx: Context) => {
 
         ctx.body = {
             data: {
-                type: 'processing',
+                type: "processing",
                 taskId,
             },
         };

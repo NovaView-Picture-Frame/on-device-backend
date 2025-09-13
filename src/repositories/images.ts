@@ -1,8 +1,11 @@
 import db from '../utils/db';
 
-export interface ExtractRegion {
+export interface ExtractOffset {
     extract_left: number;
     extract_top: number;
+}
+
+export interface ExtractRegion extends ExtractOffset {
     extract_width: number;
     extract_height: number;
 }
@@ -15,6 +18,7 @@ interface ImageRecord extends NewImage {
     id: number;
 }
 
+export type ExtractOffsetWithID = Pick<ImageRecord, 'id' | 'extract_left' | 'extract_top'>;
 type ExtractRegionWithID = Pick<ImageRecord, 'id' | 'extract_left' | 'extract_top' | 'extract_width' | 'extract_height'>;
 
 class DatabaseError extends Error {};
@@ -73,6 +77,17 @@ export const upsert = db.transaction((image: Parameters<typeof insertStmt.get>[0
 
     throw new DatabaseError()
 });
+
+const updateOffsetStmt = db.prepare<ExtractOffsetWithID>(`
+    UPDATE images
+    SET
+        extract_left = :extract_left,
+        extract_top = :extract_top
+    WHERE id = :id
+`);
+
+export const updateOffset = (input: Parameters<typeof updateOffsetStmt.run>[0]) =>
+    updateOffsetStmt.run(input).changes > 0;
 
 const listStmt = db.prepare<
     { cursor: ImageRecord['id'] | null; size: number },
