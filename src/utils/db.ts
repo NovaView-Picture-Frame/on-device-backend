@@ -15,6 +15,7 @@ db.exec(`
         extract_top     INTEGER  NOT NULL                    CHECK(extract_top >= 0),
         extract_width   INTEGER  NOT NULL                    CHECK(extract_width > 0),
         extract_height  INTEGER  NOT NULL                    CHECK(extract_height > 0),
+        exif_jsonb      BLOB     NOT NULL                    CHECK(json_valid(exif_jsonb, 8) AND json_type(exif_jsonb) = 'object' AND json(exif_jsonb) != '{}'),
 
         CHECK(extract_left = 0 OR extract_top = 0),
         CHECK(extract_width = ${config.screenWidth} OR extract_height = ${config.screenHeight})

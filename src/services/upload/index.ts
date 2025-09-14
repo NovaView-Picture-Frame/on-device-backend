@@ -4,15 +4,10 @@ import fs from 'fs/promises';
 import sharp from 'sharp';
 import type { Readable } from 'node:stream';
 
-import {
-    getMetadata,
-    saveStream,
-    resizeToCover,
-    resizeToInside,
-    insertAndMove,
-} from './pipeline';
+import { saveStream, insertAndMove } from './persist';
 import config from '../../utils/config';
 import { createHashTransformer } from '../transformers';
+import { getMetadata, parseExifBuffer, resizeToCover, resizeToInside } from './transform';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
 export class InvalidBufferError extends Error {}
@@ -47,6 +42,11 @@ export const uploadProcessor = (
     teeForSharp.pipe(transformer);
 
     const metadata = getMetadata(transformer, signal);
+    const parseExif = metadata.then(({ exif, format }) => ({
+        ...exif && parseExifBuffer(exif),
+        FileType: format.toUpperCase()
+    }));
+
     const saveOriginal = saveStream(teeForFS, originalTmp, signal);
     const crop = Promise.all([metadata, resizeToCover(transformer, croppedTmp, signal)])
         .then(([metadata, coverOutput]) => {
@@ -64,13 +64,14 @@ export const uploadProcessor = (
         });
 
     const optimize = resizeToInside(transformer.clone(), optimizedTmp, signal);
-    const persist = Promise.all([hash, saveOriginal, crop, optimize])
-        .then(([hash, _, cropResult]) => {
+    const persist = Promise.all([hash, parseExif, saveOriginal, crop, optimize])
+        .then(([hash, exif, _, cropResult]) => {
             return insertAndMove({
                 originalTmp,
                 croppedTmp,
                 optimizedTmp,
                 hash,
+                exif,
                 cropResult,
             });
         });

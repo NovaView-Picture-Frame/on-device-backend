@@ -12,9 +12,12 @@ export interface ExtractRegion extends ExtractOffset {
 
 interface NewImage extends ExtractRegion {
     hash: Buffer;
+    exif: { [key: string]: string | undefined };
 }
 
-interface ImageRecord extends NewImage {
+type ImageRow = Omit<NewImage, 'exif'> & { exif_json: string };
+
+interface ImageRecord extends ImageRow {
     id: number;
 }
 
@@ -49,30 +52,36 @@ const getByIDStmt = db.prepare<ImageRecord['id'], ExtractRegionWithID>(`
 
 export const getByID = (id: Parameters<typeof getByIDStmt.get>[0]) => getByIDStmt.get(id);
 
-const insertStmt = db.prepare<NewImage, ImageRecord['id']>(`
+const insertStmt = db.prepare<ImageRow, ImageRecord['id']>(`
     INSERT INTO images (
         hash,
         extract_left,
         extract_top,
         extract_width,
-        extract_height
+        extract_height,
+        exif_jsonb
     )
     VALUES (
         :hash,
         :extract_left,
         :extract_top,
         :extract_width,
-        :extract_height
+        :extract_height,
+        jsonb(:exif_json)
     )
     ON CONFLICT(hash) DO NOTHING
     RETURNING id
 `).pluck();
 
-export const upsert = db.transaction((image: Parameters<typeof insertStmt.get>[0]) => {
-    const id = insertStmt.get(image);
+export const upsert = db.transaction((input: NewImage) => {
+    const { exif, ...rest } = input;
+    const id = insertStmt.get({
+        ...rest,
+        exif_json: JSON.stringify(exif),
+    });
     if (id) return { id, created: true };
 
-    const record = getByHash(image.hash);
+    const record = getByHash(input.hash);
     if (record) return { id: record.id, created: false };
 
     throw new DatabaseError()
@@ -100,7 +109,7 @@ const listStmt = db.prepare<
         extract_width,
         extract_height
     FROM images
-    WHERE (:cursor IS NULL OR id > :cursor)
+    WHERE (:cursor IS NULL OR id < :cursor)
     ORDER BY id DESC
     LIMIT :size
 `);

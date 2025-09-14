@@ -13,8 +13,9 @@ import { createMaxSizeTransform, MaxSizeError } from '../services/transformers';
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
     'content-length': z.coerce.number().int().positive().max(config.sizeLimit).optional(),
-    'content-hash': z.string().length(64).regex(/^[a-f0-9]+$/i).optional(),
-});
+    'content-hash': z.string().length(64).regex(/^[\p{Hex_Digit}]+$/u).optional(),
+})
+.strict();
 
 export default async (ctx: Context) => {
     const headerResult = headerSchema.safeParse(ctx.request.headers);
@@ -22,22 +23,20 @@ export default async (ctx: Context) => {
         "Invalid headers"
     )
 
-    const taskId = randomUUID();
-    const tee = new PassThrough();
-
-    const timeoutController = new AbortController();
+    const timeoutSignal = AbortSignal.timeout(config.uploadTimeout);
     const existingController = new AbortController();
     const taskController = new AbortController();
     const signal = AbortSignal.any([
-        timeoutController.signal,
+        timeoutSignal,
         existingController.signal,
         taskController.signal,
     ]);
 
+    const taskId = randomUUID();
+    const tee = new PassThrough();
     const { hash, metadata } = uploadProcessor(taskId, tee, signal);
-    const timeout = setTimeout(() => timeoutController.abort(), config.uploadTimeout);
-
     const headerHash = headerResult.data['content-hash'];
+
     (headerHash ? Promise.resolve(Buffer.from(headerHash, 'hex')) : hash)
         .then(buffer => {
             const record = getByHash(buffer);
@@ -73,7 +72,7 @@ export default async (ctx: Context) => {
     } catch (err) {
         if (existingController.signal.aborted) return;
 
-        if (timeoutController.signal.aborted)throw new HttpBadRequestError(
+        if (timeoutSignal.aborted)throw new HttpBadRequestError(
             "Request timeout"
         );
 
@@ -88,7 +87,5 @@ export default async (ctx: Context) => {
         );
 
         throw err;
-    } finally {
-        clearTimeout(timeout);
     }
 }

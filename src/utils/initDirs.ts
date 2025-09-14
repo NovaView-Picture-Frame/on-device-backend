@@ -49,7 +49,7 @@ function assertPaths<T extends DirTree>(paths: NodePaths, tree: T):
         }
     }
 
-export default async <const T extends DirTree>(root: string, tree: T) => {
+export const initDirs = async <const T extends DirTree>(root: string, tree: T) => {
     const tmpRoot = `${root}/.tmp`;
     await fs.rm(tmpRoot, { recursive: true, force: true });
 

@@ -14,6 +14,7 @@
 		"@types/koa__router": "^12.0.4",
 		"@types/node": "^24.3.1",
 		"better-sqlite3": "^12.2.0",
+		"exifreader": "^4.31.2",
 		"koa": "^3.0.1",
 		"node-addon-api": "^8.5.0",
 		"node-gyp": "^11.4.2",

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'fs/promises';
 
-import { resizeAndExtract, updateAndMove } from './pipeline';
+import { resizeAndExtract, updateAndMove } from './transform';
 import config from '../../utils/config';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 import type { ExtractOffsetWithID } from '../../repositories/images';
