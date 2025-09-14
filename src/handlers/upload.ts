@@ -6,22 +6,40 @@ import type { Context } from 'koa';
 
 import config from '../utils/config';
 import { HttpBadRequestError } from '../middleware/errorHandler';
-import { uploadProcessor, InvalidBufferError } from '../services/upload';
 import { getByHash } from '../repositories/images';
+import { uploadProcessor, InvalidBufferError } from '../services/upload';
 import { createMaxSizeTransform, MaxSizeError } from '../services/transformers';
 
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
     'content-length': z.coerce.number().int().positive().max(config.sizeLimit).optional(),
     'content-hash': z.string().length(64).regex(/^[\p{Hex_Digit}]+$/u).optional(),
-})
-.strict();
+});
+
+const respondExisting = (ctx: Context, record: ReturnType<typeof getByHash>) => {
+    ctx.body = {
+        data: {
+            type: "existing",
+            record,
+        },
+    };
+}
 
 export default async (ctx: Context) => {
     const headerResult = headerSchema.safeParse(ctx.request.headers);
     if (!headerResult.success) throw new HttpBadRequestError(
         "Invalid headers"
     )
+
+    const headerHash = headerResult.data['content-hash'];
+    if (headerHash) {
+        const record = getByHash(Buffer.from(headerHash, 'hex'));
+        if (record) {
+            respondExisting(ctx, record);
+
+            return;
+        }
+    }
 
     const timeoutSignal = AbortSignal.timeout(config.uploadTimeout);
     const existingController = new AbortController();
@@ -35,21 +53,14 @@ export default async (ctx: Context) => {
     const taskId = randomUUID();
     const tee = new PassThrough();
     const { hash, metadata } = uploadProcessor(taskId, tee, signal);
-    const headerHash = headerResult.data['content-hash'];
 
-    (headerHash ? Promise.resolve(Buffer.from(headerHash, 'hex')) : hash)
-        .then(buffer => {
-            const record = getByHash(buffer);
-            if (!record) return;
+    hash.then(buffer => {
+        const record = getByHash(buffer);
+        if (!record) return;
 
-            existingController.abort();
-            ctx.body = {
-                data: {
-                    type: "existing",
-                    record,
-                },
-            };
-        });
+        existingController.abort();
+        respondExisting(ctx, record);
+    });
 
     try {
         await Promise.all([

@@ -4,7 +4,8 @@ import config from '../utils/config';
 
 const info = {
     data: {
-        aspect_ratio: config.screenWidth / config.screenHeight,
+        screen_width: config.screenWidth,
+        screen_height: config.screenHeight,
         size_limit: config.sizeLimit,
     },
 };

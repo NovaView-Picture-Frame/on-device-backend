@@ -1,4 +1,5 @@
 import db from '../utils/db';
+import type { Place } from '../services/upload/persist';
 
 export interface ExtractOffset {
     extract_left: number;
@@ -12,10 +13,14 @@ export interface ExtractRegion extends ExtractOffset {
 
 interface NewImage extends ExtractRegion {
     hash: Buffer;
-    exif: { [key: string]: string | undefined };
+    exif: Record<string, string>;
+    place: Place | null;
 }
 
-type ImageRow = Omit<NewImage, 'exif'> & { exif_json: string };
+interface ImageRow extends Omit<NewImage, 'exif' | 'place'> {
+    exif_json: string;
+    place_json: string | null;
+}
 
 interface ImageRecord extends ImageRow {
     id: number;
@@ -59,7 +64,8 @@ const insertStmt = db.prepare<ImageRow, ImageRecord['id']>(`
         extract_top,
         extract_width,
         extract_height,
-        exif_jsonb
+        exif_jsonb,
+        place_jsonb
     )
     VALUES (
         :hash,
@@ -67,17 +73,19 @@ const insertStmt = db.prepare<ImageRow, ImageRecord['id']>(`
         :extract_top,
         :extract_width,
         :extract_height,
-        jsonb(:exif_json)
+        jsonb(:exif_json),
+        jsonb(:place_json)
     )
     ON CONFLICT(hash) DO NOTHING
     RETURNING id
 `).pluck();
 
 export const upsert = db.transaction((input: NewImage) => {
-    const { exif, ...rest } = input;
+    const { exif, place, ...rest } = input;
     const id = insertStmt.get({
         ...rest,
         exif_json: JSON.stringify(exif),
+        place_json: place && JSON.stringify(place),
     });
     if (id) return { id, created: true };
 

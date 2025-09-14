@@ -23,6 +23,7 @@ const configSchema = z.object({
     upload_timeout: z.number().int().positive(),
     sse_keepalive_interval: z.number().int().positive(),
     tasks_results_ttl: z.number().int().positive(),
+    nominatim_user_agent: z.string().nonempty(),
 }).strict();
 
 const dirTree = {
@@ -50,4 +51,5 @@ export default {
     uploadTimeout: yamlConfig.upload_timeout,
     sseKeepaliveInterval: yamlConfig.sse_keepalive_interval,
     tasksResultsTTL: yamlConfig.tasks_results_ttl,
+    nominatimUserAgent: yamlConfig.nominatim_user_agent,
 };

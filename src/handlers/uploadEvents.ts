@@ -34,6 +34,21 @@ export default async (ctx: RouterContext) => {
         sse.end();
     };
 
+    tasks.lookupPlace.then(
+        place => sse.write(
+            `event: lookupPlaceComplete\ndata: ${JSON.stringify({
+                data: { place },
+            })}\n\n`
+        ),
+        () => sse.write(
+            `event: lookupPlaceError\ndata: ${JSON.stringify({
+                data: {
+                    message: "Failed to look up place",
+                },
+            })}\n\n`
+        )
+    );
+
     tasks.saveOriginal.then(
         null,
         () => sse.write(
@@ -46,9 +61,9 @@ export default async (ctx: RouterContext) => {
     );
 
     tasks.crop.then(
-        cropResult => sse.write(
+        region => sse.write(
             `event: cropComplete\ndata: ${JSON.stringify({
-                data: { cropResult },
+                data: { region },
             })}\n\n`
         ),
         () => sse.write(

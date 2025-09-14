@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import sharp from 'sharp';
 import type { Readable } from 'node:stream';
 
-import { saveStream, insertAndMove } from './persist';
+import { geocoding, saveStream, insertAndMove } from './persist';
 import config from '../../utils/config';
 import { createHashTransformer } from '../transformers';
 import { getMetadata, parseExifBuffer, resizeToCover, resizeToInside } from './transform';
@@ -13,6 +13,7 @@ import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 export class InvalidBufferError extends Error {}
 
 export const tasksMap = new Map<string, {
+    lookupPlace: ReturnType<typeof geocoding>,
     saveOriginal: ReturnType<typeof saveStream>,
     crop: Promise<
         Parameters<typeof insertAndMove>[0]['cropResult']
@@ -42,10 +43,24 @@ export const uploadProcessor = (
     teeForSharp.pipe(transformer);
 
     const metadata = getMetadata(transformer, signal);
+
     const parseExif = metadata.then(({ exif, format }) => ({
         ...exif && parseExifBuffer(exif),
         FileType: format.toUpperCase()
     }));
+
+    const lookupPlace = parseExif.then(({
+        GPSLatitudeRef,
+        GPSLatitude,
+        GPSLongitudeRef,
+        GPSLongitude
+    }) => {
+        if (!GPSLatitudeRef || !GPSLatitude || !GPSLongitudeRef || !GPSLongitude) return null;
+
+        const lat = GPSLatitudeRef.startsWith('N') ? +GPSLatitude : -GPSLatitude;
+        const lon = GPSLongitudeRef.startsWith('E') ? +GPSLongitude : -GPSLongitude;
+        return geocoding(lat, lon);
+    });
 
     const saveOriginal = saveStream(teeForFS, originalTmp, signal);
     const crop = Promise.all([metadata, resizeToCover(transformer, croppedTmp, signal)])
@@ -64,17 +79,22 @@ export const uploadProcessor = (
         });
 
     const optimize = resizeToInside(transformer.clone(), optimizedTmp, signal);
-    const persist = Promise.all([hash, parseExif, saveOriginal, crop, optimize])
-        .then(([hash, exif, _, cropResult]) => {
-            return insertAndMove({
-                originalTmp,
-                croppedTmp,
-                optimizedTmp,
-                hash,
-                exif,
-                cropResult,
-            });
-        });
+    const persist = Promise.all([
+        hash,
+        parseExif,
+        lookupPlace,
+        saveOriginal,
+        crop,
+        optimize
+    ]).then(([hash, exif, place, _, cropResult]) => insertAndMove({
+        originalTmp,
+        croppedTmp,
+        optimizedTmp,
+        hash,
+        exif,
+        place,
+        cropResult,
+    }));
 
     Promise.allSettled([persist]).finally(async () => {
         setTimeout(() => tasksMap.delete(id), config.tasksResultsTTL);
@@ -86,6 +106,7 @@ export const uploadProcessor = (
     });
 
     tasksMap.set(id, {
+        lookupPlace,
         saveOriginal,
         crop,
         optimize,
