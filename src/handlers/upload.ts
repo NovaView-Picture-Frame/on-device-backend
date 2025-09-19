@@ -33,9 +33,9 @@ export default async (ctx: Context) => {
 
     const headerHash = headerResult.data['content-hash'];
     if (headerHash) {
-        const record = getByHash(Buffer.from(headerHash, 'hex'));
-        if (record) {
-            respondExisting(ctx, record);
+        const extractRegionRecord = getByHash(Buffer.from(headerHash, 'hex'));
+        if (extractRegionRecord) {
+            respondExisting(ctx, extractRegionRecord);
 
             return;
         }
@@ -55,11 +55,11 @@ export default async (ctx: Context) => {
     const { hash, metadata } = uploadProcessor(taskId, tee, signal);
 
     hash.then(buffer => {
-        const record = getByHash(buffer);
-        if (!record) return;
+        const extractRegionRecord = getByHash(buffer);
+        if (!extractRegionRecord) return;
 
         existingController.abort();
-        respondExisting(ctx, record);
+        respondExisting(ctx, extractRegionRecord);
     });
 
     try {

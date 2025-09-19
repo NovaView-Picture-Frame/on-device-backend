@@ -13,12 +13,11 @@ export default (ctx: RouterContext) => {
     const queryResult = querySchema.safeParse(ctx.query);
     if (!queryResult.success) throw new HttpBadRequestError("Invalid query parameters");
 
-    const records = list({
-        cursor: queryResult.data.cursor ?? null,
-        size: queryResult.data.size
-    });
+    const extractRegionRecords = list(queryResult.data.size, queryResult.data.cursor);
 
     ctx.body = {
-        data: { records },
+        data: {
+            records: extractRegionRecords
+        },
     };
 }

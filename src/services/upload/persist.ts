@@ -7,16 +7,16 @@ import type { Readable } from "node:stream";
 import { upsert } from '../../repositories/images';
 import config from '../../utils/config';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-import type { ExtractRegion } from '../../repositories/images';
 
-const placeSchema = z.object({
-    place_id: z.number(),
+export const placeSchema = z.object({
     name: z.string(),
     addresstype: z.string(),
     display_name: z.string(),
-});
-
-export type Place = z.infer<typeof placeSchema>;
+}).transform(data => ({
+    name: data.name,
+    type: data.addresstype,
+    fullName: data.display_name,
+}));
 
 export const geocoding = async (lat: number, lon: number) => {
     const baseUrl = 'https://nominatim.openstreetmap.org/reverse';
@@ -35,9 +35,9 @@ export const geocoding = async (lat: number, lon: number) => {
         },
     });
 
-    const place = placeSchema.safeParse(await res.json());
-    if (!place.success) return null;
-    return place.data;
+    const resData = await res.json();
+    const place = placeSchema.safeParse(resData);
+    return place.success ? place.data : null;
 }
 
 export const saveStream = (
@@ -54,16 +54,16 @@ export const insertAndMove = async (input: {
     originalTmp: string;
     croppedTmp: string;
     optimizedTmp: string;
-    hash: Buffer;
-    exif: Record<string, string>;
-    place: Place | null;
-    cropResult: ExtractRegion;
+    hash: Parameters<typeof upsert>[0]['hash'];
+    cropResult: Parameters<typeof upsert>[0]['extractRegion'];
+    exif: Parameters<typeof upsert>[0]['exif'];
+    place: Parameters<typeof upsert>[0]['place'];
 }) => {
     const { id, created } = upsert({
         hash: input.hash,
+        extractRegion: input.cropResult,
         exif: input.exif,
         place: input.place,
-        ...input.cropResult
     });
 
     if (created) {

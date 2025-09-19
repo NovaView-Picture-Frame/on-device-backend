@@ -3,7 +3,7 @@ import bodyParser from '@koa/bodyparser';
 import Router from '@koa/router';
 
 import { errorHandler } from './middleware/errorHandler';
-import infoHandler from './handlers/info';
+import configHandler from './handlers/config';
 import uploadHandler from './handlers/upload';
 import uploadEventsHandler from './handlers/uploadEvents';
 import listHandler from './handlers/list';
@@ -18,7 +18,7 @@ app.use(errorHandler);
 app.use(bodyParser());
 
 const router = new Router();
-router.get('/info', infoHandler);
+router.get('/config', configHandler);
 router.post('/upload', uploadHandler);
 router.get('/upload/:taskId/events', uploadEventsHandler);
 router.get('/list', listHandler);

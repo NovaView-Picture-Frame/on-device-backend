@@ -3,7 +3,7 @@ import sharp from 'sharp';
 
 import config from '../../utils/config';
 import { updateOffset } from '../../repositories/images';
-import type { ExtractOffset, ExtractOffsetWithID } from '../../repositories/images';
+import type { ExtractOffset, ExtractOffsetUpdate } from '../../models/image';
 
 export const resizeAndExtract = (
     offset: ExtractOffset,
@@ -14,8 +14,8 @@ export const resizeAndExtract = (
         fit: 'outside',
     })
     .extract({
-        left: offset.extract_left,
-        top: offset.extract_top,
+        left: offset.left,
+        top: offset.top,
         width: config.screenWidth,
         height: config.screenHeight,
     })
@@ -23,9 +23,9 @@ export const resizeAndExtract = (
     .toFile(dest);
 
 export const updateAndMove = (
-    extractOffsetWithID: ExtractOffsetWithID,
+    extractOffsetUpdate: ExtractOffsetUpdate,
     croppedTmp: string,
     cropped: string
-) => updateOffset(extractOffsetWithID)
+) => updateOffset(extractOffsetUpdate)
     ? fs.rename(croppedTmp, cropped)
     : Promise.resolve();

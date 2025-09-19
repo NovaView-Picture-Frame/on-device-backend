@@ -4,11 +4,11 @@ import fs from 'fs/promises';
 import { resizeAndExtract, updateAndMove } from './transform';
 import config from '../../utils/config';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-import type { ExtractOffsetWithID } from '../../repositories/images';
+import type { ExtractOffsetUpdate } from '../../models/image';
 
-const getTaskKey = (offset: ExtractOffsetWithID):
-    `${ExtractOffsetWithID['id']}-${ExtractOffsetWithID['extract_left']}-${ExtractOffsetWithID['extract_top']}` =>
-        `${offset.id}-${offset.extract_left}-${offset.extract_top}`;
+const getTaskKey = (offset: ExtractOffsetUpdate):
+    `${ExtractOffsetUpdate['id']}-${ExtractOffsetUpdate['left']}-${ExtractOffsetUpdate['top']}` =>
+        `${offset.id}-${offset.left}-${offset.top}`;
 
 export const tasksMap = new Map<string, {
     key: ReturnType<typeof getTaskKey> | null;
@@ -18,7 +18,7 @@ export const tasksMap = new Map<string, {
     }
 }>();
 
-export const cropProcessor = (input: ExtractOffsetWithID) => {
+export const cropProcessor = (input: ExtractOffsetUpdate) => {
     const taskKey = getTaskKey(input);
     for (const [existingTaskId, existingEntry] of tasksMap.entries())
         if (existingEntry.key === taskKey) return existingTaskId;

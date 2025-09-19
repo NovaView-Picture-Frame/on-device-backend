@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 
 import config from '../utils/config';
 
-const info = {
+const body = {
     data: {
         screen_width: config.screenWidth,
         screen_height: config.screenHeight,
@@ -10,4 +10,4 @@ const info = {
     },
 };
 
-export default (ctx: Context) => ctx.body = info;
+export default (ctx: Context) => ctx.body = body;
