@@ -13,13 +13,13 @@ import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 export class InvalidBufferError extends Error {}
 
 export const tasksMap = new Map<string, {
-    lookupPlace: ReturnType<typeof geocoding>,
-    saveOriginal: ReturnType<typeof saveStream>,
-    crop: Promise<
+    readonly lookupPlace: ReturnType<typeof geocoding>,
+    readonly saveOriginal: ReturnType<typeof saveStream>,
+    readonly crop: Promise<
         Parameters<typeof insertAndMove>[0]['cropResult']
     >,
-	optimize: ReturnType<typeof resizeToInside>,
-    persist: ReturnType<typeof insertAndMove>,
+	readonly optimize: ReturnType<typeof resizeToInside>,
+    readonly persist: ReturnType<typeof insertAndMove>,
 }>();
 
 export const uploadProcessor = (
@@ -43,23 +43,10 @@ export const uploadProcessor = (
     teeForSharp.pipe(transformer);
 
     const metadata = getMetadata(transformer, signal);
-
-    const parseExif = metadata.then(({ exif, format }) => ({
-        ...exif && parseExifBuffer(exif),
-        FileType: format.toUpperCase()
-    }));
-
-    const lookupPlace = parseExif.then(({
-        GPSLatitudeRef,
-        GPSLatitude,
-        GPSLongitudeRef,
-        GPSLongitude
-    }) => {
-        if (!GPSLatitudeRef || !GPSLatitude || !GPSLongitudeRef || !GPSLongitude) return null;
-
-        const lat = GPSLatitudeRef.startsWith('N') ? +GPSLatitude : -GPSLatitude;
-        const lon = GPSLongitudeRef.startsWith('E') ? +GPSLongitude : -GPSLongitude;
-        return geocoding(lat, lon);
+    const parseExif = metadata.then(({ exif }) => exif ? parseExifBuffer(exif) : null);
+    const lookupPlace = parseExif.then(exif => {
+        if (!exif || !exif.gpsLatitude || !exif.gpsLongitude) return null;
+        return geocoding(exif.gpsLatitude, exif.gpsLongitude);
     });
 
     const saveOriginal = saveStream(teeForFS, originalTmp, signal);
@@ -71,10 +58,10 @@ export const uploadProcessor = (
             );
 
             return {
-                extract_left: Math.abs(coverOutput.cropOffsetLeft ?? 0),
-                extract_top: Math.abs(coverOutput.cropOffsetTop ?? 0),
-                extract_width: Math.round(metadata.width * scale),
-                extract_height: Math.round(metadata.height * scale),
+                left: Math.abs(coverOutput.cropOffsetLeft ?? 0),
+                top: Math.abs(coverOutput.cropOffsetTop ?? 0),
+                width: Math.round(metadata.width * scale),
+                height: Math.round(metadata.height * scale),
             };
         });
 

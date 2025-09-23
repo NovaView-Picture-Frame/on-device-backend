@@ -1,23 +1,66 @@
-import { load } from 'exifreader';
+import exif from 'exif-reader';
 import type { Sharp, Metadata, OutputInfo } from 'sharp';
 
 import { InvalidBufferError } from '.';
 import config from '../../utils/config';
+import type { Exif } from '../../models/image';
 
 class StreamAbortedError extends Error {}
 
-export const parseExifBuffer = (buffer: Exclude<Metadata['exif'], undefined>) => {
-    const raw = load(buffer.subarray(6));
-    const result: { [K in keyof typeof raw]: string } = Object.create(null);
+const gpsToDecimal = (gps: number[], ref: string) => {
+    const [degrees, minutes, seconds] = gps;
+    if (
+        degrees === undefined ||
+        minutes === undefined ||
+        seconds === undefined
+    ) return null;
 
-    for (const key in raw)
-        if (Object.hasOwn(raw, key)) {
-            const description = raw[key]?.description;
-            if (description) result[key] = description;
-        }
+    const decimal = degrees + minutes / 60 + seconds / 3600;
+    return ref === 'S' || ref === 'W' ? -decimal : decimal;
+};
 
-    return result;
-}
+export const parseExifBuffer = (buffer: Exclude<Metadata['exif'], undefined>): Exif => {
+    const { Image, Photo, GPSInfo } = exif(buffer);
+
+    const gpsLatitude = GPSInfo?.GPSLatitude && GPSInfo.GPSLatitudeRef
+        ? gpsToDecimal(GPSInfo.GPSLatitude, GPSInfo.GPSLatitudeRef)
+        : null;
+
+    const gpsLongitude = GPSInfo?.GPSLongitude && GPSInfo.GPSLongitudeRef
+        ? gpsToDecimal(GPSInfo.GPSLongitude, GPSInfo.GPSLongitudeRef)
+        : null;
+
+    return {
+        make: Image?.Make || null,
+        model: Image?.Model || null,
+        lensMake: Photo?.LensMake || null,
+        lensModel: Photo?.LensModel || null,
+        software: Image?.Software || null,
+
+        dateTimeOriginal: Photo?.DateTimeOriginal?.toISOString() || null,
+        offsetTimeOriginal: Photo?.OffsetTimeOriginal || null,
+
+        exposureTime: Photo?.ExposureTime || null,
+        exposureProgram: Photo?.ExposureProgram || null,
+        isoSpeedRatings: Photo?.ISOSpeedRatings || null,
+        fNumber: Photo?.FNumber || null, 
+        apertureValue: Photo?.ApertureValue || null,
+        shutterSpeedValue: Photo?.ShutterSpeedValue || null,
+        focalLength: Photo?.FocalLength || null,
+        focalLengthIn35mmFilm: Photo?.FocalLengthIn35mmFilm || null,
+        flash: Photo?.Flash || null,
+
+        pixelXDimension: Photo?.PixelXDimension || null,
+        pixelYDimension: Photo?.PixelYDimension || null,
+        orientation: Image?.Orientation || null,
+        colorSpace: Photo?.ColorSpace || null,
+
+        gpsLatitude,
+        gpsLongitude,
+        gpsAltitude: GPSInfo?.GPSAltitude || null,
+        gpsImgDirection: GPSInfo?.GPSImgDirection || null,
+    };
+};
 
 export const getMetadata = async (sharpInstance: Sharp, signal: AbortSignal) => {
     signal.throwIfAborted();

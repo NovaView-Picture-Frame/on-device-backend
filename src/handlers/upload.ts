@@ -6,7 +6,7 @@ import type { Context } from 'koa';
 
 import config from '../utils/config';
 import { HttpBadRequestError } from '../middleware/errorHandler';
-import { getByHash } from '../repositories/images';
+import { getExtractRegionRecordByHash } from '../repositories/images';
 import { uploadProcessor, InvalidBufferError } from '../services/upload';
 import { createMaxSizeTransform, MaxSizeError } from '../services/transformers';
 
@@ -16,7 +16,10 @@ const headerSchema = z.object({
     'content-hash': z.string().length(64).regex(/^[\p{Hex_Digit}]+$/u).optional(),
 });
 
-const respondExisting = (ctx: Context, record: ReturnType<typeof getByHash>) => {
+const respondExisting = (
+    ctx: Context,
+    record: ReturnType<typeof getExtractRegionRecordByHash>
+) => {
     ctx.body = {
         data: {
             type: "existing",
@@ -33,9 +36,12 @@ export default async (ctx: Context) => {
 
     const headerHash = headerResult.data['content-hash'];
     if (headerHash) {
-        const record = getByHash(Buffer.from(headerHash, 'hex'));
-        if (record) {
-            respondExisting(ctx, record);
+        const extractRegionRecord = getExtractRegionRecordByHash(
+            Buffer.from(headerHash, 'hex')
+        );
+
+        if (extractRegionRecord) {
+            respondExisting(ctx, extractRegionRecord);
 
             return;
         }
@@ -55,11 +61,11 @@ export default async (ctx: Context) => {
     const { hash, metadata } = uploadProcessor(taskId, tee, signal);
 
     hash.then(buffer => {
-        const record = getByHash(buffer);
-        if (!record) return;
+        const extractRegionRecord = getExtractRegionRecordByHash(buffer);
+        if (!extractRegionRecord) return;
 
         existingController.abort();
-        respondExisting(ctx, record);
+        respondExisting(ctx, extractRegionRecord);
     });
 
     try {

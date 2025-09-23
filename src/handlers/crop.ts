@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import { getByID } from '../repositories/images';
+import { getExtractRegionRecordByID } from '../repositories/images';
 import config from '../utils/config'
 import { cropProcessor } from '../services/crop';
 
@@ -34,24 +34,24 @@ export default (ctx: RouterContext) => {
     const bodyResult = bodySchema.safeParse(ctx.request.body);
     if (!bodyResult.success) throw new HttpBadRequestError("Invalid request body");
 
-    const extractRegionWithID = getByID(paramsResult.data.id);
-    if (!extractRegionWithID) throw new HttpNotFoundError("Image not found");
+    const extractRegionRecord = getExtractRegionRecordByID(paramsResult.data.id);
+    if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
-    const extract_left = toOffset(
-        extractRegionWithID.extract_width,
+    const left = toOffset(
+        extractRegionRecord.extractRegion.width,
         bodyResult.data.extract_left_ratio,
         config.screenWidth
     );
 
-    const extract_top = toOffset(
-        extractRegionWithID.extract_height,
+    const top = toOffset(
+        extractRegionRecord.extractRegion.height,
         bodyResult.data.extract_top_ratio,
         config.screenHeight
     );
 
     if (
-        extract_left === extractRegionWithID.extract_left &&
-        extract_top === extractRegionWithID.extract_top
+        left === extractRegionRecord.extractRegion.left &&
+        top === extractRegionRecord.extractRegion.top
     ) {
         ctx.body = {
             data: {
@@ -63,8 +63,9 @@ export default (ctx: RouterContext) => {
     }
 
     const taskId = cropProcessor({
-        id: extractRegionWithID.id,
-        extract_top, extract_left
+        id: extractRegionRecord.id,
+        left,
+        top,
     });
 
     ctx.body = {
