@@ -7,7 +7,7 @@ import type { Readable } from 'node:stream';
 import { geocoding, saveStream, insertAndMove } from './persist';
 import config from '../../utils/config';
 import { createHashTransformer } from '../transformers';
-import { getMetadata, parseExifBuffer, resizeToCover, resizeToInside } from './transform';
+import { getMetadata, parseExifBuffer, convertDMSToDecimal, resizeToCover, resizeToInside } from './transform';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
 export class InvalidBufferError extends Error {}
@@ -43,10 +43,22 @@ export const uploadProcessor = (
     teeForSharp.pipe(transformer);
 
     const metadata = getMetadata(transformer, signal);
-    const parseExif = metadata.then(({ exif }) => exif ? parseExifBuffer(exif) : null);
+    const parseExif = metadata.then(({ exif, format }) => exif
+        ? parseExifBuffer(exif, format)
+        : null
+    );
+    
     const lookupPlace = parseExif.then(exif => {
-        if (!exif || !exif.gpsLatitude || !exif.gpsLongitude) return null;
-        return geocoding(exif.gpsLatitude, exif.gpsLongitude);
+        if (
+            !exif?.GPSLatitude ||
+            !exif.GPSLatitudeRef ||
+            !exif?.GPSLongitude ||
+            !exif.GPSLongitudeRef
+        ) return null;
+
+        const lat = convertDMSToDecimal(exif.GPSLatitude, exif.GPSLatitudeRef);
+        const lon = convertDMSToDecimal(exif.GPSLongitude, exif.GPSLongitudeRef);
+        return geocoding(lat, lon);
     });
 
     const saveOriginal = saveStream(teeForFS, originalTmp, signal);

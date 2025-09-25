@@ -1,22 +1,12 @@
 import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
 import fs from 'fs/promises';
-import { z } from 'zod';
 import type { Readable } from "node:stream";
 
+import { placeSchema } from '../../models/image';
 import { upsert } from '../../repositories/images';
 import config from '../../utils/config';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-
-export const placeSchema = z.object({
-    name: z.string(),
-    addresstype: z.string(),
-    display_name: z.string(),
-}).transform(data => ({
-    name: data.name,
-    type: data.addresstype,
-    fullName: data.display_name,
-}));
 
 export const geocoding = async (lat: number, lon: number) => {
     const baseUrl = 'https://nominatim.openstreetmap.org/reverse';

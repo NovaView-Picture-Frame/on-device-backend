@@ -12,17 +12,17 @@
 		"@types/better-sqlite3": "^7.6.13",
 		"@types/koa": "^3.0.0",
 		"@types/koa__router": "^12.0.4",
-		"@types/node": "^24.3.1",
-		"better-sqlite3": "^12.2.0",
-		"exif-reader": "^2.0.2",
+		"@types/node": "^24.5.2",
+		"better-sqlite3": "^12.4.1",
+		"exifreader": "^4.32.0",
 		"koa": "^3.0.1",
 		"node-addon-api": "^8.5.0",
 		"node-gyp": "^11.4.2",
-		"rolldown-vite": "^7.1.5",
-		"sharp": "^0.34.3",
+		"rolldown-vite": "^7.1.13",
+		"sharp": "^0.34.4",
 		"typescript": "^5.9.2",
 		"vite-plugin-static-copy": "^3.1.2",
 		"yaml": "^2.8.1",
-		"zod": "^4.1.5"
+		"zod": "^4.1.11"
 	}
 }

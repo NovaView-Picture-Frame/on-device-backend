@@ -1,65 +1,61 @@
-import exif from 'exif-reader';
+import { load } from 'exifreader'
 import type { Sharp, Metadata, OutputInfo } from 'sharp';
 
 import { InvalidBufferError } from '.';
+import { exifSchema } from '../../models/image';
 import config from '../../utils/config';
 import type { Exif } from '../../models/image';
 
 class StreamAbortedError extends Error {}
 
-const gpsToDecimal = (gps: number[], ref: string) => {
-    const [degrees, minutes, seconds] = gps;
-    if (
-        degrees === undefined ||
-        minutes === undefined ||
-        seconds === undefined
-    ) return null;
-
+export function convertDMSToDecimal(
+    dms: NonNullable<Exif['GPSLatitude']>,
+    ref: NonNullable<Exif['GPSLatitudeRef']>,
+): number;
+export function convertDMSToDecimal(
+    dms: NonNullable<Exif['GPSLongitude']>,
+    ref: NonNullable<Exif['GPSLongitudeRef']>,
+): number;
+export function convertDMSToDecimal(
+    dms: NonNullable<Exif['GPSLatitude' | 'GPSLongitude']>,
+    ref: NonNullable<Exif['GPSLatitudeRef' | 'GPSLongitudeRef']>,
+) {
+    const degrees = dms[0][0] / dms[0][1];
+    const minutes = dms[1][0] / dms[1][1];
+    const seconds = dms[2][0] / dms[2][1];
     const decimal = degrees + minutes / 60 + seconds / 3600;
-    return ref === 'S' || ref === 'W' ? -decimal : decimal;
-};
 
-export const parseExifBuffer = (buffer: Exclude<Metadata['exif'], undefined>): Exif => {
-    const { Image, Photo, GPSInfo } = exif(buffer);
+    return ref === 'N' || ref === 'E' ? decimal : -decimal;
+}
 
-    const gpsLatitude = GPSInfo?.GPSLatitude && GPSInfo.GPSLatitudeRef
-        ? gpsToDecimal(GPSInfo.GPSLatitude, GPSInfo.GPSLatitudeRef)
-        : null;
+export const parseExifBuffer = (
+    buffer: NonNullable<Metadata['exif']>,
+    format: Metadata['format']
+) => {
+    const raw = (() => {
+        try {
+            return load(buffer.subarray(6));
+        } catch {
+            throw new InvalidBufferError();
+        }
+    })();
 
-    const gpsLongitude = GPSInfo?.GPSLongitude && GPSInfo.GPSLongitudeRef
-        ? gpsToDecimal(GPSInfo.GPSLongitude, GPSInfo.GPSLongitudeRef)
-        : null;
+    const exif = Object.fromEntries(
+        Object.entries(raw).map(([k, { value }]) => {
+            const key = k.startsWith('GPS')
+                ? k
+                : k.charAt(0).toLowerCase() + k.slice(1);
+            const val = Array.isArray(value) && value.length === 1 ? value[0] : value;
 
-    return {
-        make: Image?.Make || null,
-        model: Image?.Model || null,
-        lensMake: Photo?.LensMake || null,
-        lensModel: Photo?.LensModel || null,
-        software: Image?.Software || null,
+            return [
+                key.replaceAll(' ', ''),
+                k === 'FileType' ? format : val,
+            ];
+        })
+    );
 
-        dateTimeOriginal: Photo?.DateTimeOriginal?.toISOString() || null,
-        offsetTimeOriginal: Photo?.OffsetTimeOriginal || null,
-
-        exposureTime: Photo?.ExposureTime || null,
-        exposureProgram: Photo?.ExposureProgram || null,
-        isoSpeedRatings: Photo?.ISOSpeedRatings || null,
-        fNumber: Photo?.FNumber || null, 
-        apertureValue: Photo?.ApertureValue || null,
-        shutterSpeedValue: Photo?.ShutterSpeedValue || null,
-        focalLength: Photo?.FocalLength || null,
-        focalLengthIn35mmFilm: Photo?.FocalLengthIn35mmFilm || null,
-        flash: Photo?.Flash || null,
-
-        pixelXDimension: Photo?.PixelXDimension || null,
-        pixelYDimension: Photo?.PixelYDimension || null,
-        orientation: Image?.Orientation || null,
-        colorSpace: Photo?.ColorSpace || null,
-
-        gpsLatitude,
-        gpsLongitude,
-        gpsAltitude: GPSInfo?.GPSAltitude || null,
-        gpsImgDirection: GPSInfo?.GPSImgDirection || null,
-    };
+    const exifResult = exifSchema.safeParse(exif);
+    return exifResult.success ? exifResult.data : null;
 };
 
 export const getMetadata = async (sharpInstance: Sharp, signal: AbortSignal) => {
