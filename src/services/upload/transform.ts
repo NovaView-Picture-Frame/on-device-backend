@@ -2,9 +2,8 @@ import { load } from 'exifreader'
 import type { Sharp, Metadata, OutputInfo } from 'sharp';
 
 import { InvalidBufferError } from '.';
-import { exifSchema } from '../../models/image';
+import { exifSchema, type Exif } from '../../models/image';
 import config from '../../utils/config';
-import type { Exif } from '../../models/image';
 
 class StreamAbortedError extends Error {}
 

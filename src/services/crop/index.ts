@@ -10,11 +10,11 @@ const getTaskKey = (offset: ExtractOffsetUpdate):
     `${ExtractOffsetUpdate['id']}-${ExtractOffsetUpdate['left']}-${ExtractOffsetUpdate['top']}` =>
         `${offset.id}-${offset.left}-${offset.top}`;
 
-export const tasksMap = new Map<string, {
+export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     key: ReturnType<typeof getTaskKey> | null;
     tasks: {
-        crop: ReturnType<typeof resizeAndExtract>;
-        persist: ReturnType<typeof updateAndMove>;
+        readonly crop: ReturnType<typeof resizeAndExtract>;
+        readonly persist: ReturnType<typeof updateAndMove>;
     }
 }>();
 

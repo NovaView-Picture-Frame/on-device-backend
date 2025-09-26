@@ -3,9 +3,9 @@ import { createWriteStream } from 'node:fs';
 import fs from 'fs/promises';
 import type { Readable } from "node:stream";
 
+import config from '../../utils/config';
 import { placeSchema } from '../../models/image';
 import { upsert } from '../../repositories/images';
-import config from '../../utils/config';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
 export const geocoding = async (lat: number, lon: number) => {
