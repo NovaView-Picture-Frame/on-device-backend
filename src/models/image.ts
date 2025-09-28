@@ -5,7 +5,7 @@ export interface ExtractOffset {
     top: number;
 }
 
-export interface ExtractRegion extends ExtractOffset {
+interface ExtractRegion extends ExtractOffset {
     width: number;
     height: number;
 }
@@ -102,13 +102,11 @@ export const placeSchema = z.object({
     fullName: data.display_name,
 }));
 
-export type Place = z.infer<typeof placeSchema>;
-
 export interface Image {
     hash: Buffer;
     extractRegion: ExtractRegion;
     exif: Exif | null;
-    place: Place | null;
+    place: z.infer<typeof placeSchema> | null;
 }
 
 export interface ImageRecord extends Image {

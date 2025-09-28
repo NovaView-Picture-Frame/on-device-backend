@@ -1,70 +1,21 @@
-import stream from 'node:stream';
-import { z } from 'zod';
-import type { RouterContext } from '@koa/router';
-
-import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
 import { tasksMap } from '../services/crop';
-import config from '../utils/config';
+import buildTaskEventsHandler from '../services/buildTaskEventsHandler';
+import type { TaskEventsGetter } from '../services/buildTaskEventsHandler';
 
-const paramsSchema = z.object({
-    taskId: z.uuidv4(),
-});
+const getTaskEvents: TaskEventsGetter = (taskId) => {
+    const tasks = tasksMap.get(taskId);
+    if (!tasks) return;
 
-export default async (ctx: RouterContext) => {
-    const paramsResult = paramsSchema.safeParse(ctx.params);
-    if (!paramsResult.success) throw new HttpBadRequestError(
-        "Invalid URL parameters"
-    )
-
-    const entry = tasksMap.get(paramsResult.data.taskId);
-    if (!entry) throw new HttpNotFoundError(
-        "Task not found"
-    )
-
-    const sse = new stream.PassThrough();
-    sse.write("event: connected\ndata:\n\n");
-
-    const keepAlive = setInterval(
-        () => sse.write(':\n\n'),
-        config.sseKeepaliveInterval
-    );
-
-    const finish = () => {
-        clearInterval(keepAlive);
-        sse.end();
+    return {
+        crop: tasks.tasks.crop.then(
+            () => null,
+            () => { throw { message: "Failed to create cropped image" }; }
+        ),
+        persist: tasks.tasks.persist.then(
+            () => null,
+            () => { throw { message: "Failed to persist image data" }; }
+        ),
     };
+};
 
-    entry.tasks.crop.then(
-        () => sse.write("event: cropComplete\ndata:\n\n"),
-        () => sse.write(
-            `event: cropError\ndata: ${JSON.stringify({
-                data: {
-                    message: "Failed to create cropped image",
-                },
-            })}\n\n`
-        )
-    );
-
-    entry.tasks.persist
-        .then(
-            () => sse.write("event: persistComplete\ndata:\n\n"),
-            () => sse.write(
-                `event: persistError\ndata: ${JSON.stringify({
-                    data: {
-                        message: "Failed to persist image data",
-                    },
-                })}\n\n`
-            )
-        ).finally(() => {
-            sse.write(`event: done\ndata:\n\n`);
-            finish();
-        });
-
-    ctx.req.on('close', finish);
-    ctx.set({
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache, no-transform',
-        'Connection': 'keep-alive'
-    });
-    ctx.body = sse;
-}
+export default buildTaskEventsHandler(getTaskEvents);

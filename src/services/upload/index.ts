@@ -12,7 +12,7 @@ import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
 export class InvalidBufferError extends Error {}
 
-export const tasksMap = new Map<string, {
+export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     readonly lookupPlace: ReturnType<typeof geocoding>,
     readonly saveOriginal: ReturnType<typeof saveStream>,
     readonly crop: Promise<
