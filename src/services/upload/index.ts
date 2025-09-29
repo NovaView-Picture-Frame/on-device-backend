@@ -5,9 +5,9 @@ import sharp from 'sharp';
 import type { Readable } from 'node:stream';
 
 import { geocoding, saveStream, insertAndMove } from './persist';
-import config from '../../utils/config';
-import { createHashTransformer } from '../transformers';
-import { getMetadata, parseExifBuffer, convertDMSToDecimal, resizeToCover, resizeToInside } from './transform';
+import config from '../../config';
+import { getMetadata, resizeToCover, resizeToInside } from './transform';
+import { extractHashAndExif } from './inspect';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
 export class InvalidBufferError extends Error {}
@@ -31,38 +31,31 @@ export const uploadProcessor = (
 	const croppedTmp = `${config.paths.cropped._tmp}/${id}`;
 	const optimizedTmp = `${config.paths.optimized._tmp}/${id}`;
 
-    const { transform, hash } = createHashTransformer('sha256');
-    const hashedStream = stream.pipe(transform);
-
     const teeForSharp = new PassThrough();
     const teeForFS = new PassThrough();
-    hashedStream.pipe(teeForSharp);
-    hashedStream.pipe(teeForFS);
+    stream.pipe(teeForSharp);
+    stream.pipe(teeForFS);
 
-    const transformer = sharp();
-    teeForSharp.pipe(transformer);
+    const transform = sharp();
+    teeForSharp.pipe(transform);
 
-    const metadata = getMetadata(transformer, signal);
-    const parseExif = metadata.then(({ exif, format }) => exif
-        ? parseExifBuffer(exif, format)
-        : null
-    );
-    
-    const lookupPlace = parseExif.then(exif => {
-        if (
-            !exif?.GPSLatitude ||
-            !exif.GPSLatitudeRef ||
-            !exif?.GPSLongitude ||
-            !exif.GPSLongitudeRef
-        ) return null;
-
-        const lat = convertDMSToDecimal(exif.GPSLatitude, exif.GPSLatitudeRef);
-        const lon = convertDMSToDecimal(exif.GPSLongitude, exif.GPSLongitudeRef);
-        return geocoding(lat, lon);
-    });
+    const metadata = getMetadata(transform, signal);
 
     const saveOriginal = saveStream(teeForFS, originalTmp, signal);
-    const crop = Promise.all([metadata, resizeToCover(transformer, croppedTmp, signal)])
+    const extract = saveOriginal.then(extractHashAndExif);
+    const hash = extract.then(({ hash }) => hash);
+    const exif = extract.then(({ exif }) => exif);
+
+    const lookupPlace = exif.then(exif => {
+        if (
+            exif?.GPSLatitude === undefined ||
+            exif?.GPSLongitude === undefined
+        ) return null;
+
+        return geocoding(exif.GPSLatitude, exif.GPSLongitude);
+    });
+
+    const crop = Promise.all([metadata, resizeToCover(transform, croppedTmp, signal)])
         .then(([metadata, coverOutput]) => {
             const scale = Math.max( 
                 config.screenWidth / metadata.width,
@@ -77,15 +70,16 @@ export const uploadProcessor = (
             };
         });
 
-    const optimize = resizeToInside(transformer.clone(), optimizedTmp, signal);
+    const optimize = resizeToInside(transform.clone(), optimizedTmp, signal);
+
     const persist = Promise.all([
         hash,
-        parseExif,
+        exif,
         lookupPlace,
-        saveOriginal,
         crop,
-        optimize
-    ]).then(([hash, exif, place, _, cropResult]) => insertAndMove({
+        optimize,
+        saveOriginal,
+    ]).then(([hash, exif, place, cropResult]) => insertAndMove({
         originalTmp,
         croppedTmp,
         optimizedTmp,
@@ -95,7 +89,17 @@ export const uploadProcessor = (
         cropResult,
     }));
 
-    Promise.allSettled([persist]).finally(async () => {
+    const tasks = {
+        lookupPlace,
+        saveOriginal,
+        crop,
+        optimize,
+        persist,
+    }
+
+    tasksMap.set(id, tasks);
+
+    Promise.allSettled(Object.values(tasks)).finally(async () => {
         setTimeout(() => tasksMap.delete(id), config.tasksResultsTTL);
 
         await Promise.all(ignoreErrorCodes(
@@ -104,13 +108,5 @@ export const uploadProcessor = (
         ));
     });
 
-    tasksMap.set(id, {
-        lookupPlace,
-        saveOriginal,
-        crop,
-        optimize,
-        persist,
-    });
-
-    return { hash, metadata };
+    return { metadata, hash };
 }

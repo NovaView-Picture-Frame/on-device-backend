@@ -4,29 +4,27 @@ import { pipeline } from 'node:stream/promises';
 import { z } from 'zod';
 import type { Context } from 'koa';
 
-import config from '../utils/config';
+import config from '../config';
 import { getExtractRegionRecordByHash } from '../repositories/images';
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { uploadProcessor, InvalidBufferError } from '../services/upload';
-import { createMaxSizeTransform, MaxSizeError } from '../services/transformers';
+import { createMaxSizeTransform, MaxSizeError } from '../utils/transforms';
+import type { ExtractRegionRecord } from '../models/image';
 
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
     'content-length': z.coerce.number().int().positive().max(config.sizeLimit).optional(),
     'content-hash': z.string().length(64).regex(/^[\p{Hex_Digit}]+$/u).optional(),
+    'file-name': z.string().max(255).optional(),
 });
 
-const respondExisting = (
-    ctx: Context,
-    record: ReturnType<typeof getExtractRegionRecordByHash>
-) => {
+const respondExisting = (ctx: Context, record: ExtractRegionRecord) =>
     ctx.body = {
         data: {
             type: "existing",
             record,
         },
     };
-}
 
 export default async (ctx: Context) => {
     const headerResult = headerSchema.safeParse(ctx.request.headers);
@@ -36,13 +34,10 @@ export default async (ctx: Context) => {
 
     const headerHash = headerResult.data['content-hash'];
     if (headerHash) {
-        const extractRegionRecord = getExtractRegionRecordByHash(
-            Buffer.from(headerHash, 'hex')
-        );
+        const extractRegionRecord = getExtractRegionRecordByHash(headerHash);
 
         if (extractRegionRecord) {
             respondExisting(ctx, extractRegionRecord);
-
             return;
         }
     }
@@ -58,15 +53,18 @@ export default async (ctx: Context) => {
 
     const taskId = randomUUID();
     const tee = new PassThrough();
-    const { hash, metadata } = uploadProcessor(taskId, tee, signal);
+    const { metadata, hash } = uploadProcessor(taskId, tee, signal);
 
-    hash.then(buffer => {
-        const extractRegionRecord = getExtractRegionRecordByHash(buffer);
-        if (!extractRegionRecord) return;
+    hash.then(
+        hex => {
+            const extractRegionRecord = getExtractRegionRecordByHash(hex);
+            if (!extractRegionRecord) return;
 
-        existingController.abort();
-        respondExisting(ctx, extractRegionRecord);
-    });
+            existingController.abort();
+            respondExisting(ctx, extractRegionRecord);
+        },
+        () => {}
+    );
 
     try {
         await Promise.all([
@@ -76,10 +74,11 @@ export default async (ctx: Context) => {
                 tee,
                 { signal }
             ),
+            metadata,
             hash,
-            metadata
         ]);
 
+        if (existingController.signal.aborted) return;
         ctx.body = {
             data: {
                 type: "processing",
@@ -87,9 +86,7 @@ export default async (ctx: Context) => {
             },
         };
     } catch (err) {
-        if (existingController.signal.aborted) return;
-
-        if (timeoutSignal.aborted)throw new HttpBadRequestError(
+        if (timeoutSignal.aborted) throw new HttpBadRequestError(
             "Request timeout"
         );
 
