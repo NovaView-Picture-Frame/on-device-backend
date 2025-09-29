@@ -4,7 +4,7 @@ import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
 import { getExtractRegionRecordByID } from '../repositories/images';
-import config from '../utils/config';
+import config from '../config';
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),

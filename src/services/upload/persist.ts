@@ -3,16 +3,16 @@ import { createWriteStream } from 'node:fs';
 import fs from 'fs/promises';
 import type { Readable } from "node:stream";
 
-import config from '../../utils/config';
+import config from '../../config';
 import { placeSchema } from '../../models/image';
 import { upsert } from '../../repositories/images';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
-export const geocoding = async (lat: number, lon: number) => {
+export const geocoding = async (latitude: number, longitude: number) => {
     const baseUrl = 'https://nominatim.openstreetmap.org/reverse';
     const params = new URLSearchParams({
-        lat: String(lat),
-        lon: String(lon),
+        lat: latitude.toString(),
+        lon: longitude.toString(),
         zoom: '10',
         addressdetails: '0',
         format: 'jsonv2',
@@ -25,20 +25,28 @@ export const geocoding = async (lat: number, lon: number) => {
         },
     });
 
-    const resData = await res.json();
-    const place = placeSchema.safeParse(resData);
+    const { addresstype, display_name, ...rest } = await res.json()
+    const place = placeSchema.safeParse({
+        type: addresstype,
+        fullName: display_name,
+        ...rest,
+    });
     return place.success ? place.data : null;
 }
 
-export const saveStream = (
+export const saveStream = async (
     stream: Readable,
     path: string,
     signal: AbortSignal
-) => pipeline(
-    stream,
-    createWriteStream(path),
-    { signal }
-);
+) => {
+    await pipeline(
+        stream,
+        createWriteStream(path),
+        { signal }
+    );
+
+    return path;
+};
 
 export const insertAndMove = async (input: {
     originalTmp: string;

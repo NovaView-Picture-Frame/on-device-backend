@@ -4,7 +4,7 @@ import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import config from '../utils/config';
+import config from '../config';
 
 export type TaskEventsGetter = (taskId: ReturnType<typeof randomUUID>) =>
     Record<string, Promise<object | null>> | undefined;
@@ -47,8 +47,12 @@ export default (getTaskEvents: TaskEventsGetter) =>
         Promise.allSettled(
             Object.entries(tasks).map(([taskName, taskEventPromise]) =>
                 taskEventPromise.then(
-                    resolve => resolve && writeEvent(`${taskName}Complete`, resolve),
-                    reject => reject && writeEvent(`${taskName}Error`, reject)
+                    resolve => resolve !== null && writeEvent(
+                        `${taskName}Complete`, resolve
+                    ),
+                    reject => reject !== null && writeEvent(
+                        `${taskName}Error`, reject
+                    )
                 )
             )
         ).then(() => {

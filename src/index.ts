@@ -11,7 +11,7 @@ import previewHandler from './handlers/preview';
 import cropHandler from './handlers/crop';
 import cropEventsHandler from './handlers/cropEvents';
 
-import config from './utils/config';
+import config from './config';
 
 const app = new koa();
 app.use(errorHandler);

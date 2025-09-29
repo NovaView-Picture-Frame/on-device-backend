@@ -1,4 +1,4 @@
-import db from '../../utils/db';
+import db from '../../db';
 import { toExtractRegionRecord, toInsert } from '../../models/image-db';
 import type { ImageInsertDB, ImageRecordDB, ExtractRegionRecordDB, ExtractOffsetUpdateDB } from '../../models/image-db';
 import type { Image, ImageRecord, ExtractRegionRecord, ExtractOffsetUpdate } from '../../models/image';
@@ -66,7 +66,7 @@ const insertStmt = db.prepare<ImageInsertDB, ImageRecordDB['id']>(`
 
 export const upsert = db.transaction((input: Image) => {
     const id = insertStmt.get(toInsert(input));
-    if (id) return { id, created: true };
+    if (id !== undefined) return { id, created: true };
 
     const record = getExtractRegionRecordByHash(input.hash);
     if (record) return { id: record.id, created: false };

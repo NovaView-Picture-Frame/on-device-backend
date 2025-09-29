@@ -11,7 +11,7 @@ const db = new Database(
 db.exec(`
     CREATE TABLE IF NOT EXISTS images (
         id                     INTEGER  PRIMARY KEY  AUTOINCREMENT,
-        hash                   BLOB     NOT NULL     UNIQUE         CHECK(length(hash) = 32),
+        hash                   TEXT     NOT NULL     UNIQUE         CHECK(length(hash) = 64),
         extract_region_left    INTEGER  NOT NULL                    CHECK(extract_region_left >= 0),
         extract_region_top     INTEGER  NOT NULL                    CHECK(extract_region_top >= 0),
         extract_region_width   INTEGER  NOT NULL                    CHECK(extract_region_width > 0),

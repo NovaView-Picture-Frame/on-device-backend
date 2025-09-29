@@ -3,7 +3,7 @@ import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
 import { getExtractRegionRecordByID } from '../repositories/images';
-import config from '../utils/config'
+import config from '../config'
 import { cropProcessor } from '../services/crop';
 
 const paramsSchema = z.object({
@@ -23,7 +23,6 @@ const bodySchema = z.object({
 const toOffset = (size: number, ratio: number, limit: number): number => {
     const offset = Math.floor(size * ratio);
     if (offset + limit > size) throw new HttpBadRequestError("Offset out of bounds");
-
     return offset;
 };
 

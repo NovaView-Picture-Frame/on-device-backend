@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import { z } from 'zod';
 import yaml from 'yaml';
 
-import { initDirs, type DirTree } from './initDirs';
+import { initDirs, type DirTree } from './utils/initDirs';
 
 const argsSchema = z.tuple([
     z.literal('-c'),
@@ -10,19 +10,19 @@ const argsSchema = z.tuple([
 ]);
 
 const configSchema = z.object({
-    screen_width: z.number().int().positive(),
-    screen_height: z.number().int().positive(),
-    preview_max_width: z.number().int().positive(),
-    preview_max_height: z.number().int().positive(),
+    screen_width: z.int().positive(),
+    screen_height: z.int().positive(),
+    preview_max_width: z.int().positive(),
+    preview_max_height: z.int().positive(),
 
     data_dir: z.string().nonempty(),
     database: z.string().nonempty(),
-    size_limit: z.number().int().positive(),
+    size_limit: z.int().positive(),
 
-    port: z.number().int().min(1024).max(65535),
-    upload_timeout: z.number().int().positive(),
-    sse_keepalive_interval: z.number().int().positive(),
-    tasks_results_ttl: z.number().int().positive(),
+    port: z.int().min(1024).max(65535),
+    upload_timeout: z.int().positive(),
+    sse_keepalive_interval: z.int().positive(),
+    tasks_results_ttl: z.int().positive(),
     nominatim_user_agent: z.string().nonempty(),
 }).strict();
 

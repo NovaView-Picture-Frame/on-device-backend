@@ -1,12 +1,12 @@
 import fs from 'fs/promises';
 import sharp from 'sharp';
 
-import config from '../../utils/config';
+import config from '../../config';
 import { updateOffset } from '../../repositories/images';
-import type { ExtractOffset, ExtractOffsetUpdate } from '../../models/image';
+import type { ImageRecord, ExtractOffsetUpdate } from '../../models/image';
 
 export const resizeAndExtract = (
-    offset: ExtractOffset,
+    offset: Pick<ImageRecord['extractRegion'], 'left' | 'top'>,
     src: string,
     dest: string
 ) => sharp(src)

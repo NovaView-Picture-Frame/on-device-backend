@@ -5,7 +5,7 @@ import type { RouterContext } from '@koa/router';
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { deleteByID } from '../repositories/images';
 import ignoreErrorCode from '../utils/ignoreErrorCodes';
-import config from '../utils/config';
+import config from '../config';
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),

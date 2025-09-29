@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import fs from 'fs/promises';
 
 import { resizeAndExtract, updateAndMove } from './transform';
-import config from '../../utils/config';
+import config from '../../config';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 import type { ExtractOffsetUpdate } from '../../models/image';
 

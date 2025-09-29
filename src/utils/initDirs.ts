@@ -7,7 +7,7 @@ export type DirTree = { _withTmp?: boolean; _base?: never; _tmp?: never } & (
 function* walkTree(tree: DirTree, path = ''): Generator<[string, DirTree]> {
     yield [path, tree];
     for (const [k, v] of Object.entries(tree))
-        if (v && typeof v === 'object')
+        if (typeof v === 'object')
             yield* walkTree(v, path ? `${path}/${k}` : k);
 }
 
@@ -18,12 +18,15 @@ type NodePaths = {
 };
 
 const getNodeAtPath = (root: NodePaths, path: string) => path
-    ? path.split('/').reduce((cur, k) => {
-        const next = cur[k];
-        return typeof next === 'object' && next !== null
-            ? next
-            : (cur[k] = {});
-    }, root)
+    ? path.split('/').reduce(
+        (cur, k) => {
+            const next = cur[k];
+            return typeof next === 'object' && next !== null
+                ? next
+                : (cur[k] = {});
+        },
+        root
+    )
     : root;
 
 type BasePaths<T> = { readonly _base: string } & (
