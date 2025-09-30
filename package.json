@@ -8,7 +8,7 @@
 	},
 	"devDependencies": {
 		"@gqloom/core": "^0.12.0",
-		"@gqloom/zod": "^0.12.1",
+		"@gqloom/zod": "^0.12.2",
 		"@koa/bodyparser": "^6.0.0",
 		"@koa/router": "^14.0.0",
 		"@types/better-sqlite3": "^7.6.13",
@@ -22,7 +22,7 @@
 		"koa": "^3.0.1",
 		"node-addon-api": "^8.5.0",
 		"node-gyp": "^11.4.2",
-		"rolldown-vite": "^7.1.13",
+		"rolldown-vite": "^7.1.14",
 		"sharp": "^0.34.4",
 		"typescript": "^5.9.2",
 		"vite-plugin-static-copy": "^3.1.2",

@@ -1,11 +1,13 @@
 import db from '../../db';
-import { toExtractRegionRecord, toInsert } from '../../models/image-db';
-import type { ImageInsertDB, ImageRecordDB, ExtractRegionRecordDB, ExtractOffsetUpdateDB } from '../../models/image-db';
-import type { Image, ImageRecord, ExtractRegionRecord, ExtractOffsetUpdate } from '../../models/image';
+import { toExtractRegionRecord, toInsert } from '../../models/images/repository';
+import type { ImageInsert, ImageRecordDB, ExtractRegionRecordDB, ExtractOffsetUpdateDB } from '../../models/images/repository';
+import type { Image, ImageRecord, ExtractRegionRecord, ExtractOffsetUpdate } from '../../models/images';
+
+export { querySingle, queryList } from './query';
 
 class DatabaseError extends Error {};
 
-const getByHashStmt = db.prepare<ImageRecordDB['hash'], ExtractRegionRecordDB>(`
+const getByHashStmt = db.prepare<ImageRecordDB['hash'], ExtractRegionRecordDB>(/* sql */`
     SELECT
         id,
         extract_region_left,
@@ -21,7 +23,7 @@ export const getExtractRegionRecordByHash =(hash: ImageRecord['hash']): ExtractR
     return record ? toExtractRegionRecord(record) : null;
 };
 
-const getByIDStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(`
+const getByIDStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sql */`
     SELECT
         id,
         extract_region_left,
@@ -37,7 +39,7 @@ export const getExtractRegionRecordByID =(id: ImageRecord['id']): ExtractRegionR
     return record ? toExtractRegionRecord(record) : null;
 };
 
-const insertStmt = db.prepare<ImageInsertDB, ImageRecordDB['id']>(`
+const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
     INSERT INTO images (
         hash,
         extract_region_left,
@@ -74,7 +76,7 @@ export const upsert = db.transaction((input: Image) => {
     throw new DatabaseError()
 });
 
-const updateOffsetStmt = db.prepare<ExtractOffsetUpdateDB>(`
+const updateOffsetStmt = db.prepare<ExtractOffsetUpdateDB>(/* sql */`
     UPDATE images
     SET
         extract_region_left = :extract_region_left,
@@ -89,40 +91,7 @@ export const updateOffset = (input: ExtractOffsetUpdate) =>
         extract_region_top: input.top,
     }).changes > 0;
 
-const listStmt = db.prepare<
-    {
-        size: number;
-        cursor: ImageRecordDB['id'] | null;
-    },
-    ExtractRegionRecordDB
->(`
-    SELECT
-        id,
-        extract_region_left,
-        extract_region_top,
-        extract_region_width,
-        extract_region_height
-    FROM images
-    WHERE (:cursor IS NULL OR id < :cursor)
-    ORDER BY id DESC
-    LIMIT :size
-`);
-
-export const list = (
-    size: number,
-    cursor?: ImageRecord['id']
-): ExtractRegionRecord[] =>
-    listStmt.all({ size, cursor: cursor ?? null }).map(record => ({
-        id: record.id,
-        extractRegion: {
-            left: record.extract_region_left,
-            top: record.extract_region_top,
-            width: record.extract_region_width,
-            height: record.extract_region_height,
-        },
-    }));
-
-const deleteByIDStmt = db.prepare<ImageRecordDB['id']>(`
+const deleteByIDStmt = db.prepare<ImageRecordDB['id']>(/* sql */`
     DELETE FROM images
     WHERE id = ?
 `);

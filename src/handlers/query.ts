@@ -5,6 +5,7 @@ import { createHandler } from 'graphql-http/lib/use/koa';
 import type { ResolverPayload } from '@gqloom/core';
 
 import { imageQuerySchema } from '../models/images/query';
+import { querySingle, queryList } from '../repositories/images';
 
 const parseFields = (payload: ResolverPayload) => {
     const fields = getDeepResolvingFields(payload);
@@ -23,30 +24,26 @@ const parseFields = (payload: ResolverPayload) => {
 
 const queryResolver = resolver({
     image: query(imageQuerySchema.nullable())
-        .input({ id: z.int() })
+        .input({ id: z.int().positive() })
         .resolve(({ id }, payload) => {
             if (!payload) return null;
-
             const selection = parseFields(payload);
             if (!selection) return null;
-            console.log(id, selection);
 
-            return null;
+            return querySingle(id, selection);
         }),
 
     images: query(z.array(imageQuerySchema))
         .input({
             cursor: z.int().positive().optional(),
-            size: z.int().positive().max(50).optional(),
+            size: z.int().positive().max(50).optional().default(50),
         })
-        .resolve(({ cursor, size }, payload) => {
+        .resolve(({ size, cursor }, payload) => {
             if (!payload) return [];
-
             const selection = parseFields(payload);
             if (!selection) return [];
-            console.log({ cursor, size },selection);
 
-            return [];
+            return queryList(selection, size, cursor);
         }),
 });
 
