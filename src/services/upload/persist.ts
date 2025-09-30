@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import type { Readable } from "node:stream";
 
 import config from '../../config';
-import { placeSchema } from '../../models/image';
+import { placeSchema } from '../../models/images';
 import { upsert } from '../../repositories/images';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 

@@ -8,7 +8,7 @@ const db = new Database(
     }
 );
 
-db.exec(`
+db.exec(/* sql */`
     CREATE TABLE IF NOT EXISTS images (
         id                     INTEGER  PRIMARY KEY  AUTOINCREMENT,
         hash                   TEXT     NOT NULL     UNIQUE         CHECK(length(hash) = 64),

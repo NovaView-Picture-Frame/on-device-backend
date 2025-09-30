@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { resizeAndExtract, updateAndMove } from './transform';
 import config from '../../config';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-import type { ExtractOffsetUpdate } from '../../models/image';
+import type { ExtractOffsetUpdate } from '../../models/images';
 
 const getTaskKey = (offset: ExtractOffsetUpdate):
     `${ExtractOffsetUpdate['id']}-${ExtractOffsetUpdate['left']}-${ExtractOffsetUpdate['top']}` =>

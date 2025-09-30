@@ -1,4 +1,4 @@
-import type { Image, ExtractRegionRecord } from './image';
+import type { Image, ExtractRegionRecord } from '.';
 
 export interface ImageInsert {
     hash: string;

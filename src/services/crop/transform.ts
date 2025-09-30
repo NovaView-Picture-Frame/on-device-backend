@@ -3,7 +3,7 @@ import sharp from 'sharp';
 
 import config from '../../config';
 import { updateOffset } from '../../repositories/images';
-import type { ImageRecord, ExtractOffsetUpdate } from '../../models/image';
+import type { ImageRecord, ExtractOffsetUpdate } from '../../models/images';
 
 export const resizeAndExtract = (
     offset: Pick<ImageRecord['extractRegion'], 'left' | 'top'>,

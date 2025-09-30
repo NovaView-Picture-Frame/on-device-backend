@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { toTSPartial } from '../utils/zodWorkAround';
+import { toTSPartial } from '../../utils/zodWorkAround';
 export { toTSPartial };
 
 interface ExtractOffset {

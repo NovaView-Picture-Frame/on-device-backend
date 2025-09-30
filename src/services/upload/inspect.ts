@@ -2,7 +2,7 @@ import { exiftool, ExifDate, ExifTime, ExifDateTime } from 'exiftool-vendored';
 
 import { hasOwn } from '../../utils/typeWorkarounds';
 import { InvalidBufferError } from '.';
-import { exifKeys, type Image } from '../../models/image';
+import { exifKeys, type Image } from '../../models//images';
 
 const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDateTime) =>
     input instanceof ExifDate ||

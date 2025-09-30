@@ -9,7 +9,7 @@ import { getExtractRegionRecordByHash } from '../repositories/images';
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { uploadProcessor, InvalidBufferError } from '../services/upload';
 import { createMaxSizeTransform, MaxSizeError } from '../utils/transforms';
-import type { ExtractRegionRecord } from '../models/image';
+import type { ExtractRegionRecord } from '../models/images';
 
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
