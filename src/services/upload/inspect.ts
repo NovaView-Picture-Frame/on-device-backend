@@ -1,8 +1,8 @@
 import { exiftool, ExifDate, ExifTime, ExifDateTime } from 'exiftool-vendored';
+import type { Metadata } from 'sharp';
 
-import { hasOwn } from '../../utils/typeWorkarounds';
 import { InvalidBufferError } from '.';
-import { exifKeys, type Image } from '../../models//images';
+import { metadataSchema, type Image } from '../../models/images';
 
 const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDateTime) =>
     input instanceof ExifDate ||
@@ -12,6 +12,12 @@ const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDate
         : typeof input === 'number'
             ? input.toString()
             : input;
+
+const hasOwn = <
+    T extends object,
+    K extends PropertyKey
+>(object: T, key: K): key is Extract<keyof T, K> =>
+    Object.hasOwn(object, key);
 
 const pickByKeys = <
     T extends object,
@@ -27,62 +33,68 @@ const pickByKeys = <
     return result;
 }
 
-export const extractHashAndExif = (path: string): {
-    hash: Promise<Image['hash']>;
-    exif: Promise<Image['exif']>;
-} => {
-    const read = exiftool.read(path, { imageHashType: 'SHA256' });
+export const extractHashAndMetadata = async (
+    path: string,
+    size: number,
+    meta: Metadata,
+): Promise<{
+    hash: Image['hash'];
+    metadata: Image['metadata'];
+}> => {
+    const {
+        ImageDataHash,
 
-    const hash = read.then(({ ImageDataHash }) => {
-        if (ImageDataHash === undefined) throw new InvalidBufferError();
-        return ImageDataHash;
-    });
+        DateTimeOriginal,
+        CreateDate,
+        ModifyDate,
 
-    const exif = read
-        .then(({
-            DateTimeOriginal,
-            CreateDate,
-            ModifyDate,
+        GPSLatitude,
+        GPSLongitude,
+        GPSDateStamp,
+        GPSTimeStamp,
 
-            GPSLatitude,
-            GPSLongitude,
-            GPSDateStamp,
-            GPSTimeStamp,
+        ...rest
+    } = await exiftool.read(path, { imageHashType: 'SHA256' });
+    if (ImageDataHash === undefined) throw new InvalidBufferError();
 
-            ...rest
-        }) => {
-            const exifRaw = {
-                ...(DateTimeOriginal !== undefined && {
-                    DateTimeOriginal: formatTimestamp(DateTimeOriginal)
-                }),
-                ...(CreateDate !== undefined && {
-                    CreateDate: formatTimestamp(CreateDate)
-                }),
-                ...(ModifyDate !== undefined && {
-                    ModifyDate: formatTimestamp(ModifyDate)
-                }),
+    const exifToolMetadata = {
+        ...rest,
 
-                ...(GPSLatitude !== undefined && Number.isFinite(+GPSLatitude) && {
-                    GPSLatitude: +GPSLatitude
-                }),
-                ...(GPSLongitude !== undefined && Number.isFinite(+GPSLongitude) && {
-                    GPSLongitude: +GPSLongitude
-                }),
-                ...(GPSDateStamp !== undefined && {
-                    GPSDateStamp: formatTimestamp(GPSDateStamp)
-                }),
-                ...(GPSTimeStamp !== undefined && {
-                    GPSTimeStamp: formatTimestamp(GPSTimeStamp)
-                }),
+        ...(DateTimeOriginal !== undefined && {
+            DateTimeOriginal: formatTimestamp(DateTimeOriginal)
+        }),
+        ...(CreateDate !== undefined && {
+            CreateDate: formatTimestamp(CreateDate)
+        }),
+        ...(ModifyDate !== undefined && {
+            ModifyDate: formatTimestamp(ModifyDate)
+        }),
 
-                ...rest,
-            };
+        ...(GPSLatitude !== undefined && Number.isFinite(+GPSLatitude) && {
+            GPSLatitude: +GPSLatitude
+        }),
+        ...(GPSLongitude !== undefined && Number.isFinite(+GPSLongitude) && {
+            GPSLongitude: +GPSLongitude
+        }),
+        ...(GPSDateStamp !== undefined && {
+            GPSDateStamp: formatTimestamp(GPSDateStamp)
+        }),
+        ...(GPSTimeStamp !== undefined && {
+            GPSTimeStamp: formatTimestamp(GPSTimeStamp)
+        }),
+    };
 
-            const filteredExif = pickByKeys(exifRaw, exifKeys);
-            if (Object.keys(filteredExif).length === 0) throw Error();
-            return filteredExif;
-        })
-        .catch(() => null);
+    const metadata = {
+        ...pickByKeys(exifToolMetadata, metadataSchema.keyof().options),
 
-    return { hash, exif };
+        FileSize: size,
+        FileFormat: meta.format,
+        ImageWidth: meta.width,
+        ImageHeight: meta.height,
+    };
+
+    return {
+        hash: ImageDataHash,
+        metadata,
+    };
 };

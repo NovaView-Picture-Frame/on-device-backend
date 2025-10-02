@@ -1,32 +1,32 @@
-import { buildFields, toImageQuery } from './fields';
+import buildFieldsAndResolver from './mapper';
 import db from '../../../db';
 
-import type { ImageRecordDB, ImageSelect } from '../../../models/images/repository';
 import type { ImageRecord } from '../../../models/images';
 import type { FieldsSelection, ImageQuery } from '../../../models/images/query';
-
-const buildSingleDStmt = (select: FieldsSelection) => {
-    const fields = buildFields(select);
-
-    return db.prepare<ImageRecordDB['id'], ImageSelect>(/* sql */`
-        SELECT ${fields.join(', ')}
-        FROM images
-        WHERE id = ?
-    `);
-};
+import type { ImageRecordDB, ImageSelect } from '../../../models/images/repository';
 
 export const querySingle = (
     id: ImageRecord['id'],
     select: FieldsSelection
 ): ImageQuery | null => {
-    const record = buildSingleDStmt(select).get(id);
-    return record ? toImageQuery(record, select) : null;
+    const { fields, resolver } = buildFieldsAndResolver(select);
+    const stmt = db.prepare<ImageRecordDB['id'], ImageSelect>(/* sql */`
+        SELECT ${fields.join(', ')}
+        FROM images
+        WHERE id = ?
+    `);
+
+    const record = stmt.get(id);
+    return record ? resolver(record) : null;
 };
 
-const buildListStmt = (select: FieldsSelection) => {
-    const fields = buildFields(select);
-
-    return db.prepare<
+export const queryList = (
+    select: FieldsSelection,
+    size: number,
+    cursor?: ImageRecord['id'],
+): ImageQuery[] => {
+    const { fields, resolver } = buildFieldsAndResolver(select);
+    const stmt = db.prepare<
         {
             size: number;
             cursor: ImageRecordDB['id'] | null
@@ -39,17 +39,10 @@ const buildListStmt = (select: FieldsSelection) => {
         ORDER BY id DESC
         LIMIT :size
     `);
-};
 
-export const queryList = (
-    select: FieldsSelection,
-    size: number,
-    cursor?: ImageRecord['id'],
-): ImageQuery[] => {
-    const records = buildListStmt(select).all({
+    const records = stmt.all({
         size,
         cursor: cursor ?? null,
     });
-
-    return records.map(record => toImageQuery(record, select));
+    return records.map(resolver);
 };

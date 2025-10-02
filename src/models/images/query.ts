@@ -1,40 +1,28 @@
 import { z } from 'zod';
+import { asField } from '@gqloom/zod';
+import { GraphQLID } from 'graphql';
 
-import { exifSchema, placeSchema, toTSPartial, type ImageRecord } from '.';
+import { imageRecordSchema, type ImageRecord } from '.';
 
-export type FieldsSelection<T = ImageRecord> = {
-    [K in keyof T]?: NonNullable<T[K]> extends object
-        ? (keyof NonNullable<T[K]>)[]
+export type FieldsSelection = {
+    [K in keyof ImageRecord]?: NonNullable<ImageRecord[K]> extends object
+        ? (keyof NonNullable<ImageRecord[K]>)[]
         : 'include';
 };
 
-const extractRegionSchema = z.object({
-    left: z.number(),
-    top: z.number(),
-    width: z.number(),
-    height: z.number(),
-}) satisfies z.ZodType<ImageRecord['extractRegion']>;
-
-export const extractRegionKeys = extractRegionSchema.keyof().options;
-
-const imageSchema = z.object({
-    id: z.int(),
-    hash: z.string(),
-    extractRegion: extractRegionSchema,
-    exif: exifSchema,
-    place: placeSchema,
-}) satisfies z.ZodType<ImageRecord>;
+type ZodPartial<T> = Partial<{
+    [P in keyof T]: T[P] | undefined
+}>;
 
 interface ImageQueryRaw extends Omit<ImageRecord, 'extractRegion' | 'place'> {
-    extractRegion: Partial<ImageRecord['extractRegion']>;
-    place: Partial<ImageRecord['place']>;
+    extractRegion: ZodPartial<ImageRecord['extractRegion']>;
+    place: ZodPartial<ImageRecord['place']>;
 }
 
-const imageQuerySchemaRaw = imageSchema.extend({
-    extractRegion: toTSPartial(imageSchema.shape.extractRegion),
-    place: toTSPartial(imageSchema.shape.place),
-}) satisfies z.ZodType<ImageQueryRaw>;
-
-export const imageQuerySchema: z.ZodType<Partial<ImageQueryRaw>> = toTSPartial(imageQuerySchemaRaw);
+export const imageQuerySchema = imageRecordSchema.extend({
+    id: imageRecordSchema.shape.id.register(asField, { type: GraphQLID }),
+    extractRegion: imageRecordSchema.shape.extractRegion.partial(),
+    place: imageRecordSchema.shape.place.unwrap().partial().nullable(),
+}).partial() satisfies z.ZodType<ZodPartial<ImageQueryRaw>>;
 
 export type ImageQuery = z.infer<typeof imageQuerySchema>;

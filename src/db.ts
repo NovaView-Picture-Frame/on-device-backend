@@ -16,7 +16,7 @@ db.exec(/* sql */`
         extract_region_top     INTEGER  NOT NULL                    CHECK(extract_region_top >= 0),
         extract_region_width   INTEGER  NOT NULL                    CHECK(extract_region_width > 0),
         extract_region_height  INTEGER  NOT NULL                    CHECK(extract_region_height > 0),
-        exif_jsonb             BLOB                                 CHECK(json_valid(exif_jsonb, 8) AND json_type(exif_jsonb) = 'object' AND json(exif_jsonb) != '{}'),
+        metadata_jsonb         BLOB     NOT NULL                    CHECK(json_valid(metadata_jsonb, 8) AND json_type(metadata_jsonb) = 'object' AND json(metadata_jsonb) != '{}'),
         place_name             TEXT,
         place_type             TEXT,
         place_fullName         TEXT,

@@ -44,6 +44,7 @@ export const resizeToCover = async (
             fit: 'cover',
             position: 'entropy',
         })
+        .keepIccProfile()
         .png()
         .toFile(path)
         .then(resolve, reject);
@@ -75,6 +76,7 @@ export const resizeToInside = async (
             fit: 'inside',
             withoutEnlargement: true,
         })
+        .keepIccProfile()
         .avif()
         .toFile(path)
         .then(resolve, reject);

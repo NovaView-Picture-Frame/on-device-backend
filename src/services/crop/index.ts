@@ -1,24 +1,26 @@
 import { randomUUID } from 'node:crypto';
 import fs from 'fs/promises';
 
-import { resizeAndExtract, updateAndMove } from './transform';
+import { updateAndMove } from './persist';
 import config from '../../config';
+import { resizeAndExtract } from './transform';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-import type { ExtractOffsetUpdate } from '../../models/images';
+import type { ExtractRegionRecord, ExtractOffsetUpdate } from '../../models/images';
 
-const getTaskKey = (offset: ExtractOffsetUpdate):
-    `${ExtractOffsetUpdate['id']}-${ExtractOffsetUpdate['left']}-${ExtractOffsetUpdate['top']}` =>
-        `${offset.id}-${offset.left}-${offset.top}`;
+const getTaskKey = (offset: ExtractOffsetUpdate) =>
+        `${offset.id}-${offset.extractRegion.left}-${offset.extractRegion.top}`;
 
 export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     key: ReturnType<typeof getTaskKey> | null;
     tasks: {
-        readonly crop: ReturnType<typeof resizeAndExtract>;
+        readonly crop: Promise<
+            Parameters<typeof updateAndMove>[0]['extractRegion']
+        >;
         readonly persist: ReturnType<typeof updateAndMove>;
     }
 }>();
 
-export const cropProcessor = (input: ExtractOffsetUpdate) => {
+export const cropProcessor = (input: ExtractRegionRecord) => {
     const taskKey = getTaskKey(input);
     for (const [existingTaskId, existingEntry] of tasksMap.entries())
         if (existingEntry.key === taskKey) return existingTaskId;
@@ -29,7 +31,7 @@ export const cropProcessor = (input: ExtractOffsetUpdate) => {
         input,
         `${config.paths.originals._base}/${input.id}`,
         croppedTmp
-    );
+    ).then(() => input.extractRegion);
 
     const persist = crop.then(() => updateAndMove(
         input,

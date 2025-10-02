@@ -7,7 +7,7 @@ import type { Readable } from 'node:stream';
 import { geocoding, saveStream, insertAndMove } from './persist';
 import config from '../../config';
 import { getMetadata, resizeToCover, resizeToInside } from './transform';
-import { extractHashAndExif } from './inspect';
+import { extractHashAndMetadata } from './inspect';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
 export class InvalidBufferError extends Error {}
@@ -16,7 +16,7 @@ export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     readonly lookupPlace: ReturnType<typeof geocoding>,
     readonly saveOriginal: ReturnType<typeof saveStream>,
     readonly crop: Promise<
-        Parameters<typeof insertAndMove>[0]['cropResult']
+        Parameters<typeof insertAndMove>[0]['extractRegion']
     >,
 	readonly optimize: ReturnType<typeof resizeToInside>,
     readonly persist: ReturnType<typeof insertAndMove>,
@@ -39,23 +39,19 @@ export const uploadProcessor = (
     const transform = sharp();
     teeForSharp.pipe(transform);
 
-    const metadata = getMetadata(transform, signal);
-
+    const sharpMetadata = getMetadata(transform, signal);
     const saveOriginal = saveStream(teeForFS, originalTmp, signal);
-    const extract = saveOriginal.then(extractHashAndExif);
-    const hash = extract.then(({ hash }) => hash);
-    const exif = extract.then(({ exif }) => exif);
+    const hashAndMetadata = Promise.all([sharpMetadata, saveOriginal])
+        .then(([meta, { path, size }]) => extractHashAndMetadata(path, size, meta));
 
-    const lookupPlace = exif.then(exif => {
-        if (
-            exif?.GPSLatitude === undefined ||
-            exif?.GPSLongitude === undefined
-        ) return null;
+    const lookupPlace = hashAndMetadata.then(
+        ({ metadata: { GPSLatitude, GPSLongitude } }) => {
+            if (GPSLatitude === undefined || GPSLongitude === undefined) return null;
+            return geocoding(GPSLatitude, GPSLongitude); 
+        }
+    );
 
-        return geocoding(exif.GPSLatitude, exif.GPSLongitude);
-    });
-
-    const crop = Promise.all([metadata, resizeToCover(transform, croppedTmp, signal)])
+    const crop = Promise.all([sharpMetadata, resizeToCover(transform, croppedTmp, signal)])
         .then(([metadata, coverOutput]) => {
             const scale = Math.max( 
                 config.screenWidth / metadata.width,
@@ -73,20 +69,19 @@ export const uploadProcessor = (
     const optimize = resizeToInside(transform.clone(), optimizedTmp, signal);
 
     const persist = Promise.all([
-        hash,
-        exif,
+        hashAndMetadata,
         lookupPlace,
         crop,
         optimize,
         saveOriginal,
-    ]).then(([hash, exif, place, cropResult]) => insertAndMove({
+    ]).then(([{ hash, metadata }, place, extractRegion]) => insertAndMove({
         originalTmp,
         croppedTmp,
         optimizedTmp,
         hash,
-        exif,
+        metadata,
         place,
-        cropResult,
+        extractRegion,
     }));
 
     const tasks = {
@@ -96,7 +91,6 @@ export const uploadProcessor = (
         optimize,
         persist,
     }
-
     tasksMap.set(id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
@@ -108,5 +102,5 @@ export const uploadProcessor = (
         ));
     });
 
-    return { metadata, hash };
+    return hashAndMetadata;
 }

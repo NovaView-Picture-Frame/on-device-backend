@@ -6,7 +6,7 @@ export interface ImageInsert {
     extract_region_top: number;
     extract_region_width: number;
     extract_region_height: number;
-    exif_jsonb: string | null;
+    metadata_jsonb: string;
     place_name: string | null;
     place_type: string | null;
     place_fullName: string | null;
@@ -19,8 +19,8 @@ export interface ImageRecordDB extends ImageInsert {
 export type ExtractRegionRecordDB = Pick<ImageRecordDB, 'id' | 'extract_region_left' | 'extract_region_top' | 'extract_region_width' | 'extract_region_height'>;
 export type ExtractOffsetUpdateDB = Pick<ImageRecordDB, 'id' | 'extract_region_left' | 'extract_region_top'>;
 
-export type ImageSelect = Omit<ImageRecordDB, 'exif_jsonb'> & {
-    [key: `exif_${string}`]: string | number | null;
+export interface ImageSelect extends Omit<ImageRecordDB, 'metadata_jsonb'> {
+    metadata_json: string
 };
 
 export const toInsert = (input: Image): ImageInsert => ({
@@ -29,10 +29,7 @@ export const toInsert = (input: Image): ImageInsert => ({
     extract_region_top: input.extractRegion.top,
     extract_region_width: input.extractRegion.width,
     extract_region_height: input.extractRegion.height,
-
-    exif_jsonb: input.exif !== null
-        ? JSON.stringify(input.exif)
-        : null,
+    metadata_jsonb: JSON.stringify(input.metadata),
 
     ...(input.place !== null ? {
         place_name: input.place.name,

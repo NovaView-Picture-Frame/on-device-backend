@@ -1,35 +1,32 @@
 import { z } from 'zod';
 
-import { toTSPartial } from '../../utils/zodWorkAround';
-export { toTSPartial };
+const extractRegionSchema = z.object({
+    left: z.int(),
+    top: z.int(),
+    width: z.int(),
+    height: z.int(),
+});
 
-interface ExtractOffset {
-    left: number;
-    top: number;
-}
+const metadataRequiredSchema = z.object({
+    FileSize: z.int(),
+    FileFormat: z.string(),
+    ImageWidth: z.int(),
+    ImageHeight: z.int(),
+});
 
-interface ExtractRegion extends ExtractOffset {
-    width: number;
-    height: number;
-}
-
-const exifSchemaRaw = z.object({
+const metadataOptionalSchema = z.object({
     FileName: z.string(),
-    FileSize: z.string(),
-    FileType: z.string(),
-    FileExtension: z.string(),
     MIMEType: z.string(),
     DateTimeOriginal: z.string(),
     CreateDate: z.string(),
     ModifyDate: z.string(),
 
-    ImageWidth: z.number(),
-    ImageHeight: z.number(),
-    Orientation: z.number(),
+    Orientation: z.int(),
     Megapixels: z.number(),
 
     Make: z.string(),
     Model: z.string(),
+    Software: z.string(),
     LensMake: z.string(),
     LensModel: z.string(),
     FocalLength: z.string(),
@@ -40,13 +37,13 @@ const exifSchemaRaw = z.object({
     ShutterSpeed: z.string(),
     FNumber: z.number(),
     Aperture: z.number(),
-    ISO: z.number(),
-    ExposureCompensation: z.number(),
+    ISO: z.int(),
+    ExposureCompensation: z.int(),
     ExposureMode: z.string(),
     MeteringMode: z.string(),
     Flash: z.string(),
     WhiteBalance: z.string(),
-    ColorTemperature: z.number(),
+    ColorTemperature: z.int(),
 
     GPSLatitude: z.number(),
     GPSLongitude: z.number(),
@@ -64,16 +61,15 @@ const exifSchemaRaw = z.object({
     FocusDistanceRange: z.string(),
     ColorSpace: z.string(),
     HDRGain: z.number(),
-    AFConfidence: z.number(),
-    AFMeasuredDepth: z.number(),
+    AFConfidence: z.int(),
+    AFMeasuredDepth: z.int(),
 
     ProfileDescription: z.string(),
     ColorPrimaries: z.string(),
     TransferCharacteristics: z.string(),
-});
+}).partial();
 
-export const exifSchema = toTSPartial(exifSchemaRaw);
-export const exifKeys = exifSchemaRaw.keyof().options;
+export const metadataSchema = metadataRequiredSchema.extend(metadataOptionalSchema.shape);
 
 export const placeSchema = z.object({
     name: z.string(),
@@ -81,18 +77,18 @@ export const placeSchema = z.object({
     fullName: z.string(),
 });
 
-export const placeKeys = placeSchema.keyof().options;
+export const imageRecordSchema = z.object({
+    id: z.int(),
+    hash: z.string(),
+    extractRegion: extractRegionSchema,
+    metadata: metadataSchema,
+    place: placeSchema.nullable(),
+});
 
-export interface Image {
-    hash: string;
-    extractRegion: ExtractRegion;
-    exif: z.infer<typeof exifSchema> | null;
-    place: z.infer<typeof placeSchema> | null;
-}
-
-export interface ImageRecord extends Image {
-    id: number;
-}
+export type ImageRecord = z.infer<typeof imageRecordSchema>;
+export type Image = Omit<ImageRecord, 'id'>;
 
 export type ExtractRegionRecord = Pick<ImageRecord, 'id' | 'extractRegion'>;
-export type ExtractOffsetUpdate = Pick<ImageRecord, 'id'> & Pick<ImageRecord['extractRegion'], 'left' | 'top'>;
+export interface ExtractOffsetUpdate extends Pick<ImageRecord, 'id'> {
+    extractRegion: Pick<ImageRecord['extractRegion'], 'left' | 'top'>;
+}

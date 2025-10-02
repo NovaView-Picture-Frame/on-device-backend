@@ -27,9 +27,9 @@ export const geocoding = async (latitude: number, longitude: number) => {
 
     const { addresstype, display_name, ...rest } = await res.json()
     const place = placeSchema.safeParse({
+        ...rest,
         type: addresstype,
         fullName: display_name,
-        ...rest,
     });
     return place.success ? place.data : null;
 }
@@ -39,13 +39,13 @@ export const saveStream = async (
     path: string,
     signal: AbortSignal
 ) => {
-    await pipeline(
-        stream,
-        createWriteStream(path),
-        { signal }
-    );
+    const sink = createWriteStream(path);
+    await pipeline(stream, sink, { signal });
 
-    return path;
+    return {
+        path,
+        size: sink.bytesWritten
+    };
 };
 
 export const insertAndMove = async (input: {
@@ -53,16 +53,11 @@ export const insertAndMove = async (input: {
     croppedTmp: string;
     optimizedTmp: string;
     hash: Parameters<typeof upsert>[0]['hash'];
-    cropResult: Parameters<typeof upsert>[0]['extractRegion'];
-    exif: Parameters<typeof upsert>[0]['exif'];
+    extractRegion: Parameters<typeof upsert>[0]['extractRegion'];
+    metadata: Parameters<typeof upsert>[0]['metadata'];
     place: Parameters<typeof upsert>[0]['place'];
 }) => {
-    const { id, created } = upsert({
-        hash: input.hash,
-        extractRegion: input.cropResult,
-        exif: input.exif,
-        place: input.place,
-    });
+    const { id, created } = upsert(input);
 
     if (created) {
         const moves: [string, string][] = [

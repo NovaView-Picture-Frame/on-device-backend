@@ -30,14 +30,14 @@ importers:
         specifier: ^12.0.4
         version: 12.0.4
       '@types/node':
-        specifier: ^24.6.0
-        version: 24.6.0
+        specifier: ^24.6.2
+        version: 24.6.2
       better-sqlite3:
         specifier: ^12.4.1
         version: 12.4.1
       exiftool-vendored:
-        specifier: ^31.0.0
-        version: 31.0.0
+        specifier: ^31.1.0
+        version: 31.1.0
       graphql:
         specifier: ^16.11.0
         version: 16.11.0
@@ -55,16 +55,16 @@ importers:
         version: 11.4.2
       rolldown-vite:
         specifier: ^7.1.14
-        version: 7.1.14(@types/node@24.6.0)(esbuild@0.25.10)(yaml@2.8.1)
+        version: 7.1.14(@types/node@24.6.2)(esbuild@0.25.10)(yaml@2.8.1)
       sharp:
         specifier: ^0.34.4
         version: 0.34.4
       typescript:
-        specifier: ^5.9.2
-        version: 5.9.2
+        specifier: ^5.9.3
+        version: 5.9.3
       vite-plugin-static-copy:
-        specifier: ^3.1.2
-        version: 3.1.2(vite@7.1.7(@types/node@24.6.0)(lightningcss@1.30.2)(yaml@2.8.1))
+        specifier: ^3.1.3
+        version: 3.1.3(vite@7.1.7(@types/node@24.6.2)(lightningcss@1.30.2)(yaml@2.8.1))
       yaml:
         specifier: ^2.8.1
         version: 2.8.1
@@ -676,8 +676,8 @@ packages:
   '@types/mime@1.3.5':
     resolution: {integrity: sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w==}
 
-  '@types/node@24.6.0':
-    resolution: {integrity: sha512-F1CBxgqwOMc4GKJ7eY22hWhBVQuMYTtqI8L0FcszYcpYX0fzfDGpez22Xau8Mgm7O9fI+zA/TYIdq3tGWfweBA==}
+  '@types/node@24.6.2':
+    resolution: {integrity: sha512-d2L25Y4j+W3ZlNAeMKcy7yDsK425ibcAOO2t7aPTz6gNMH0z2GThtwENCDc0d/Pw9wgyRqE5Px1wkV7naz8ang==}
 
   '@types/qs@6.14.0':
     resolution: {integrity: sha512-eOunJqu0K1923aExK6y8p6fsihYEn/BYuQ4g0CxAAgFc4b/ZLN4CrsRZ55srTdqoiLzU2B2evC+apEIxprEzkQ==}
@@ -907,17 +907,17 @@ packages:
   escape-html@1.0.3:
     resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==}
 
-  exiftool-vendored.exe@13.37.0:
-    resolution: {integrity: sha512-vxEFxLkGm1rC9GCsUfE28gqNlh/TF+mQlseTd/4aDzoMJLAUUDbKME9IVuBZ93HLCC6u4tJf+wldi/0gyDIQPQ==}
+  exiftool-vendored.exe@13.38.0:
+    resolution: {integrity: sha512-oZx5enTAvSiIAXL+OEk7nNWrfUhEdKUpaGwDjCmz4VKwOa4HbisqyM808xPGPYj8X7XikcME/fq5hvevPeE3cw==}
     os: [win32]
 
-  exiftool-vendored.pl@13.37.0:
-    resolution: {integrity: sha512-qgV5rKweSVYixw/M1jpqmY2Iodpiw3MFtIT6Zyyzd/pxkYuJR07KdgQTOMFNlZvotX0MrtXKa+t48SZLpQkWvw==}
+  exiftool-vendored.pl@13.38.0:
+    resolution: {integrity: sha512-Q3xl1nnwswrsR5344z4NyqvI74fKwla+VJHY1N+32gcDgt8cs9KBsDUwcNzKHSOSa/MjEfniuCJVrQiqR05iag==}
     os: ['!win32']
     hasBin: true
 
-  exiftool-vendored@31.0.0:
-    resolution: {integrity: sha512-1za1yHI1o3BFBKHOGjkeaXOqq+RElDgNvrQH4M4bA9bw7Cwr8m73IQx8+osuW1EkWHNRFx28nPb3XapSoWrMlg==}
+  exiftool-vendored@31.1.0:
+    resolution: {integrity: sha512-q8StxLawHLDvhqv/uoBYCfVbDskn49Cr5ouNCZhh4lgryGu1aymHwK9AvO6RcW2SbPm5MSnQDJOfGp2MW5Nnrw==}
     engines: {node: '>=20.0.0'}
 
   expand-template@2.0.3:
@@ -1599,8 +1599,8 @@ packages:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
 
-  typescript@5.9.2:
-    resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
+  typescript@5.9.3:
+    resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -1630,8 +1630,8 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  vite-plugin-static-copy@3.1.2:
-    resolution: {integrity: sha512-aVmYOzptLVOI2b1jL+cmkF7O6uhRv1u5fvOkQgbohWZp2CbR22kn9ZqkCUIt9umKF7UhdbsEpshn1rf4720QFg==}
+  vite-plugin-static-copy@3.1.3:
+    resolution: {integrity: sha512-U47jgyoJfrvreF87u2udU6dHIXbHhdgGZ7wSEqn6nVHKDOMdRoB2uVc6iqxbEzENN5JvX6djE5cBhQZ2MMBclA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^5.0.0 || ^6.0.0 || ^7.0.0
@@ -2087,25 +2087,25 @@ snapshots:
 
   '@types/accepts@1.3.7':
     dependencies:
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
 
   '@types/better-sqlite3@7.6.13':
     dependencies:
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
 
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
 
   '@types/co-body@6.1.3':
     dependencies:
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
       '@types/qs': 6.14.0
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
 
   '@types/content-disposition@0.5.9': {}
 
@@ -2114,13 +2114,13 @@ snapshots:
       '@types/connect': 3.4.38
       '@types/express': 5.0.3
       '@types/keygrip': 1.0.6
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
 
   '@types/estree@1.0.8': {}
 
   '@types/express-serve-static-core@5.0.7':
     dependencies:
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.5
@@ -2150,7 +2150,7 @@ snapshots:
       '@types/http-errors': 2.0.5
       '@types/keygrip': 1.0.6
       '@types/koa-compose': 3.2.8
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
 
   '@types/koa__router@12.0.4':
     dependencies:
@@ -2160,7 +2160,7 @@ snapshots:
 
   '@types/mime@1.3.5': {}
 
-  '@types/node@24.6.0':
+  '@types/node@24.6.2':
     dependencies:
       undici-types: 7.13.0
 
@@ -2171,12 +2171,12 @@ snapshots:
   '@types/send@0.17.5':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
 
   '@types/serve-static@1.15.8':
     dependencies:
       '@types/http-errors': 2.0.5
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
       '@types/send': 0.17.5
 
   abbrev@3.0.1: {}
@@ -2405,13 +2405,13 @@ snapshots:
 
   escape-html@1.0.3: {}
 
-  exiftool-vendored.exe@13.37.0:
+  exiftool-vendored.exe@13.38.0:
     optional: true
 
-  exiftool-vendored.pl@13.37.0:
+  exiftool-vendored.pl@13.38.0:
     optional: true
 
-  exiftool-vendored@31.0.0:
+  exiftool-vendored@31.1.0:
     dependencies:
       '@photostructure/tz-lookup': 11.2.1
       '@types/luxon': 3.7.1
@@ -2419,8 +2419,8 @@ snapshots:
       he: 1.2.0
       luxon: 3.7.2
     optionalDependencies:
-      exiftool-vendored.exe: 13.37.0
-      exiftool-vendored.pl: 13.37.0
+      exiftool-vendored.exe: 13.38.0
+      exiftool-vendored.pl: 13.38.0
 
   expand-template@2.0.3: {}
 
@@ -2890,7 +2890,7 @@ snapshots:
 
   retry@0.12.0: {}
 
-  rolldown-vite@7.1.14(@types/node@24.6.0)(esbuild@0.25.10)(yaml@2.8.1):
+  rolldown-vite@7.1.14(@types/node@24.6.2)(esbuild@0.25.10)(yaml@2.8.1):
     dependencies:
       '@oxc-project/runtime': 0.92.0
       fdir: 6.5.0(picomatch@4.0.3)
@@ -2900,7 +2900,7 @@ snapshots:
       rolldown: 1.0.0-beta.41
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
       esbuild: 0.25.10
       fsevents: 2.3.3
       yaml: 2.8.1
@@ -3142,7 +3142,7 @@ snapshots:
       media-typer: 1.1.0
       mime-types: 3.0.1
 
-  typescript@5.9.2: {}
+  typescript@5.9.3: {}
 
   undici-types@7.13.0: {}
 
@@ -3162,16 +3162,16 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite-plugin-static-copy@3.1.2(vite@7.1.7(@types/node@24.6.0)(lightningcss@1.30.2)(yaml@2.8.1)):
+  vite-plugin-static-copy@3.1.3(vite@7.1.7(@types/node@24.6.2)(lightningcss@1.30.2)(yaml@2.8.1)):
     dependencies:
       chokidar: 3.6.0
       fs-extra: 11.3.2
       p-map: 7.0.3
       picocolors: 1.1.1
       tinyglobby: 0.2.15
-      vite: 7.1.7(@types/node@24.6.0)(lightningcss@1.30.2)(yaml@2.8.1)
+      vite: 7.1.7(@types/node@24.6.2)(lightningcss@1.30.2)(yaml@2.8.1)
 
-  vite@7.1.7(@types/node@24.6.0)(lightningcss@1.30.2)(yaml@2.8.1):
+  vite@7.1.7(@types/node@24.6.2)(lightningcss@1.30.2)(yaml@2.8.1):
     dependencies:
       esbuild: 0.25.10
       fdir: 6.5.0(picomatch@4.0.3)
@@ -3180,7 +3180,7 @@ snapshots:
       rollup: 4.52.3
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 24.6.0
+      '@types/node': 24.6.2
       fsevents: 2.3.3
       lightningcss: 1.30.2
       yaml: 2.8.1

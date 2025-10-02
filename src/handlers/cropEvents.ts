@@ -8,7 +8,7 @@ const getTaskEvents: TaskEventsGetter = (taskId) => {
 
     return {
         crop: tasks.tasks.crop.then(
-            () => null,
+            region => ({ region }),
             () => { throw { message: "Failed to create cropped image" }; }
         ),
         persist: tasks.tasks.persist.then(

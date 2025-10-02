@@ -53,11 +53,11 @@ export default async (ctx: Context) => {
 
     const taskId = randomUUID();
     const tee = new PassThrough();
-    const { metadata, hash } = uploadProcessor(taskId, tee, signal);
+    const hashAndMetadata = uploadProcessor(taskId, tee, signal);
 
-    hash.then(
-        hex => {
-            const extractRegionRecord = getExtractRegionRecordByHash(hex);
+    hashAndMetadata.then(
+        ({ hash }) => {
+            const extractRegionRecord = getExtractRegionRecordByHash(hash);
             if (!extractRegionRecord) return;
 
             existingController.abort();
@@ -74,8 +74,7 @@ export default async (ctx: Context) => {
                 tee,
                 { signal }
             ),
-            metadata,
-            hash,
+            hashAndMetadata,
         ]);
 
         if (existingController.signal.aborted) return;

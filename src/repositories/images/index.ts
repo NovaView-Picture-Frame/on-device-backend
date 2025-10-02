@@ -46,7 +46,7 @@ const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
         extract_region_top,
         extract_region_width,
         extract_region_height,
-        exif_jsonb,
+        metadata_jsonb,
         place_name,
         place_type,
         place_fullName
@@ -57,7 +57,7 @@ const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
         :extract_region_top,
         :extract_region_width,
         :extract_region_height,
-        jsonb(:exif_jsonb),
+        jsonb(:metadata_jsonb),
         :place_name,
         :place_type,
         :place_fullName
@@ -87,8 +87,8 @@ const updateOffsetStmt = db.prepare<ExtractOffsetUpdateDB>(/* sql */`
 export const updateOffset = (input: ExtractOffsetUpdate) =>
     updateOffsetStmt.run({
         id: input.id,
-        extract_region_left: input.left,
-        extract_region_top: input.top,
+        extract_region_left: input.extractRegion.left,
+        extract_region_top: input.extractRegion.top,
     }).changes > 0;
 
 const deleteByIDStmt = db.prepare<ImageRecordDB['id']>(/* sql */`

@@ -61,16 +61,10 @@ export default (ctx: RouterContext) => {
         return;
     }
 
-    const taskId = cropProcessor({
-        id: extractRegionRecord.id,
-        left,
-        top,
-    });
-
     ctx.body = {
         data: {
             type: "processing",
-            taskId,
+            taskId: cropProcessor(extractRegionRecord),
         },
     }
 }

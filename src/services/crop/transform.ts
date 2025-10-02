@@ -1,31 +1,22 @@
-import fs from 'fs/promises';
 import sharp from 'sharp';
 
 import config from '../../config';
-import { updateOffset } from '../../repositories/images';
-import type { ImageRecord, ExtractOffsetUpdate } from '../../models/images';
+import type { ExtractRegionRecord } from '../../models/images';
 
 export const resizeAndExtract = (
-    offset: Pick<ImageRecord['extractRegion'], 'left' | 'top'>,
+    record: ExtractRegionRecord,
     src: string,
-    dest: string
+    dest: string,
 ) => sharp(src)
     .resize(config.screenWidth, config.screenHeight, {
         fit: 'outside',
     })
     .extract({
-        left: offset.left,
-        top: offset.top,
+        left: record.extractRegion.left,
+        top: record.extractRegion.top,
         width: config.screenWidth,
         height: config.screenHeight,
     })
+    .keepIccProfile()
     .png()
     .toFile(dest);
-
-export const updateAndMove = (
-    extractOffsetUpdate: ExtractOffsetUpdate,
-    croppedTmp: string,
-    cropped: string
-) => updateOffset(extractOffsetUpdate)
-    ? fs.rename(croppedTmp, cropped)
-    : Promise.resolve();
