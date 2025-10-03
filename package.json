@@ -22,7 +22,7 @@
 		"koa": "^3.0.1",
 		"node-addon-api": "^8.5.0",
 		"node-gyp": "^11.4.2",
-		"rolldown-vite": "^7.1.14",
+		"rolldown-vite": "^7.1.15",
 		"sharp": "^0.34.4",
 		"typescript": "^5.9.3",
 		"vite-plugin-static-copy": "^3.1.3",

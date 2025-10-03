@@ -4,22 +4,28 @@ import { ZodWeaver } from '@gqloom/zod';
 import { createHandler } from 'graphql-http/lib/use/koa';
 import type { ResolverPayload } from '@gqloom/core';
 
-import { imageQuerySchema } from '../models/images/query';
+import { selectionSchema, imageQuerySchema } from '../models/images/query';
 import { querySingle, queryList } from '../repositories/images';
 
 const parseFields = (payload: ResolverPayload) => {
-    const fields = getDeepResolvingFields(payload);
-    const root = fields.get('');
+    const fieldsRaw = getDeepResolvingFields(payload);
+    const root = fieldsRaw.get('');
     if (!root) return null;
-    return [ ...root.requestedFields ]
-        .reduce<Record<string, string | string[]>>(
-            (acc, key) => {
-                const selected = fields.get(key)?.selectedFields;
-                acc[key] = selected ? [ ...selected ] : 'include';
-                return acc;
-            },
-            {}
-        );
+
+    const fields = Object.fromEntries(
+        [ ...root.requestedFields ].map(key => {
+            const selectedFields = fieldsRaw.get(key)?.selectedFields;
+
+            return [
+                key,
+                selectedFields ? [ ...selectedFields ] : 'include'
+            ];
+        })
+    );
+
+    const fieldsResult = selectionSchema.safeParse(fields);
+    if (!fieldsResult.success) return null;
+    return fieldsResult.data;
 }
 
 const queryResolver = resolver({
@@ -36,14 +42,14 @@ const queryResolver = resolver({
     images: query(z.array(imageQuerySchema))
         .input({
             cursor: z.int().positive().optional(),
-            size: z.int().positive().max(50).optional().default(50),
+            size: z.int().positive().max(50).default(50),
         })
         .resolve(({ size, cursor }, payload) => {
             if (!payload) return [];
             const selection = parseFields(payload);
             if (!selection) return [];
 
-            return queryList(selection, size, cursor);
+            return queryList(size, selection, cursor);
         }),
 });
 

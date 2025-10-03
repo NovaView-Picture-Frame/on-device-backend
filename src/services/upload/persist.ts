@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import type { Readable } from "node:stream";
 
 import config from '../../config';
-import { placeSchema } from '../../models/images';
+import { imageRecordSchema } from '../../models/images';
 import { upsert } from '../../repositories/images';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
@@ -26,7 +26,7 @@ export const geocoding = async (latitude: number, longitude: number) => {
     });
 
     const { addresstype, display_name, ...rest } = await res.json()
-    const place = placeSchema.safeParse({
+    const place = imageRecordSchema.shape.place.safeParse({
         ...rest,
         type: addresstype,
         fullName: display_name,

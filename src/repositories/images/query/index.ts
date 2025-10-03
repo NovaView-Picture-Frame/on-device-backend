@@ -2,14 +2,14 @@ import buildFieldsAndResolver from './mapper';
 import db from '../../../db';
 
 import type { ImageRecord } from '../../../models/images';
-import type { FieldsSelection, ImageQuery } from '../../../models/images/query';
+import type { Selection, ImageQuery } from '../../../models/images/query';
 import type { ImageRecordDB, ImageSelect } from '../../../models/images/repository';
 
 export const querySingle = (
     id: ImageRecord['id'],
-    select: FieldsSelection
+    selection: Selection
 ): ImageQuery | null => {
-    const { fields, resolver } = buildFieldsAndResolver(select);
+    const { fields, resolver } = buildFieldsAndResolver(selection);
     const stmt = db.prepare<ImageRecordDB['id'], ImageSelect>(/* sql */`
         SELECT ${fields.join(', ')}
         FROM images
@@ -21,11 +21,11 @@ export const querySingle = (
 };
 
 export const queryList = (
-    select: FieldsSelection,
     size: number,
+    selection: Selection,
     cursor?: ImageRecord['id'],
 ): ImageQuery[] => {
-    const { fields, resolver } = buildFieldsAndResolver(select);
+    const { fields, resolver } = buildFieldsAndResolver(selection);
     const stmt = db.prepare<
         {
             size: number;

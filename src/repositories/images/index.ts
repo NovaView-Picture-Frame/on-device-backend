@@ -49,7 +49,7 @@ const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
         metadata_jsonb,
         place_name,
         place_type,
-        place_fullName
+        place_full_name
     )
     VALUES (
         :hash,
@@ -60,7 +60,7 @@ const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
         jsonb(:metadata_jsonb),
         :place_name,
         :place_type,
-        :place_fullName
+        :place_full_name
     )
     ON CONFLICT(hash) DO NOTHING
     RETURNING id

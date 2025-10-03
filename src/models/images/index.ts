@@ -69,9 +69,9 @@ const metadataOptionalSchema = z.object({
     TransferCharacteristics: z.string(),
 }).partial();
 
-export const metadataSchema = metadataRequiredSchema.extend(metadataOptionalSchema.shape);
+const metadataSchema = metadataRequiredSchema.extend(metadataOptionalSchema.shape);
 
-export const placeSchema = z.object({
+const placeSchema = z.object({
     name: z.string(),
     type: z.string(),
     fullName: z.string(),

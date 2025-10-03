@@ -2,7 +2,7 @@ import { exiftool, ExifDate, ExifTime, ExifDateTime } from 'exiftool-vendored';
 import type { Metadata } from 'sharp';
 
 import { InvalidBufferError } from '.';
-import { metadataSchema, type Image } from '../../models/images';
+import { imageRecordSchema, type Image } from '../../models/images';
 
 const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDateTime) =>
     input instanceof ExifDate ||
@@ -85,7 +85,10 @@ export const extractHashAndMetadata = async (
     };
 
     const metadata = {
-        ...pickByKeys(exifToolMetadata, metadataSchema.keyof().options),
+        ...pickByKeys(
+            exifToolMetadata,
+            imageRecordSchema.shape.metadata.keyof().options
+        ),
 
         FileSize: size,
         FileFormat: meta.format,

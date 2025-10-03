@@ -1,50 +1,51 @@
-import type { FieldsSelection } from '../../../models/images/query';
+import type { Selection, ImageQuery } from '../../../models/images/query';
 import type { ImageSelect } from '../../../models/images/repository';
 
-export default (select: FieldsSelection) => {
+export default (selection: Selection) => {
     const fields = [
-        ...select.id ? ['id'] : [],
-        ...select.hash ? ['hash'] : [],
+        ...selection.id ? ['id'] : [],
+        ...selection.hash ? ['hash'] : [],
 
-        ...select.extractRegion?.map(
+        ...selection.extractRegion?.map(
             key => `extract_region_${key}`
         ) ?? [],
 
-        ...select.metadata ? [/* sql */`
+        ...selection.metadata ? [/* sql */`
             (
                 SELECT json_group_object(json_each.key, json_each.value)
                 FROM json_each(metadata_jsonb)
-                WHERE json_each.key IN (${select.metadata.map(key => `'${key}'`).join(', ')})
+                WHERE json_each.key IN (${selection.metadata.map(key => `'${key}'`).join(', ')})
             ) AS metadata_json
         `] : [],
 
-        ...select.place?.map(
+        ...selection.place?.map(
             key => `place_${key}`
         ) ?? [],
     ];
 
-    const resolver = (record: ImageSelect) => ({
-        ...select.id === 'include' && { id: record.id },
-        ...select.hash === 'include' && { hash: record.hash },
+    const resolver = (record: ImageSelect): ImageQuery => ({
+        ...selection.id && { id: record.id },
+        ...selection.hash && { hash: record.hash },
 
-        ...select.extractRegion && {
-            extractRegion: Object.fromEntries(
-                Object.entries(record)
-                    .filter(([key]) => key.startsWith('extract_region_'))
-                    .map(([k, v]) => [k.replace('extract_region_', ''), v])
-            ),
+        ...selection.extractRegion && {
+            extractRegion: {
+                left: record.extract_region_left,
+                top: record.extract_region_top,
+                width: record.extract_region_width,
+                height: record.extract_region_height,
+            },
         },
 
-        ...select.metadata && {
+        ...selection.metadata && {
             metadata: JSON.parse(record.metadata_json),
         },
 
-        ...select.place && {
-            place: Object.fromEntries(
-                Object.entries(record)
-                    .filter(([key]) => key.startsWith('place_'))
-                    .map(([k, v]) => [k.replace('place_', ''), v])
-            ),
+        ...selection.place && {
+            place: {
+                ...record.place_name && { name: record.place_name },
+                ...record.place_type && { type: record.place_type },
+                ...record.place_full_name && { fullName: record.place_full_name },
+            },
         },
     });
 

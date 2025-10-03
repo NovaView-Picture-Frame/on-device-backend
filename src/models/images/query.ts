@@ -4,25 +4,35 @@ import { GraphQLID } from 'graphql';
 
 import { imageRecordSchema, type ImageRecord } from '.';
 
-export type FieldsSelection = {
-    [K in keyof ImageRecord]?: NonNullable<ImageRecord[K]> extends object
-        ? (keyof NonNullable<ImageRecord[K]>)[]
-        : 'include';
-};
-
 type ZodPartial<T> = Partial<{
     [P in keyof T]: T[P] | undefined
 }>;
+
+type Field<T> = T extends object ? (keyof T)[] : 'include';
+
+type ImageRecordFieldMap = {
+    [K in keyof ImageRecord]: Field<NonNullable<ImageRecord[K]>>;
+};
+
+export type Selection = ZodPartial<ImageRecordFieldMap>;
+
+export const selectionSchema: z.ZodType<Selection> = z.object({
+    id: z.literal('include'),
+    hash: z.literal('include'),
+    extractRegion: z.array(imageRecordSchema.shape.extractRegion.keyof()),
+    metadata: z.array(imageRecordSchema.shape.metadata.keyof()),
+    place: z.array(imageRecordSchema.shape.place.unwrap().keyof()),
+}).partial();
 
 interface ImageQueryRaw extends Omit<ImageRecord, 'extractRegion' | 'place'> {
     extractRegion: ZodPartial<ImageRecord['extractRegion']>;
     place: ZodPartial<ImageRecord['place']>;
 }
 
-export const imageQuerySchema = imageRecordSchema.extend({
+export type ImageQuery = ZodPartial<ImageQueryRaw>;
+
+export const imageQuerySchema: z.ZodType<ImageQuery> = imageRecordSchema.extend({
     id: imageRecordSchema.shape.id.register(asField, { type: GraphQLID }),
     extractRegion: imageRecordSchema.shape.extractRegion.partial(),
     place: imageRecordSchema.shape.place.unwrap().partial().nullable(),
-}).partial() satisfies z.ZodType<ZodPartial<ImageQueryRaw>>;
-
-export type ImageQuery = z.infer<typeof imageQuerySchema>;
+}).partial();

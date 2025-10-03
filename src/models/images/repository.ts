@@ -9,7 +9,7 @@ export interface ImageInsert {
     metadata_jsonb: string;
     place_name: string | null;
     place_type: string | null;
-    place_fullName: string | null;
+    place_full_name: string | null;
 };
 
 export interface ImageRecordDB extends ImageInsert {
@@ -34,11 +34,11 @@ export const toInsert = (input: Image): ImageInsert => ({
     ...(input.place !== null ? {
         place_name: input.place.name,
         place_type: input.place.type,
-        place_fullName: input.place.fullName,
+        place_full_name: input.place.fullName,
     } : {
         place_name: null,
         place_type: null,
-        place_fullName: null,
+        place_full_name: null,
     })
 });
 

@@ -12,7 +12,7 @@ const getTaskKey = (offset: ExtractOffsetUpdate) =>
 
 export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     key: ReturnType<typeof getTaskKey> | null;
-    tasks: {
+    readonly tasks: {
         readonly crop: Promise<
             Parameters<typeof updateAndMove>[0]['extractRegion']
         >;

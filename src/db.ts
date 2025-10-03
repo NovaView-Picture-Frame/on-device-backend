@@ -19,14 +19,14 @@ db.exec(/* sql */`
         metadata_jsonb         BLOB     NOT NULL                    CHECK(json_valid(metadata_jsonb, 8) AND json_type(metadata_jsonb) = 'object' AND json(metadata_jsonb) != '{}'),
         place_name             TEXT,
         place_type             TEXT,
-        place_fullName         TEXT,
+        place_full_name        TEXT,
 
         CHECK(extract_region_left = 0 OR extract_region_top = 0),
         CHECK(extract_region_width = ${config.screenWidth} OR extract_region_height = ${config.screenHeight}),
         CHECK (
-            (place_name IS NULL AND place_type IS NULL AND place_fullName IS NULL)
+            (place_name IS NULL AND place_type IS NULL AND place_full_name IS NULL)
             OR
-            (place_name IS NOT NULL AND place_type IS NOT NULL AND place_fullName IS NOT NULL)
+            (place_name IS NOT NULL AND place_type IS NOT NULL AND place_full_name IS NOT NULL)
         )
     ) STRICT;
 `);
