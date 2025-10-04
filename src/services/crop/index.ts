@@ -20,23 +20,35 @@ export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     }
 }>();
 
-export const cropProcessor = (input: ExtractRegionRecord) => {
-    const taskKey = getTaskKey(input);
+export const cropProcessor = (
+    current: ExtractRegionRecord,
+    left: ExtractRegionRecord['extractRegion']['left'],
+    top: ExtractRegionRecord['extractRegion']['top'],
+) => {
+    const next = {
+        id: current.id,
+        extractRegion: {
+            left,
+            top,
+        }
+    }
+
+    const taskKey = getTaskKey(next);
     for (const [existingTaskId, existingEntry] of tasksMap.entries())
         if (existingEntry.key === taskKey) return existingTaskId;
 
-    const croppedTmp = `${config.paths.cropped._tmp}/${input.id}`;
+    const croppedTmp = `${config.paths.cropped._tmp}/${next.id}`;
 
     const crop = resizeAndExtract(
-        input,
-        `${config.paths.originals._base}/${input.id}`,
+        next,
+        `${config.paths.originals._base}/${next.id}`,
         croppedTmp
-    ).then(() => input.extractRegion);
+    ).then(() => next.extractRegion);
 
     const persist = crop.then(() => updateAndMove(
-        input,
+        next,
         croppedTmp,
-        `${config.paths.cropped._base}/${input.id}`
+        `${config.paths.cropped._base}/${next.id}`
     ))
 
     const taskId = randomUUID();

@@ -1,10 +1,10 @@
 import sharp from 'sharp';
 
 import config from '../../config';
-import type { ExtractRegionRecord } from '../../models/images';
+import type { ExtractOffsetUpdate } from '../../models/images';
 
 export const resizeAndExtract = (
-    record: ExtractRegionRecord,
+    record: ExtractOffsetUpdate,
     src: string,
     dest: string,
 ) => sharp(src)

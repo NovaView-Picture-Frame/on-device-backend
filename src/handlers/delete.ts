@@ -4,7 +4,7 @@ import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { deleteByID } from '../repositories/images';
-import ignoreErrorCode from '../utils/ignoreErrorCodes';
+import ignoreErrorCodes from '../utils/ignoreErrorCodes';
 import config from '../config';
 
 const paramsSchema = z.object({
@@ -16,8 +16,7 @@ export default async (ctx: RouterContext) => {
     if (!paramsResult.success) throw new HttpBadRequestError("Invalid URL parameters");
 
     const id = paramsResult.data.id;
-
-    deleteByID(id) && await Promise.all(ignoreErrorCode(
+    deleteByID(id) && await Promise.all(ignoreErrorCodes(
         [
             `${config.paths.originals._base}/${id}`,
             `${config.paths.cropped._base}/${id}`,

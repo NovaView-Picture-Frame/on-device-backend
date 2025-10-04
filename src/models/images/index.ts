@@ -72,9 +72,9 @@ const metadataOptionalSchema = z.object({
 const metadataSchema = metadataRequiredSchema.extend(metadataOptionalSchema.shape);
 
 const placeSchema = z.object({
-    name: z.string(),
-    type: z.string(),
-    fullName: z.string(),
+    name: z.string().nonempty(),
+    type: z.string().nonempty(),
+    fullName: z.string().nonempty(),
 });
 
 export const imageRecordSchema = z.object({

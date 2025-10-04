@@ -14,12 +14,14 @@ export default (selection: Selection) => {
             (
                 SELECT json_group_object(json_each.key, json_each.value)
                 FROM json_each(metadata_jsonb)
-                WHERE json_each.key IN (${selection.metadata.map(key => `'${key}'`).join(', ')})
+                WHERE json_each.key IN (${
+                    selection.metadata.map(key => `'${key}'`).join(', ')
+                })
             ) AS metadata_json
         `] : [],
 
-        ...selection.place?.map(
-            key => `place_${key}`
+        ...selection.place?.map(key =>
+            key !== 'fullName' ? `place_${key}` : 'place_full_name'
         ) ?? [],
     ];
 
@@ -41,13 +43,14 @@ export default (selection: Selection) => {
         },
 
         ...selection.place && {
-            place: {
-                ...record.place_name && { name: record.place_name },
-                ...record.place_type && { type: record.place_type },
-                ...record.place_full_name && { fullName: record.place_full_name },
-            },
+            place: record.place_name || record.place_type || record.place_full_name
+                ? {
+                    name: record.place_name || undefined,
+                    type: record.place_type || undefined,
+                    fullName: record.place_full_name || undefined,
+                } : null,
         },
     });
 
-    return { fields, resolver };
-};
+    return { fields, resolver }
+}

@@ -12,7 +12,7 @@ export const getMetadata = async (sharpInstance: Sharp, signal: AbortSignal) => 
     const onAbort = () => {
         reject(new StreamAbortedError());
         sharpInstance.destroy();
-    };
+    }
 
     signal.addEventListener('abort', onAbort, { once: true });
     sharpInstance.metadata().then(resolve, reject);
@@ -36,7 +36,7 @@ export const resizeToCover = async (
     const onAbort = () => {
         reject(new StreamAbortedError());
         sharpInstance.destroy();
-    };
+    }
 
     signal.addEventListener('abort', onAbort, { once: true });
     sharpInstance
@@ -68,7 +68,7 @@ export const resizeToInside = async (
     const onAbort = () => {
         reject(new StreamAbortedError());
         sharpInstance.destroy();
-    };
+    }
 
     signal.addEventListener('abort', onAbort, { once: true });
     sharpInstance

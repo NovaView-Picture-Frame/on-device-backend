@@ -1,5 +1,5 @@
-import { pipeline } from 'node:stream/promises';
 import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 import fs from 'fs/promises';
 import type { Readable } from "node:stream";
 
@@ -8,7 +8,11 @@ import { imageRecordSchema } from '../../models/images';
 import { upsert } from '../../repositories/images';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
 
-export const geocoding = async (latitude: number, longitude: number) => {
+export const geocoding = async (
+    latitude: number,
+    longitude: number,
+    signal: AbortSignal,
+) => {
     const baseUrl = 'https://nominatim.openstreetmap.org/reverse';
     const params = new URLSearchParams({
         lat: latitude.toString(),
@@ -23,7 +27,9 @@ export const geocoding = async (latitude: number, longitude: number) => {
             'User-Agent': config.nominatimUserAgent,
             'Accept-Language': 'en',
         },
+        signal
     });
+    if (!res.ok) return null;
 
     const { addresstype, display_name, ...rest } = await res.json()
     const place = imageRecordSchema.shape.place.safeParse({
@@ -45,8 +51,8 @@ export const saveStream = async (
     return {
         path,
         size: sink.bytesWritten
-    };
-};
+    }
+}
 
 export const insertAndMove = async (input: {
     originalTmp: string;
