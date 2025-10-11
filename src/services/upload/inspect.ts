@@ -99,5 +99,5 @@ export const extractHashAndMetadata = async (
     return {
         hash: ImageDataHash,
         metadata,
-    };
-};
+    }
+}

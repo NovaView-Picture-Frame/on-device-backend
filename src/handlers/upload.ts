@@ -5,8 +5,8 @@ import { z } from 'zod';
 import type { Context } from 'koa';
 
 import config from '../config';
-import { getExtractRegionRecordByHash } from '../repositories/images';
 import { HttpBadRequestError } from '../middleware/errorHandler';
+import { getExtractRegionRecordByHash } from '../repositories/images';
 import { uploadProcessor, InvalidBufferError } from '../services/upload';
 import { createMaxSizeTransform, MaxSizeError } from '../utils/transforms';
 import type { ExtractRegionRecord } from '../models/images';
@@ -30,7 +30,7 @@ export default async (ctx: Context) => {
     const headerResult = headerSchema.safeParse(ctx.request.headers);
     if (!headerResult.success) throw new HttpBadRequestError(
         "Invalid headers"
-    )
+    );
 
     const headerHash = headerResult.data['content-hash'];
     if (headerHash) {
@@ -42,11 +42,11 @@ export default async (ctx: Context) => {
         }
     }
 
-    const timeoutSignal = AbortSignal.timeout(config.uploadTimeout);
+    const timeoutController = new AbortController();
     const existingController = new AbortController();
     const taskController = new AbortController();
     const signal = AbortSignal.any([
-        timeoutSignal,
+        timeoutController.signal,
         existingController.signal,
         taskController.signal,
     ]);
@@ -54,6 +54,7 @@ export default async (ctx: Context) => {
     const taskId = randomUUID();
     const tee = new PassThrough();
     const hashAndMetadata = uploadProcessor(taskId, tee, signal);
+    const timer = setTimeout(() => timeoutController.abort(), config.uploadTimeout);
 
     hashAndMetadata.then(
         ({ hash }) => {
@@ -78,6 +79,7 @@ export default async (ctx: Context) => {
         ]);
 
         if (existingController.signal.aborted) return;
+        clearTimeout(timer);
         ctx.body = {
             data: {
                 type: "processing",
@@ -85,7 +87,7 @@ export default async (ctx: Context) => {
             },
         };
     } catch (err) {
-        if (timeoutSignal.aborted) throw new HttpBadRequestError(
+        if (timeoutController.signal.aborted) throw new HttpBadRequestError(
             "Request timeout"
         );
 

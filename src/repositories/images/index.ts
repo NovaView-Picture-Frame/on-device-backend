@@ -21,7 +21,7 @@ const getByHashStmt = db.prepare<ImageRecordDB['hash'], ExtractRegionRecordDB>(/
 export const getExtractRegionRecordByHash =(hash: ImageRecord['hash']): ExtractRegionRecord | null => {
     const record = getByHashStmt.get(hash);
     return record ? toExtractRegionRecord(record) : null;
-};
+}
 
 const getByIDStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sql */`
     SELECT
@@ -37,7 +37,7 @@ const getByIDStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sq
 export const getExtractRegionRecordByID =(id: ImageRecord['id']): ExtractRegionRecord | null => {
     const record = getByIDStmt.get(id);
     return record ? toExtractRegionRecord(record) : null;
-};
+}
 
 const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
     INSERT INTO images (

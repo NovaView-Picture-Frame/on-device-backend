@@ -15,7 +15,7 @@ const paramsSchema = z.object({
     ),
 });
 
-export default (getTaskEvents: TaskEventsGetter) =>
+export const buildTaskEventsHandler = (getTaskEvents: TaskEventsGetter) =>
     (ctx: RouterContext) => {
         const paramsResult = paramsSchema.safeParse(ctx.params);
         if (!paramsResult.success) throw new HttpBadRequestError(

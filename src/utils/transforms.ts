@@ -13,4 +13,4 @@ export const createMaxSizeTransform = (limit: number) => {
                 : callback(null, chunk);
         },
     });
-};
+}

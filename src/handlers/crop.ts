@@ -24,7 +24,7 @@ const toOffset = (size: number, ratio: number, limit: number): number => {
     const offset = Math.floor(size * ratio);
     if (offset + limit > size) throw new HttpBadRequestError("Offset out of bounds");
     return offset;
-};
+}
 
 export default (ctx: RouterContext) => {
     const paramsResult = paramsSchema.safeParse(ctx.params);
@@ -64,7 +64,7 @@ export default (ctx: RouterContext) => {
     ctx.body = {
         data: {
             type: "processing",
-            taskId: cropProcessor(extractRegionRecord),
+            taskId: cropProcessor(extractRegionRecord, left, top),
         },
     }
 }

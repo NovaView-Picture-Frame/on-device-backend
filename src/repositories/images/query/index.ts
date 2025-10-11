@@ -18,7 +18,7 @@ export const querySingle = (
 
     const record = stmt.get(id);
     return record ? resolver(record) : null;
-};
+}
 
 export const queryList = (
     size: number,
@@ -45,4 +45,4 @@ export const queryList = (
         cursor: cursor ?? null,
     });
     return records.map(resolver);
-};
+}

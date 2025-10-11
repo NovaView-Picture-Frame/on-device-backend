@@ -1,7 +1,7 @@
 import { getDeepResolvingFields, resolver, query, weave } from '@gqloom/core';
 import { z } from 'zod';
-import { ZodWeaver } from '@gqloom/zod';
 import { createHandler } from 'graphql-http/lib/use/koa';
+import { ZodWeaver } from '@gqloom/zod';
 import type { ResolverPayload } from '@gqloom/core';
 
 import { selectionSchema, imageQuerySchema } from '../models/images/query';

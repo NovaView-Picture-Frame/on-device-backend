@@ -3,6 +3,8 @@ import bodyParser from '@koa/bodyparser';
 import Router from '@koa/router';
 
 import { errorHandler } from './middleware/errorHandler';
+import config from './config';
+
 import infoHandler from './handlers/info';
 import uploadHandler from './handlers/upload';
 import uploadEventsHandler from './handlers/uploadEvents';
@@ -10,8 +12,6 @@ import queryHandler from './handlers/query';
 import previewHandler from './handlers/preview';
 import cropHandler from './handlers/crop';
 import cropEventsHandler from './handlers/cropEvents';
-
-import config from './config';
 
 const app = new koa();
 app.use(errorHandler);

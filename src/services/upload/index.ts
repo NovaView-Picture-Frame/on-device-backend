@@ -47,7 +47,7 @@ export const uploadProcessor = (
     const lookupPlace = hashAndMetadata.then(
         ({ metadata: { GPSLatitude, GPSLongitude } }) => {
             if (GPSLatitude === undefined || GPSLongitude === undefined) return null;
-            return geocoding(GPSLatitude, GPSLongitude); 
+            return geocoding(GPSLatitude, GPSLongitude, signal); 
         }
     );
 
@@ -63,7 +63,7 @@ export const uploadProcessor = (
                 top: Math.abs(coverOutput.cropOffsetTop ?? 0),
                 width: Math.round(metadata.width * scale),
                 height: Math.round(metadata.height * scale),
-            };
+            }
         });
 
     const optimize = resizeToInside(transform.clone(), optimizedTmp, signal);

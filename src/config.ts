@@ -52,4 +52,4 @@ export default {
     sseKeepaliveInterval: yamlConfig.sse_keepalive_interval,
     tasksResultsTTL: yamlConfig.tasks_results_ttl,
     nominatimUserAgent: yamlConfig.nominatim_user_agent,
-};
+}
