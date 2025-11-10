@@ -20,12 +20,12 @@ export const buildTaskEventsHandler = (getTaskEvents: TaskEventsGetter) =>
         const paramsResult = paramsSchema.safeParse(ctx.params);
         if (!paramsResult.success) throw new HttpBadRequestError(
             "Invalid URL parameters"
-        )
+        );
 
         const tasks = getTaskEvents(paramsResult.data.taskId);
         if (!tasks) throw new HttpNotFoundError(
             "Task not found"
-        )
+        );
 
         const sse = new stream.PassThrough();
         sse.write("event: connected\ndata:\n\n");
@@ -64,7 +64,7 @@ export const buildTaskEventsHandler = (getTaskEvents: TaskEventsGetter) =>
         ctx.set({
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache, no-transform',
-            'Connection': 'keep-alive'
+            'Connection': 'keep-alive',
         });
         ctx.body = sse;
     }

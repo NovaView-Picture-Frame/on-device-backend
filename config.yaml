@@ -8,7 +8,7 @@ database: 'data.sqlite'
 size_limit: 15728640
 
 port: 3000
-upload_timeout: 15000
+upload_timeout: 2000
 sse_keepalive_interval: 15000
 tasks_results_ttl: 600000
 nominatim_user_agent: on-device-backend

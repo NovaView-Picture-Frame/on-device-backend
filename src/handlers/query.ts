@@ -13,12 +13,12 @@ const parseFields = (payload: ResolverPayload) => {
     if (!root) return null;
 
     const fields = Object.fromEntries(
-        [ ...root.requestedFields ].map(key => {
+        Array.from(root.requestedFields, key => {
             const selectedFields = fieldsRaw.get(key)?.selectedFields;
 
             return [
                 key,
-                selectedFields ? [ ...selectedFields ] : 'include'
+                selectedFields ? Array.from(selectedFields) : 'include',
             ];
         })
     );

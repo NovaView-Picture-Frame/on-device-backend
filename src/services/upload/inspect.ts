@@ -15,13 +15,13 @@ const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDate
 
 const hasOwn = <
     T extends object,
-    K extends PropertyKey
+    K extends PropertyKey,
 >(object: T, key: K): key is Extract<keyof T, K> =>
     Object.hasOwn(object, key);
 
 const pickByKeys = <
     T extends object,
-    K extends ReadonlyArray<PropertyKey>
+    K extends ReadonlyArray<PropertyKey>,
 >(object: T, keys: K) => {
     type KK = Extract<keyof T, K[number]>;
 

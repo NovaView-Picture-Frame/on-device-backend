@@ -1,6 +1,6 @@
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import type { Readable } from "node:stream";
 
 import config from '../../config';
@@ -27,7 +27,7 @@ export const geocoding = async (
             'User-Agent': config.nominatimUserAgent,
             'Accept-Language': 'en',
         },
-        signal
+        signal,
     });
     if (!res.ok) return null;
 
@@ -50,7 +50,7 @@ export const saveStream = async (
 
     return {
         path,
-        size: sink.bytesWritten
+        size: sink.bytesWritten,
     }
 }
 
@@ -72,8 +72,8 @@ export const insertAndMove = async (input: {
             [input.optimizedTmp, `${config.paths.optimized._base}/${id}`],
         ];
 
-        await Promise.all(
-            ignoreErrorCodes(moves.map(move => fs.link(...move)),
+        await Promise.all(ignoreErrorCodes(
+            moves.map(move => fs.link(...move)),
             'EEXIST'
         ));
     }

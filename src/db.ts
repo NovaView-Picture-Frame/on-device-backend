@@ -5,7 +5,7 @@ import config from './config';
 const db = new Database(
     `${config.paths._base}/${config.database}`, {
         nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`,
-    }
+    },
 );
 
 db.exec(/* sql */`

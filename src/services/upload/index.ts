@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { PassThrough } from 'node:stream';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import sharp from 'sharp';
 import type { Readable } from 'node:stream';
 
@@ -90,7 +90,7 @@ export const uploadProcessor = (
         crop,
         optimize,
         persist,
-    }
+    };
     tasksMap.set(id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {

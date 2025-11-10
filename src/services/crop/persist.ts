@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { updateOffset } from '../../repositories/images';
 import type { ExtractOffsetUpdate } from '../../models/images';

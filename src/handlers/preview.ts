@@ -1,3 +1,4 @@
+import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
@@ -17,12 +18,10 @@ export default async (ctx: RouterContext) => {
     const extractRegionRecord = getExtractRegionRecordByID(paramsResult.data.id);
     if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
-    const handle = await fs.open(
-        `${config.paths.optimized._base}/${extractRegionRecord.id}`
-    );
-    const stats = await handle.stat();
+    const path = `${config.paths.optimized._base}/${extractRegionRecord.id}`;
+    const stats = await fs.stat(path);
 
     ctx.set('Content-Length', stats.size.toString());
     ctx.type = 'image/avif';
-    ctx.body = handle.createReadStream();
+    ctx.body = createReadStream(path);
 }

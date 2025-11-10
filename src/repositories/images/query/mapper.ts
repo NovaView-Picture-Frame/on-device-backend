@@ -52,5 +52,5 @@ export default (selection: Selection) => {
         },
     });
 
-    return { fields, resolver }
+    return { fields, resolver };
 }

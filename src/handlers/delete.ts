@@ -20,12 +20,12 @@ export default async (ctx: RouterContext) => {
         [
             `${config.paths.originals._base}/${id}`,
             `${config.paths.cropped._base}/${id}`,
-            `${config.paths.optimized._base}/${id}`
+            `${config.paths.optimized._base}/${id}`,
         ].map(fs.unlink),
         'ENOENT'
     ));
 
     ctx.body = {
-        success: true
+        success: true,
     };
 }

@@ -21,7 +21,7 @@ const bodySchema = z.object({
 );
 
 const toOffset = (size: number, ratio: number, limit: number): number => {
-    const offset = Math.floor(size * ratio);
+    const offset = ~~(size * ratio);
     if (offset + limit > size) throw new HttpBadRequestError("Offset out of bounds");
     return offset;
 }
@@ -55,7 +55,7 @@ export default (ctx: RouterContext) => {
         ctx.body = {
             data: {
                 type: "unchanged",
-            }
+            },
         };
 
         return;
@@ -66,5 +66,5 @@ export default (ctx: RouterContext) => {
             type: "processing",
             taskId: cropProcessor(extractRegionRecord, left, top),
         },
-    }
+    };
 }

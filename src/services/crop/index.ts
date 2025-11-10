@@ -1,14 +1,14 @@
 import { randomUUID } from 'node:crypto';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { updateAndMove } from './persist';
 import config from '../../config';
 import { resizeAndExtract } from './transform';
 import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-import type { ExtractRegionRecord, ExtractOffsetUpdate } from '../../models/images';
+import type { ExtractOffsetUpdate, ExtractRegionRecord } from '../../models/images';
 
 const getTaskKey = (offset: ExtractOffsetUpdate) =>
-        `${offset.id}-${offset.extractRegion.left}-${offset.extractRegion.top}`;
+    `${offset.id}-${offset.extractRegion.left}-${offset.extractRegion.top}`;
 
 export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     key: ReturnType<typeof getTaskKey> | null;
@@ -30,8 +30,8 @@ export const cropProcessor = (
         extractRegion: {
             left,
             top,
-        }
-    }
+        },
+    };
 
     const taskKey = getTaskKey(next);
     for (const [existingTaskId, existingEntry] of tasksMap.entries())

@@ -14,7 +14,7 @@ import type { ExtractRegionRecord } from '../models/images';
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
     'content-length': z.coerce.number().int().positive().max(config.sizeLimit).optional(),
-    'content-hash': z.string().length(64).regex(/^[\p{Hex_Digit}]+$/u).optional(),
+    'content-hash': z.string().length(64).regex(/^\p{Hex_Digit}+$/v).optional(),
     'file-name': z.string().max(255).optional(),
 });
 
