@@ -19,9 +19,9 @@ export type Selection = ZodPartial<ImageRecordFieldMap>;
 export const selectionSchema: z.ZodType<Selection> = z.object({
     id: z.literal('include'),
     hash: z.literal('include'),
-    extractRegion: z.array(imageRecordSchema.shape.extractRegion.keyof()).nonempty(),
-    metadata: z.array(imageRecordSchema.shape.metadata.keyof()).nonempty(),
-    place: z.array(imageRecordSchema.shape.place.unwrap().keyof()).nonempty(),
+    extractRegion: z.array(imageRecordSchema.shape.extractRegion.keyof()),
+    metadata: z.array(imageRecordSchema.shape.metadata.keyof()),
+    place: z.array(imageRecordSchema.shape.place.unwrap().keyof()),
 }).partial();
 
 interface ImageQueryRaw extends Omit<ImageRecord, 'extractRegion' | 'place'> {
@@ -35,6 +35,4 @@ export const imageQuerySchema: z.ZodType<ImageQuery> = imageRecordSchema.extend(
     id: imageRecordSchema.shape.id.register(asField, {
         type: new GraphQLNonNull(GraphQLID)
     }),
-    extractRegion: imageRecordSchema.shape.extractRegion.partial(),
-    place: imageRecordSchema.shape.place.unwrap().partial().nullable(),
-}).partial();
+});

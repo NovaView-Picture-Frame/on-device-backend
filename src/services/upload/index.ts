@@ -39,7 +39,7 @@ export const uploadProcessor = (
     const transform = sharp();
     teeForSharp.pipe(transform);
 
-    const sharpMetadata = getMetadata(transform, signal);
+    const sharpMetadata = getMetadata(transform.clone(), signal);
     const saveOriginal = saveStream(teeForFS, originalTmp, signal);
     const hashAndMetadata = Promise.all([sharpMetadata, saveOriginal])
         .then(([meta, { path, size }]) => extractHashAndMetadata(path, size, meta));
@@ -51,7 +51,7 @@ export const uploadProcessor = (
         }
     );
 
-    const crop = Promise.all([sharpMetadata, resizeToCover(transform, croppedTmp, signal)])
+    const crop = Promise.all([sharpMetadata, resizeToCover(transform.clone(), croppedTmp, signal)])
         .then(([metadata, coverOutput]) => {
             const scale = Math.max( 
                 config.screenWidth / metadata.width,

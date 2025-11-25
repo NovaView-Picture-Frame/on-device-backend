@@ -79,7 +79,7 @@ export default async (ctx: Context) => {
         ]);
 
         if (existingController.signal.aborted) return;
-        clearTimeout(timer);
+
         ctx.body = {
             data: {
                 type: "processing",
@@ -102,5 +102,7 @@ export default async (ctx: Context) => {
         );
 
         throw err;
+    } finally {
+        clearTimeout(timer);
     }
 }

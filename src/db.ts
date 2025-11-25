@@ -23,6 +23,10 @@ db.exec(/* sql */`
 
         CHECK(extract_region_left = 0 OR extract_region_top = 0),
         CHECK(extract_region_width = ${config.screenWidth} OR extract_region_height = ${config.screenHeight}),
+        CHECK(
+            extract_region_left + ${config.screenWidth} <= extract_region_width OR
+            extract_region_top  + ${config.screenHeight} <= extract_region_height
+        ),
         CHECK (
             (place_name IS NULL AND place_type IS NULL AND place_full_name IS NULL)
             OR

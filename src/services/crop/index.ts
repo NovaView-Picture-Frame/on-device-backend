@@ -37,7 +37,8 @@ export const cropProcessor = (
     for (const [existingTaskId, existingEntry] of tasksMap.entries())
         if (existingEntry.key === taskKey) return existingTaskId;
 
-    const croppedTmp = `${config.paths.cropped._tmp}/${next.id}`;
+    const taskId = randomUUID();
+    const croppedTmp = `${config.paths.cropped._tmp}/${next.id}_${taskId}`;
 
     const crop = resizeAndExtract(
         next,
@@ -51,7 +52,6 @@ export const cropProcessor = (
         `${config.paths.cropped._base}/${next.id}`
     ))
 
-    const taskId = randomUUID();
     tasksMap.set(taskId, {
         key: taskKey,
         tasks: { crop, persist }

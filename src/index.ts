@@ -1,6 +1,7 @@
 import koa from 'koa';
 import bodyParser from '@koa/bodyparser';
 import Router from '@koa/router';
+import { exiftool } from 'exiftool-vendored';
 
 import { errorHandler } from './middleware/errorHandler';
 import config from './config';
@@ -15,18 +16,37 @@ import cropEventsHandler from './handlers/cropEvents';
 
 const app = new koa();
 app.use(errorHandler);
-app.use(bodyParser());
 
-const router = new Router();
-router.get('/info', infoHandler);
-router.post('/upload', uploadHandler);
-router.get('/upload/:taskId/events', uploadEventsHandler);
-router.post('/query', queryHandler);
-router.get('/preview/:id', previewHandler);
-router.post('/crop/:id', cropHandler);
-router.get('/crop/:taskId/events', cropEventsHandler);
+const router = new Router()
+    .get('/info', infoHandler)
+    .post('/upload', uploadHandler)
+    .get('/upload/:taskId/events', uploadEventsHandler)
+    .post('/query', queryHandler)
+    .get('/preview/:id', previewHandler)
+    .get('/crop/:taskId/events', cropEventsHandler);
+
+const bodyRouter = new Router()
+    .use(bodyParser())
+    .post('/crop/:id', cropHandler);
 
 app.use(router.routes());
-app.listen(config.port, () =>
+app.use(bodyRouter.routes());
+
+const server = app.listen(config.port, () =>
     console.log(`Server listening on port ${config.port}`)
 );
+
+const shutdown = async (signal: string) => {
+    console.log(`Received ${signal}, shutting down...`);
+    try {
+        server.close();
+        await exiftool.end();
+        process.exit(0);
+    } catch (err) {
+        console.error("Shutdown error:", err);
+        process.exit(1);
+    }
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
