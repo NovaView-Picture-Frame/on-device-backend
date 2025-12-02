@@ -20,17 +20,16 @@ const parseFields = (payload: ResolverPayload) => {
     if (validFields.length === 0) return null;
 
     const fields = Object.fromEntries(
-        validFields
-            .map(key => {
-                const selectedFields = fieldsRaw.get(key)?.selectedFields;
+        validFields.map(key => {
+            const selectedFields = fieldsRaw.get(key)?.selectedFields;
 
-                return [
-                    key,
-                    selectedFields
-                        ? Array.from(selectedFields).filter(isValidField)
-                        : 'include',
-                ];
-            })
+            return [
+                key,
+                selectedFields
+                    ? Array.from(selectedFields).filter(isValidField)
+                    : 'include',
+            ];
+        })
     );
 
     const fieldsResult = selectionSchema.safeParse(fields);

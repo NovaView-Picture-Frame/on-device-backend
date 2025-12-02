@@ -10,7 +10,7 @@ export default (selection: Selection) => {
             key => `extract_region_${key}`
         ) ?? [],
 
-        ...selection.metadata ? [/* sql */`
+        ...selection.metadata?.length ? [/* sql */`
             (
                 SELECT json_group_object(json_each.key, json_each.value)
                 FROM json_each(metadata_jsonb)
@@ -43,11 +43,11 @@ export default (selection: Selection) => {
         },
 
         ...selection.place && {
-            place: record.place_name || record.place_type || record.place_full_name
+            place: record.place_name && record.place_type && record.place_full_name
                 ? {
-                    name: record.place_name || undefined,
-                    type: record.place_type || undefined,
-                    fullName: record.place_full_name || undefined,
+                    name: record.place_name,
+                    type: record.place_type,
+                    fullName: record.place_full_name,
                 } : null,
         },
     });

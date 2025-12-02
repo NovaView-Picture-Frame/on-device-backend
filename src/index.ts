@@ -1,6 +1,7 @@
 import koa from 'koa';
 import bodyParser from '@koa/bodyparser';
 import Router from '@koa/router';
+import { WebSocketServer } from 'ws';
 import { exiftool } from 'exiftool-vendored';
 
 import { errorHandler } from './middleware/errorHandler';
@@ -13,6 +14,7 @@ import queryHandler from './handlers/query';
 import previewHandler from './handlers/preview';
 import cropHandler from './handlers/crop';
 import cropEventsHandler from './handlers/cropEvents';
+import carouselHandler from './handlers/carousel';
 
 const app = new koa();
 app.use(errorHandler);
@@ -32,14 +34,22 @@ const bodyRouter = new Router()
 app.use(router.routes());
 app.use(bodyRouter.routes());
 
-const server = app.listen(config.port, () =>
+const httpServer = app.listen(config.port, () =>
     console.log(`Server listening on port ${config.port}`)
 );
+
+const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/carousel',
+});
+
+wsServer.addListener('connection', carouselHandler);
 
 const shutdown = async (signal: string) => {
     console.log(`Received ${signal}, shutting down...`);
     try {
-        server.close();
+        httpServer.close();
+        wsServer.close();
         await exiftool.end();
         process.exit(0);
     } catch (err) {
