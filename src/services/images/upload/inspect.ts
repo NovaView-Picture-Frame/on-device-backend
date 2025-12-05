@@ -1,8 +1,8 @@
 import { exiftool, ExifDate, ExifTime, ExifDateTime } from 'exiftool-vendored';
 import type { Metadata } from 'sharp';
 
-import { InvalidBufferError } from '.';
-import { imageRecordSchema, type Image } from '../../models/images';
+import { InvalidBufferError } from './errors';
+import { imageRecordSchema, type Image } from '../../../models/images';
 
 const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDateTime) =>
     input instanceof ExifDate ||

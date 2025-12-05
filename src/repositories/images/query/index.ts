@@ -1,9 +1,13 @@
 import buildFieldsAndResolver from './mapper';
 import db from '../../../db';
 
-import type { ImageRecord } from '../../../models/images';
-import type { Selection, ImageQuery } from '../../../models/images/query';
-import type { ImageRecordDB, ImageSelect } from '../../../models/images/repository';
+import type {
+    ImageRecord,
+    Selection,
+    ImageQuery,
+    ImageRecordDB,
+    ImageSelect,
+} from '../../../models/images';
 
 export const querySingle = (
     id: ImageRecord['id'],

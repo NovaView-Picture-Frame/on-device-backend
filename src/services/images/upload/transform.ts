@@ -1,7 +1,7 @@
 import type { Sharp } from 'sharp';
 
-import { InvalidBufferError } from '.';
-import config from "../../config";
+import { InvalidBufferError } from './errors';
+import config from "../../../config";
 
 class StreamAbortedError extends Error {}
 

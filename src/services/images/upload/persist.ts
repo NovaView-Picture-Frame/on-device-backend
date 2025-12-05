@@ -3,10 +3,10 @@ import { pipeline } from 'node:stream/promises';
 import fs from 'node:fs/promises';
 import type { Readable } from "node:stream";
 
-import config from '../../config';
-import { imageRecordSchema } from '../../models/images';
-import { upsert } from '../../repositories/images';
-import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
+import config from '../../../config';
+import { imageRecordSchema } from '../../../models/images';
+import { upsert } from '../../../repositories/images';
+import ignoreErrorCodes from '../../../utils/ignoreErrorCodes';
 
 export const geocoding = async (
     latitude: number,

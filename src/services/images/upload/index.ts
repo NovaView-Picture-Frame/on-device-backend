@@ -1,16 +1,15 @@
 import { randomUUID } from 'node:crypto';
-import { PassThrough } from 'node:stream';
+import { PassThrough, type Readable } from 'node:stream';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
-import type { Readable } from 'node:stream';
 
 import { geocoding, saveStream, insertAndMove } from './persist';
-import config from '../../config';
+import config from '../../../config';
 import { getMetadata, resizeToCover, resizeToInside } from './transform';
 import { extractHashAndMetadata } from './inspect';
-import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
+import ignoreErrorCodes from '../../../utils/ignoreErrorCodes';
 
-export class InvalidBufferError extends Error {}
+export { InvalidBufferError } from './errors';
 
 export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     readonly lookupPlace: ReturnType<typeof geocoding>,

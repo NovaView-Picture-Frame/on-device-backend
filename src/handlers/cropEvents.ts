@@ -1,8 +1,11 @@
-import { tasksMap } from '../services/crop';
-import { buildTaskEventsHandler, type TaskEventsGetter } from '../services/buildTaskEventsHandler';
+import {
+    cropTasksMap,
+    buildTaskEventsHandler,
+    type TaskEventsGetter
+} from '../services/images';
 
-const getTaskEvents: TaskEventsGetter = (taskId) => {
-    const tasks = tasksMap.get(taskId);
+const getTaskEvents: TaskEventsGetter = taskId => {
+    const tasks = cropTasksMap.get(taskId);
     if (!tasks) return;
 
     return {

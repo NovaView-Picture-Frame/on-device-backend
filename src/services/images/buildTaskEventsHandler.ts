@@ -3,8 +3,8 @@ import stream from 'node:stream';
 import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
-import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import config from '../config';
+import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
+import config from '../../config';
 
 export type TaskEventsGetter = (taskId: ReturnType<typeof randomUUID>) =>
     Record<string, Promise<object | null>> | undefined;

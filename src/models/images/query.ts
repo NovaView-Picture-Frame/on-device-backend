@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { asField } from '@gqloom/zod';
 import { GraphQLNonNull, GraphQLID } from 'graphql';
 
-import { imageRecordSchema, type ImageRecord } from '.';
+import { imageRecordSchema, type ImageRecord } from './base';
 
 type ZodPartial<T> = Partial<{
     [P in keyof T]: T[P] | undefined

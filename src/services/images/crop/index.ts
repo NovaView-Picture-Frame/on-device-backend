@@ -2,10 +2,10 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 
 import { updateAndMove } from './persist';
-import config from '../../config';
+import config from '../../../config';
 import { resizeAndExtract } from './transform';
-import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-import type { ExtractOffsetUpdate, ExtractRegionRecord } from '../../models/images';
+import ignoreErrorCodes from '../../../utils/ignoreErrorCodes';
+import type { ExtractOffsetUpdate, ExtractRegionRecord } from '../../../models/images';
 
 const getTaskKey = (offset: ExtractOffsetUpdate) =>
     `${offset.id}-${offset.extractRegion.left}-${offset.extractRegion.top}`;

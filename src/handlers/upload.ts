@@ -7,7 +7,7 @@ import type { Context } from 'koa';
 import config from '../config';
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { getExtractRegionRecordByHash } from '../repositories/images';
-import { uploadProcessor, InvalidBufferError } from '../services/upload';
+import { uploadProcessor, InvalidBufferError } from '../services/images';
 import { createMaxSizeTransform, MaxSizeError } from '../utils/transforms';
 import type { ExtractRegionRecord } from '../models/images';
 

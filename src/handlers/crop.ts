@@ -4,7 +4,7 @@ import type { RouterContext } from '@koa/router';
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
 import { getExtractRegionRecordByID } from '../repositories/images';
 import config from '../config'
-import { cropProcessor } from '../services/crop';
+import { cropProcessor } from '../services/images';
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),

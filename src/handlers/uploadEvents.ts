@@ -1,8 +1,11 @@
-import { tasksMap } from '../services/upload';
-import { buildTaskEventsHandler, type TaskEventsGetter } from '../services/buildTaskEventsHandler';
+import {
+    uploadTasksMap,
+    buildTaskEventsHandler,
+    type TaskEventsGetter
+} from '../services/images';
 
-const getTaskEvents: TaskEventsGetter = (taskId) => {
-    const tasks = tasksMap.get(taskId);
+const getTaskEvents: TaskEventsGetter = taskId => {
+    const tasks = uploadTasksMap.get(taskId);
     if (!tasks) return;
 
     return {

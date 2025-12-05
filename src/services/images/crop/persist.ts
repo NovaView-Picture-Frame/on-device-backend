@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
-import { updateOffset } from '../../repositories/images';
-import type { ExtractOffsetUpdate } from '../../models/images';
+import { updateOffset } from '../../../repositories/images';
+import type { ExtractOffsetUpdate } from '../../../models/images';
 
 export const updateAndMove = (
     record: ExtractOffsetUpdate,

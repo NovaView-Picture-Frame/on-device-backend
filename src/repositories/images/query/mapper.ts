@@ -1,5 +1,4 @@
-import type { Selection, ImageQuery } from '../../../models/images/query';
-import type { ImageSelect } from '../../../models/images/repository';
+import type { Selection, ImageQuery, ImageSelect } from '../../../models/images';
 
 export default (selection: Selection) => {
     const fields = [

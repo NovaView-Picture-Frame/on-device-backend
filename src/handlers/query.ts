@@ -5,7 +5,7 @@ import { ZodWeaver } from '@gqloom/zod';
 import { GraphQLError } from 'graphql';
 import type { ResolverPayload } from '@gqloom/core';
 
-import { selectionSchema, imageQuerySchema } from '../models/images/query';
+import { selectionSchema, imageQuerySchema } from '../models/images';
 import { querySingle, queryList } from '../repositories/images';
 
 const isValidField = (field: string) => !field.startsWith('__');

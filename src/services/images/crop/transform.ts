@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 
-import config from '../../config';
-import type { ExtractOffsetUpdate } from '../../models/images';
+import config from '../../../config';
+import type { ExtractOffsetUpdate } from '../../../models/images';
 
 export const resizeAndExtract = (
     record: ExtractOffsetUpdate,
