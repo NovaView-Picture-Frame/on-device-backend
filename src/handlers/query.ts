@@ -5,47 +5,40 @@ import { ZodWeaver } from '@gqloom/zod';
 import { GraphQLError } from 'graphql';
 import type { ResolverPayload } from '@gqloom/core';
 
-import { selectionSchema, imageQuerySchema } from '../models/images';
+import { imageQuerySchema, type Selection } from '../models/images';
 import { querySingle, queryList } from '../repositories/images';
 
-const isValidField = (field: string) => !field.startsWith('__');
+const parseSelection = (payload: ResolverPayload): Selection => {
+    const rootMap = getDeepResolvingFields(payload);
 
-const parseFields = (payload: ResolverPayload) => {
-    const fieldsRaw = getDeepResolvingFields(payload);
-
-    const root = fieldsRaw.get('');
-    if (!root) return null;
-
-    const validFields = Array.from(root.requestedFields).filter(isValidField);
-    if (validFields.length === 0) return null;
-
-    const fields = Object.fromEntries(
-        validFields.map(key => {
-            const selectedFields = fieldsRaw.get(key)?.selectedFields;
-
-            return [
-                key,
-                selectedFields
-                    ? Array.from(selectedFields).filter(isValidField)
-                    : 'include',
-            ];
-        })
+    const rootSet = rootMap.get('')?.requestedFields;
+    if (!rootSet) throw new Error(
+        "Unexpected error: rootSet does not exist."
     );
 
-    const fieldsResult = selectionSchema.safeParse(fields);
-    if (!fieldsResult.success) throw new GraphQLError("Invalid selection");
-    return fieldsResult.data;
+    return Object.fromEntries(
+        Array.from(rootSet, field => {
+            const childSet = rootMap.get(field)?.requestedFields;
+
+            return [
+                field,
+                childSet
+                    ? Array.from(childSet)
+                    : 'include',
+            ]
+        })
+    );
 }
 
 const queryResolver = resolver({
     image: query(imageQuerySchema.nullable())
         .input({ id: z.int().positive() })
         .resolve(({ id }, payload) => {
-            if (!payload) return null;
-            const selection = parseFields(payload);
-            if (!selection) return {};
+            if (!payload) throw new GraphQLError(
+                "Unexpected error: payload is undefined."
+            );
 
-            return querySingle(id, selection);
+            return querySingle(id, parseSelection(payload));
         }),
 
     images: query(z.array(imageQuerySchema))
@@ -54,11 +47,11 @@ const queryResolver = resolver({
             size: z.int().positive().max(50).default(50),
         })
         .resolve(({ size, cursor }, payload) => {
-            if (!payload) return [];
-            const selection = parseFields(payload);
-            if (!selection) return [{}];
+            if (!payload) throw new GraphQLError(
+                "Unexpected error: payload is undefined."
+            );
 
-            return queryList(size, selection, cursor);
+            return queryList(size, parseSelection(payload), cursor);
         }),
 });
 

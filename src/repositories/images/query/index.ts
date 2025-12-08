@@ -1,52 +1,48 @@
-import buildFieldsAndResolver from './mapper';
+import buildJsonSelector from './selector';
 import db from '../../../db';
 
 import type {
     ImageRecord,
     Selection,
-    ImageQuery,
     ImageRecordDB,
-    ImageSelect,
 } from '../../../models/images';
 
 export const querySingle = (
     id: ImageRecord['id'],
     selection: Selection
-): ImageQuery | null => {
-    const { fields, resolver } = buildFieldsAndResolver(selection);
-    const stmt = db.prepare<ImageRecordDB['id'], ImageSelect>(/* sql */`
-        SELECT ${fields.join(', ')}
+) => {
+    const stmt = db.prepare<ImageRecordDB['id'], string>(/* sql */`
+        SELECT ${buildJsonSelector(selection)}
         FROM images
         WHERE id = ?
-    `);
-
-    const record = stmt.get(id);
-    return record ? resolver(record) : null;
+    `).pluck();
+    
+    const result = stmt.get(id);
+    return result ? JSON.parse(result) : null;
 }
 
 export const queryList = (
     size: number,
     selection: Selection,
     cursor?: ImageRecord['id'],
-): ImageQuery[] => {
-    const { fields, resolver } = buildFieldsAndResolver(selection);
+) => {
     const stmt = db.prepare<
         {
             size: number;
             cursor: ImageRecordDB['id'] | null
         },
-        ImageSelect
+        string
     >(/* sql */`
-        SELECT ${fields.join(', ')}
+        SELECT ${buildJsonSelector(selection)}
         FROM images
         WHERE (:cursor IS NULL OR id < :cursor)
         ORDER BY id DESC
         LIMIT :size
-    `);
+    `).pluck();
 
-    const records = stmt.all({
+    const results = stmt.all({
         size,
         cursor: cursor ?? null,
     });
-    return records.map(resolver);
+    return JSON.parse(`[${results.join(',')}]`);
 }

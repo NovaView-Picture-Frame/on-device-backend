@@ -16,20 +16,12 @@ type ImageRecordFieldMap = {
 
 export type Selection = ZodPartial<ImageRecordFieldMap>;
 
-export const selectionSchema: z.ZodType<Selection> = z.object({
-    id: z.literal('include'),
-    hash: z.literal('include'),
-    extractRegion: z.array(imageRecordSchema.shape.extractRegion.keyof()),
-    metadata: z.array(imageRecordSchema.shape.metadata.keyof()),
-    place: z.array(imageRecordSchema.shape.place.unwrap().keyof()),
-}).partial();
-
 interface ImageQueryRaw extends Omit<ImageRecord, 'extractRegion' | 'place'> {
     extractRegion: ZodPartial<ImageRecord['extractRegion']>;
     place: ZodPartial<ImageRecord['place']>;
 }
 
-export type ImageQuery = ZodPartial<ImageQueryRaw>;
+type ImageQuery = ZodPartial<ImageQueryRaw>;
 
 export const imageQuerySchema: z.ZodType<ImageQuery> = imageRecordSchema.extend({
     id: imageRecordSchema.shape.id.register(asField, {

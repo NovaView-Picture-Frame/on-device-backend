@@ -19,10 +19,6 @@ export interface ImageRecordDB extends ImageInsert {
 export type ExtractRegionRecordDB = Pick<ImageRecordDB, 'id' | 'extract_region_left' | 'extract_region_top' | 'extract_region_width' | 'extract_region_height'>;
 export type ExtractOffsetUpdateDB = Pick<ImageRecordDB, 'id' | 'extract_region_left' | 'extract_region_top'>;
 
-export interface ImageSelect extends Omit<ImageRecordDB, 'metadata_jsonb'> {
-    metadata_json: string
-};
-
 export const toInsert = (input: Image): ImageInsert => ({
     hash: input.hash,
     extract_region_left: input.extractRegion.left,

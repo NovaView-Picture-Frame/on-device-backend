@@ -6,8 +6,7 @@ export type {
     ExtractOffsetUpdate
 } from './base';
 
-export { selectionSchema, imageQuerySchema } from './query';
-export type { Selection, ImageQuery } from './query';
+export { imageQuerySchema, type Selection } from './query';
 
 export { toInsert, toExtractRegionRecord } from './repository';
 export type {
@@ -15,5 +14,6 @@ export type {
     ImageRecordDB,
     ExtractRegionRecordDB,
     ExtractOffsetUpdateDB,
-    ImageSelect
 } from './repository';
+
+export { ScheduleMessage, type Slot } from './carousel';

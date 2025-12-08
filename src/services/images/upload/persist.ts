@@ -1,12 +1,25 @@
 import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import fs from 'node:fs/promises';
+import { z } from 'zod';
 import type { Readable } from "node:stream";
 
 import config from '../../../config';
 import { imageRecordSchema } from '../../../models/images';
 import { upsert } from '../../../repositories/images';
 import ignoreErrorCodes from '../../../utils/ignoreErrorCodes';
+
+type PlaceSchema = ReturnType<typeof imageRecordSchema.shape.place.unwrap>;
+
+const nominatimSchema = z.object({
+    name: z.string(),
+    addresstype: z.string(),
+    display_name: z.string(),
+}).transform((raw): z.infer<PlaceSchema> => ({
+    name: raw.name,
+    type: raw.addresstype,
+    fullName: raw.display_name,
+}));
 
 export const geocoding = async (
     latitude: number,
@@ -31,19 +44,15 @@ export const geocoding = async (
     });
     if (!res.ok) return null;
 
-    const { addresstype, display_name, ...rest } = await res.json()
-    const place = imageRecordSchema.shape.place.safeParse({
-        ...rest,
-        type: addresstype,
-        fullName: display_name,
-    });
-    return place.success ? place.data : null;
+    const nominatimResult = nominatimSchema.safeParse(await res.json());
+    if (!nominatimResult.success) return null;
+    return nominatimResult.data;
 }
 
 export const saveStream = async (
     stream: Readable,
     path: string,
-    signal: AbortSignal
+    signal: AbortSignal,
 ) => {
     const sink = createWriteStream(path);
     await pipeline(stream, sink, { signal });
@@ -55,9 +64,9 @@ export const saveStream = async (
 }
 
 export const insertAndMove = async (input: {
-    originalTmp: string;
-    croppedTmp: string;
-    optimizedTmp: string;
+    originalTmp: string,
+    croppedTmp: string,
+    optimizedTmp: string,
     hash: Parameters<typeof upsert>[0]['hash'];
     extractRegion: Parameters<typeof upsert>[0]['extractRegion'];
     metadata: Parameters<typeof upsert>[0]['metadata'];
