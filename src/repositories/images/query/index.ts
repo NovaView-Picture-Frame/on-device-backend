@@ -1,5 +1,5 @@
-import buildJsonSelector from './selector';
 import db from '../../../db';
+import { buildSelector} from './selector';
 
 import type {
     ImageRecord,
@@ -12,7 +12,7 @@ export const querySingle = (
     selection: Selection
 ) => {
     const stmt = db.prepare<ImageRecordDB['id'], string>(/* sql */`
-        SELECT ${buildJsonSelector(selection)}
+        SELECT ${buildSelector(selection)}
         FROM images
         WHERE id = ?
     `).pluck();
@@ -33,7 +33,7 @@ export const queryList = (
         },
         string
     >(/* sql */`
-        SELECT ${buildJsonSelector(selection)}
+        SELECT ${buildSelector(selection)}
         FROM images
         WHERE (:cursor IS NULL OR id < :cursor)
         ORDER BY id DESC

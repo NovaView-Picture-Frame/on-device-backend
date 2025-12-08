@@ -1,6 +1,6 @@
 import type { Selection } from '../../../models/images';
 
-export default (selection: Selection) => {
+export const buildSelector = (selection: Selection) => {
     const fields = [
         ...(selection.id ? [`'id', id`] : []),
         ...(selection.hash ? [`'hash', hash`] : []),

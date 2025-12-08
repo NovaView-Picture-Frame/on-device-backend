@@ -1,7 +1,6 @@
 export interface Slot {
     id: string;
     startTime: Date;
-    duration: number;
     payload: {
         id: number;
     };

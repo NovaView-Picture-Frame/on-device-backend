@@ -1,0 +1,1 @@
+export { getSlots } from './getSlots';

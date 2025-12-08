@@ -9,11 +9,11 @@ importers:
   .:
     devDependencies:
       '@gqloom/core':
-        specifier: ^0.14.0
-        version: 0.14.0(graphql@16.12.0)
+        specifier: ^0.14.1
+        version: 0.14.1(graphql@16.12.0)
       '@gqloom/zod':
         specifier: ^0.13.0
-        version: 0.13.0(@gqloom/core@0.14.0(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)
+        version: 0.13.0(@gqloom/core@0.14.1(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)
       '@koa/bodyparser':
         specifier: ^6.0.0
         version: 6.0.0(koa@3.1.1)
@@ -248,8 +248,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@gqloom/core@0.14.0':
-    resolution: {integrity: sha512-tddZnz9HiXObaW/cNhRN0Sy6+LWdT3KFgR0R8ITBPBOBzWkURq8jSJ7pMdqORVpfkEAvV0TVXwpnIB4s8dsn4A==}
+  '@gqloom/core@0.14.1':
+    resolution: {integrity: sha512-Glin1mf/P5BTJX90indArEPAWWrBwzkUqcjZOSIECXAVHUxrCen2yUnLBYy3NRK5TncCCBux5QmR8qgL3Flwaw==}
     peerDependencies:
       graphql: '>= 16.8.0'
 
@@ -1736,13 +1736,13 @@ snapshots:
   '@esbuild/win32-x64@0.25.12':
     optional: true
 
-  '@gqloom/core@0.14.0(graphql@16.12.0)':
+  '@gqloom/core@0.14.1(graphql@16.12.0)':
     dependencies:
       graphql: 16.12.0
 
-  '@gqloom/zod@0.13.0(@gqloom/core@0.14.0(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)':
+  '@gqloom/zod@0.13.0(@gqloom/core@0.14.1(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)':
     dependencies:
-      '@gqloom/core': 0.14.0(graphql@16.12.0)
+      '@gqloom/core': 0.14.1(graphql@16.12.0)
       graphql: 16.12.0
       zod: 4.1.13
 
