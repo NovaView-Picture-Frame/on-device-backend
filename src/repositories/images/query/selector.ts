@@ -38,4 +38,4 @@ export const buildSelector = (selection: Selection) => {
     ];
 
     return `json_object(${fields.join(', ')})`;
-};
+}

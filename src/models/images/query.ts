@@ -5,7 +5,7 @@ import { GraphQLNonNull, GraphQLID } from 'graphql';
 import { imageRecordSchema, type ImageRecord } from './base';
 
 type ZodPartial<T> = Partial<{
-    [P in keyof T]: T[P] | undefined
+    [P in keyof T]: T[P] | undefined;
 }>;
 
 type Field<T> = T extends object ? (keyof T)[] : 'include';
@@ -25,6 +25,6 @@ type ImageQuery = ZodPartial<ImageQueryRaw>;
 
 export const imageQuerySchema: z.ZodType<ImageQuery> = imageRecordSchema.extend({
     id: imageRecordSchema.shape.id.register(asField, {
-        type: new GraphQLNonNull(GraphQLID)
+        type: new GraphQLNonNull(GraphQLID),
     }),
 });

@@ -2,7 +2,7 @@ import { createWriteStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import fs from 'node:fs/promises';
 import { z } from 'zod';
-import type { Readable } from "node:stream";
+import type { Readable } from 'node:stream';
 
 import config from '../../../config';
 import { imageRecordSchema } from '../../../models/images';
@@ -83,7 +83,7 @@ export const insertAndMove = async (input: {
 
         await Promise.all(ignoreErrorCodes(
             moves.map(move => fs.link(...move)),
-            'EEXIST'
+            'EEXIST',
         ));
     }
 

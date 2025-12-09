@@ -13,7 +13,7 @@ import type { ExtractRegionRecord } from '../models/images';
 
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
-    'content-length': z.coerce.number().int().positive().max(config.sizeLimit).optional(),
+    'content-length': z.coerce.number().int().positive().max(config.sizeLimitBytes).optional(),
     'content-hash': z.string().length(64).regex(/^\p{Hex_Digit}+$/v).optional(),
     'file-name': z.string().max(255).optional(),
 });
@@ -54,7 +54,7 @@ export default async (ctx: Context) => {
     const taskId = randomUUID();
     const tee = new PassThrough();
     const hashAndMetadata = uploadProcessor(taskId, tee, signal);
-    const timer = setTimeout(() => timeoutController.abort(), config.uploadTimeout);
+    const timer = setTimeout(() => timeoutController.abort(), config.uploadTimeoutMs);
 
     hashAndMetadata.then(
         ({ hash }) => {
@@ -71,7 +71,7 @@ export default async (ctx: Context) => {
         await Promise.all([
             pipeline(
                 ctx.req,
-                createMaxSizeTransform(config.sizeLimit),
+                createMaxSizeTransform(config.sizeLimitBytes),
                 tee,
                 { signal }
             ),
@@ -94,7 +94,7 @@ export default async (ctx: Context) => {
         taskController.abort();
 
         if (err instanceof MaxSizeError) throw new HttpBadRequestError(
-            `Max ${config.sizeLimit} bytes`
+            `Max ${config.sizeLimitBytes} bytes`
         );
 
         if (err instanceof InvalidBufferError) throw new HttpBadRequestError(

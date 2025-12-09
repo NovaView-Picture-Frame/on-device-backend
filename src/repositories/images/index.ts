@@ -3,7 +3,7 @@ export {
     getExtractRegionRecordByID,
     upsert,
     updateOffset,
-    deleteByID
+    deleteByID,
 } from './crud';
 
 export { querySingle, queryList } from './query';

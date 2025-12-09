@@ -6,7 +6,7 @@ const body = {
     data: {
         screen_width: config.screenWidth,
         screen_height: config.screenHeight,
-        size_limit: config.sizeLimit,
+        size_limit: config.sizeLimitBytes,
     },
 };
 

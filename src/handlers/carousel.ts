@@ -1,15 +1,34 @@
-import type { WebSocket } from 'ws';
+import type { WebSocket, RawData } from 'ws';
 
-const carouselHandler = (ws: WebSocket) => {
-    ws.send('Welcome to the carousel WebSocket!');
+import {
+    handleConnected,
+    handleClosed,
+    requestSchedule,
+} from '../services/images/carousel';
+import { ClientMessageSchema } from '../models/carousel';
 
-    ws.on('message', message =>
-        ws.send(`Server received: ${message}`)
-    );
+export default (ws: WebSocket) => {
+    handleConnected(ws);
 
-    ws.on('close', () =>
-        console.log('WebSocket connection closed')
-    );
+    ws.on('message', (raw: RawData) => {
+        try {
+            const message = ClientMessageSchema.parse(
+                JSON.parse(raw.toString())
+            );
+
+            switch (message.type) {
+                case 'requestSchedule':
+                    requestSchedule(ws);
+
+                    break;
+            }
+        } catch {
+            ws.send("Invalid message");
+        }
+    });
+
+    ws.on('close', () => {
+        handleClosed(ws);
+        console.log("WebSocket connection closed");
+    });
 };
-
-export default carouselHandler;

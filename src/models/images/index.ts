@@ -3,7 +3,7 @@ export type {
     ImageRecord,
     Image,
     ExtractRegionRecord,
-    ExtractOffsetUpdate
+    ExtractOffsetUpdate,
 } from './base';
 
 export { imageQuerySchema, type Selection } from './query';
@@ -15,5 +15,3 @@ export type {
     ExtractRegionRecordDB,
     ExtractOffsetUpdateDB,
 } from './repository';
-
-export { ScheduleMessage, type Slot } from './carousel';

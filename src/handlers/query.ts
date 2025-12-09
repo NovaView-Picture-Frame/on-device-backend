@@ -1,4 +1,9 @@
-import { getDeepResolvingFields, resolver, query, weave } from '@gqloom/core';
+import {
+    getDeepResolvingFields,
+    resolver,
+    query,
+    weave,
+} from '@gqloom/core';
 import { z } from 'zod';
 import { createHandler } from 'graphql-http/lib/use/koa';
 import { ZodWeaver } from '@gqloom/zod';
