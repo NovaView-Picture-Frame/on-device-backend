@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 
 import { deleteByID } from '../../repositories/images';
-import ignoreErrorCodes from '../../utils/ignoreErrorCodes';
-import config from '../../config';
+import { ignoreErrorCodes } from '../../utils/ignoreErrorCodes';
+import { config } from '../../config';
 
 export const deleteProcessor = async (id: Parameters<typeof deleteByID>[0]) =>
     deleteByID(id) && await Promise.all(ignoreErrorCodes(

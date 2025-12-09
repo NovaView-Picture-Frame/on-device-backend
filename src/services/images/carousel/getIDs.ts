@@ -2,7 +2,7 @@ import {
     listID,
     listIDByCreated,
     listIDByTaken,
-} from "../../../repositories/images";
+} from '../../../repositories/images';
 import type { Order } from '../../../models/carousel';
 
 export const getIDs = (order: Order) => {

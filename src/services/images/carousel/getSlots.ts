@@ -39,11 +39,11 @@ const buildSlot = (input: {
 })
 
 export const getSlots = (input: {
-    IDs: number[],
-    startTime: Date,
-    start: number,
-    length: number,
-    random?: boolean,
+    IDs: number[];
+    startTime: Date;
+    start: number;
+    length: number;
+    random?: boolean;
 }) => {
     if (input.start < 0 || input.length < 0) throw new Error(
         `Invalid arguments: 'start' and 'length' must be non-negative.`
@@ -60,7 +60,7 @@ export const getSlots = (input: {
         const rounds = Array.from({ length: roundCount }, (_, offset) =>
             getRound(
                 input.IDs,
-                startRound + offset
+                startRound + offset,
             )
         );
 

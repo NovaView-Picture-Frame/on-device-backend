@@ -40,7 +40,7 @@ const file = await fs.readFile(args[1], 'utf-8');
 const yamlConfig = configSchema.parse(yaml.parse(file));
 const paths = await initDirs(yamlConfig.data_dir, dirTree);
 
-export default {
+export const config = {
     screenWidth: yamlConfig.screen_width,
     screenHeight: yamlConfig.screen_height,
     previewMaxWidth: yamlConfig.preview_max_width,

@@ -8,14 +8,14 @@ import {
     saveStream,
     insertAndMove
 } from './persist';
-import config from '../../../config';
+import { config } from '../../../config';
 import {
     getMetadata,
     resizeToCover,
     resizeToInside,
 } from './transform';
 import { extractHashAndMetadata } from './inspect';
-import ignoreErrorCodes from '../../../utils/ignoreErrorCodes';
+import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
 
 export { InvalidBufferError } from './errors';
 
@@ -62,7 +62,7 @@ export const uploadProcessor = (
         .then(([metadata, coverOutput]) => {
             const scale = Math.max( 
                 config.screenWidth / metadata.width,
-                config.screenHeight / metadata.height
+                config.screenHeight / metadata.height,
             );
 
             return {
@@ -105,7 +105,7 @@ export const uploadProcessor = (
 
         await Promise.all(ignoreErrorCodes(
             [originalTmp, croppedTmp, optimizedTmp].map(fs.unlink),
-            'ENOENT'
+            'ENOENT',
         ));
     });
 

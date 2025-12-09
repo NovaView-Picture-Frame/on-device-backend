@@ -32,4 +32,4 @@ const getTaskEvents: TaskEventsGetter = taskId => {
     }
 }
 
-export default buildTaskEventsHandler(getTaskEvents);
+export const uploadEventsHandler = buildTaskEventsHandler(getTaskEvents);

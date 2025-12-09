@@ -4,10 +4,10 @@ import fs from 'node:fs/promises';
 import { z } from 'zod';
 import type { Readable } from 'node:stream';
 
-import config from '../../../config';
+import { config } from '../../../config';
 import { imageRecordSchema } from '../../../models/images';
 import { upsert } from '../../../repositories/images';
-import ignoreErrorCodes from '../../../utils/ignoreErrorCodes';
+import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
 
 type PlaceSchema = ReturnType<typeof imageRecordSchema.shape.place.unwrap>;
 

@@ -12,9 +12,9 @@ const suppressError = <T>(promise: Promise<T>, codes: string | string[]) => prom
         throw err;
     });
 
-export default function <T>(promises: Promise<T>[], code: string): Promise<T | void>[];
-export default function <T>(promise: Promise<T>, code: string): Promise<T | void>;
-export default function <T>(input: Promise<T> | Promise<T>[], code: string) {
+export function ignoreErrorCodes<T>(promises: Promise<T>[], code: string): Promise<T | void>[];
+export function ignoreErrorCodes<T>(promise: Promise<T>, code: string): Promise<T | void>;
+export function ignoreErrorCodes<T>(input: Promise<T> | Promise<T>[], code: string) {
     return Array.isArray(input)
         ? input.map(p => suppressError(p, code))
         : suppressError(input, code);

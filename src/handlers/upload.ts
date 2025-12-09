@@ -4,7 +4,7 @@ import { pipeline } from 'node:stream/promises';
 import { z } from 'zod';
 import type { Context } from 'koa';
 
-import config from '../config';
+import { config } from '../config';
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { getExtractRegionRecordByHash } from '../repositories/images';
 import { uploadProcessor, InvalidBufferError } from '../services/images';
@@ -26,7 +26,7 @@ const respondExisting = (ctx: Context, record: ExtractRegionRecord) =>
         },
     };
 
-export default async (ctx: Context) => {
+export const uploadHandler = async (ctx: Context) => {
     const headerResult = headerSchema.safeParse(ctx.request.headers);
     if (!headerResult.success) throw new HttpBadRequestError(
         "Invalid headers"

@@ -92,7 +92,7 @@ export const extractHashAndMetadata = async (
     const metadata = {
         ...pickByKeys(
             exifToolMetadata,
-            imageRecordSchema.shape.metadata.keyof().options
+            imageRecordSchema.shape.metadata.keyof().options,
         ),
 
         FileSize: size,

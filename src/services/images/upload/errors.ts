@@ -1,1 +1,1 @@
-export class InvalidBufferError extends Error { }
+export class InvalidBufferError extends Error {}

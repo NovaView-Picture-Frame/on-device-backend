@@ -1,4 +1,4 @@
-import config from '../../../config';
+import { config } from '../../../config';
 import { getIDs } from './getIDs';
 import { getSlots } from './getSlots';
 
