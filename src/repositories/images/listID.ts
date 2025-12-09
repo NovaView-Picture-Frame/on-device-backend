@@ -1,12 +1,12 @@
 import { db } from '../../db';
 import type { ImageRecordDB } from '../../models/images';
 
-const listIDStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
+const listIDUnorderedStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
     SELECT id
     FROM images
 `).pluck();
 
-export const listID = () => listIDStmt.all();
+export const listIDUnordered = () => listIDUnorderedStmt.all();
 
 const listIDByCreatedAscStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
     SELECT id

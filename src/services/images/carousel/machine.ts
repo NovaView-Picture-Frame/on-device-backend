@@ -10,7 +10,7 @@ export type State =
         startTime: Date;
     };
 
-export const createInitialState = (): State => ({ phase: 'idle' });
+export const initialState: State = { phase: 'idle' };
 
 type Event =
     | {

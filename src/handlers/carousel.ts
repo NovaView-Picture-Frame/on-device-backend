@@ -23,7 +23,10 @@ export const carouselHandler = (ws: WebSocket) => {
                     break;
             }
         } catch {
-            ws.send("Invalid message");
+            ws.send(JSON.stringify({
+                type: 'error',
+                message: "Invalid message",
+            }));
         }
     });
 

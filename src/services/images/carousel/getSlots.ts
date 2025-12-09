@@ -1,8 +1,8 @@
 import { randomBytes, createHash } from 'crypto';
 
+import { config } from '../../../config';
 import type { Slot } from '../../../models/carousel';
 
-const SLOT_DURATION_MS = 5000;
 const seed = randomBytes(32);
 
 const getRound = (IDs: number[], index: number) => {
@@ -31,7 +31,7 @@ const buildSlot = (input: {
 }): Slot => ({
     id: `slot-${input.index}`,
     startTime: new Date(
-        input.startTime.getTime() + input.index * SLOT_DURATION_MS
+        input.startTime.getTime() + input.index * config.carouselDefaultIntervalMs
     ),
     payload: {
         id: input.id,
@@ -55,7 +55,8 @@ export const getSlots = (input: {
     if (input?.random) {
         const startRound = ~~(input.start / length);
         const startIndex = input.start % length;
-        const roundCount = Math.ceil((startIndex + input.length) / length);
+        const endIndex = startIndex + input.length;
+        const roundCount = Math.ceil(endIndex / length);
 
         const rounds = Array.from({ length: roundCount }, (_, offset) =>
             getRound(
@@ -66,7 +67,7 @@ export const getSlots = (input: {
 
         return rounds
             .flat()
-            .slice(startIndex)
+            .slice(startIndex, endIndex)
             .map((id, offset) => buildSlot({
                 index: input.start + offset,
                 startTime: input.startTime,

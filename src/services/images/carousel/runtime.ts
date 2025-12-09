@@ -1,14 +1,14 @@
 import type { WebSocket } from 'ws';
 
 import {
-    createInitialState,
+    initialState,
     reduceCarousel,
     type Action,
 } from './machine';
 import { buildScheduleMessage } from './buildSchedule';
 import type { Order } from '../../../models/carousel';
 
-let state = createInitialState();
+let state = initialState;
 const clients = new Set<WebSocket>();
 
 const runAction = (action?: Action) => {
@@ -50,8 +50,12 @@ export const handleConnected = (ws: WebSocket) => {
     runAction(action);
 };
 
-export const handleClosed = (ws: WebSocket) =>
+export const handleClosed = (ws: WebSocket) => {
     clients.delete(ws);
+    if (clients.size === 0) {
+        state = initialState;
+    }
+}
 
 export const requestSchedule = (ws: WebSocket) => {
     const { nextState, action } = reduceCarousel(state, {

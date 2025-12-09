@@ -1,5 +1,5 @@
 import {
-    listID,
+    listIDUnordered,
     listIDByCreated,
     listIDByTaken,
 } from '../../../repositories/images';
@@ -8,7 +8,7 @@ import type { Order } from '../../../models/carousel';
 export const getIDs = (order: Order) => {
     switch (order) {
         case 'random':
-        return listID();
+        return listIDUnordered();
 
         case 'createdAsc':
         return listIDByCreated(true);

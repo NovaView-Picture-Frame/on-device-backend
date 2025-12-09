@@ -9,7 +9,7 @@ export {
 export { querySingle, queryList } from './query';
 
 export {
-    listID,
+    listIDUnordered,
     listIDByCreated,
     listIDByTaken,
 } from './listID';
