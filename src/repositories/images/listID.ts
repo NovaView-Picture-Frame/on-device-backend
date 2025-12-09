@@ -1,4 +1,4 @@
-import db from '../../db';
+import { db } from '../../db';
 import type { ImageRecordDB } from '../../models/images';
 
 const listIDStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`

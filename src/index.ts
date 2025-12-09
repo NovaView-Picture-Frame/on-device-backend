@@ -5,16 +5,17 @@ import { WebSocketServer } from 'ws';
 import { exiftool } from 'exiftool-vendored';
 
 import { errorHandler } from './middleware/errorHandler';
-import config from './config';
+import { config } from './config';
 
-import infoHandler from './handlers/info';
-import uploadHandler from './handlers/upload';
-import uploadEventsHandler from './handlers/uploadEvents';
-import queryHandler from './handlers/query';
-import previewHandler from './handlers/preview';
-import cropHandler from './handlers/crop';
-import cropEventsHandler from './handlers/cropEvents';
-import carouselHandler from './handlers/carousel';
+import { infoHandler } from './handlers/info';
+import { uploadHandler } from './handlers/upload';
+import { uploadEventsHandler } from './handlers/uploadEvents';
+import { queryHandler } from './handlers/query';
+import { previewHandler } from './handlers/preview';
+import { deleteHandler } from './handlers/delete';
+import { cropHandler } from './handlers/crop';
+import { cropEventsHandler } from './handlers/cropEvents';
+import { carouselHandler } from './handlers/carousel';
 
 const app = new koa();
 app.use(errorHandler);
@@ -25,6 +26,7 @@ const router = new Router()
     .get('/upload/:taskId/events', uploadEventsHandler)
     .post('/query', queryHandler)
     .get('/preview/:id', previewHandler)
+    .delete('/delete/:id', deleteHandler)
     .get('/crop/:taskId/events', cropEventsHandler);
 
 const bodyRouter = new Router()

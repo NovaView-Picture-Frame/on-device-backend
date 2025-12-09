@@ -1,4 +1,4 @@
-import db from '../../db';
+import { db } from '../../db';
 import { toExtractRegionRecord, toInsert } from '../../models/images';
 import { DatabaseError } from './errors';
 import type {

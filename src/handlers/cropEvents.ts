@@ -20,4 +20,4 @@ const getTaskEvents: TaskEventsGetter = taskId => {
     }
 }
 
-export default buildTaskEventsHandler(getTaskEvents);
+export const cropEventsHandler = buildTaskEventsHandler(getTaskEvents);

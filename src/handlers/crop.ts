@@ -26,7 +26,7 @@ const toOffset = (size: number, ratio: number, limit: number): number => {
     return offset;
 }
 
-export default (ctx: RouterContext) => {
+export const cropHandler = (ctx: RouterContext) => {
     const paramsResult = paramsSchema.safeParse(ctx.params);
     if (!paramsResult.success) throw new HttpBadRequestError("Invalid URL parameters");
 

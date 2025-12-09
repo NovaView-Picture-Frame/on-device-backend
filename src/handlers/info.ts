@@ -10,4 +10,5 @@ const body = {
     },
 };
 
-export default (ctx: Context) => ctx.body = body;
+export const infoHandler = (ctx: Context) =>
+    ctx.body = body;

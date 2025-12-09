@@ -60,6 +60,6 @@ const queryResolver = resolver({
         }),
 });
 
-export default createHandler({
+export const queryHandler = createHandler({
     schema: weave(ZodWeaver, queryResolver)
 });

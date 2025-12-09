@@ -7,7 +7,7 @@ import {
 } from '../services/images/carousel';
 import { ClientMessageSchema } from '../models/carousel';
 
-export default (ws: WebSocket) => {
+export const carouselHandler = (ws: WebSocket) => {
     handleConnected(ws);
 
     ws.on('message', (raw: RawData) => {

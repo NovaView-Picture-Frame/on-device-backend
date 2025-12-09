@@ -2,7 +2,7 @@ import Database from 'better-sqlite3';
 
 import { config } from './config';
 
-const db = new Database(
+export const db = new Database(
     `${config.paths._base}/${config.database}`, {
         nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`,
     },
@@ -55,5 +55,3 @@ db.exec(/* sql */`
 `);
 
 db.pragma('journal_mode = WAL');
-
-export default db;

@@ -8,7 +8,7 @@ const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),
 });
 
-export default async (ctx: RouterContext) => {
+export const deleteHandler = async (ctx: RouterContext) => {
     const paramsResult = paramsSchema.safeParse(ctx.params);
     if (!paramsResult.success) throw new HttpBadRequestError("Invalid URL parameters");
 
