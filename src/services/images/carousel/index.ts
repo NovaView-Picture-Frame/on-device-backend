@@ -1,1 +1,6 @@
-export { getSlots } from './getSlots';
+export {
+    handleClosed,
+    handleConnected,
+    requestSchedule,
+    onImagesChanged,
+} from './runtime';

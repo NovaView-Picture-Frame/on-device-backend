@@ -32,7 +32,7 @@ export const buildTaskEventsHandler = (getTaskEvents: TaskEventsGetter) =>
 
         const keepAlive = setInterval(
             () => sse.write(':\n\n'),
-            config.sseKeepaliveInterval
+            config.sseKeepaliveIntervalMs
         );
 
         const finish = () => {

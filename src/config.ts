@@ -17,13 +17,16 @@ const configSchema = z.object({
 
     data_dir: z.string().nonempty(),
     database: z.string().nonempty(),
-    size_limit: z.int().positive(),
+    size_limit_bytes: z.int().positive(),
 
     port: z.int().min(1024).max(65535),
-    upload_timeout: z.int().positive(),
-    sse_keepalive_interval: z.int().positive(),
-    tasks_results_ttl: z.int().positive(),
+    upload_timeout_ms: z.int().positive(),
+    sse_keepalive_interval_ms: z.int().positive(),
+    tasks_results_ttl_ms: z.int().positive(),
     nominatim_user_agent: z.string().nonempty(),
+
+    carousel_default_interval_ms: z.int().positive(),
+    carousel_window_size: z.int().positive(),
 }).strict();
 
 const dirTree = {
@@ -45,11 +48,14 @@ export default {
 
     paths,
     database: yamlConfig.database,
-    sizeLimit: yamlConfig.size_limit,
+    sizeLimitBytes: yamlConfig.size_limit_bytes,
 
     port: yamlConfig.port,
-    uploadTimeout: yamlConfig.upload_timeout,
-    sseKeepaliveInterval: yamlConfig.sse_keepalive_interval,
-    tasksResultsTTL: yamlConfig.tasks_results_ttl,
+    uploadTimeoutMs: yamlConfig.upload_timeout_ms,
+    sseKeepaliveIntervalMs: yamlConfig.sse_keepalive_interval_ms,
+    tasksResultsTTLMs: yamlConfig.tasks_results_ttl_ms,
     nominatimUserAgent: yamlConfig.nominatim_user_agent,
+
+    carouselDefaultIntervalMs: yamlConfig.carousel_default_interval_ms,
+    carouselWindowSize: yamlConfig.carousel_window_size,
 }

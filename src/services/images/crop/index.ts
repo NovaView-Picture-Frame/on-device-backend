@@ -60,7 +60,7 @@ export const cropProcessor = (
     Promise.allSettled([persist]).finally(async () => {
         const entry = tasksMap.get(taskId);
         if (entry) entry.key = null;
-        setTimeout(() => tasksMap.delete(taskId), config.tasksResultsTTL);
+        setTimeout(() => tasksMap.delete(taskId), config.tasksResultsTTLMs);
 
         await Promise.all([
             ignoreErrorCodes(fs.unlink(croppedTmp),

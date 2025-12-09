@@ -1,4 +1,9 @@
-import { exiftool, ExifDate, ExifTime, ExifDateTime } from 'exiftool-vendored';
+import {
+    exiftool,
+    ExifDate,
+    ExifTime,
+    ExifDateTime,
+} from 'exiftool-vendored';
 import type { Metadata } from 'sharp';
 
 import { InvalidBufferError } from './errors';

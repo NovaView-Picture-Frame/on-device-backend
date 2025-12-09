@@ -1,14 +1,14 @@
-import { createHash } from "crypto";
+import { randomBytes, createHash } from 'crypto';
 
-import type { Slot } from "../../../models/images";
+import type { Slot } from '../../../models/carousel';
 
 const SLOT_DURATION_MS = 5000;
-const seed = new Date();
+const seed = randomBytes(32);
 
 const getRound = (IDs: number[], index: number) => {
     const getKey = (id: typeof IDs[number]) =>
         createHash('sha256')
-            .update(String(seed))
+            .update(seed)
             .update(':')
             .update(String(index))
             .update(':')

@@ -3,9 +3,17 @@ import { PassThrough, type Readable } from 'node:stream';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
 
-import { geocoding, saveStream, insertAndMove } from './persist';
+import {
+    geocoding,
+    saveStream,
+    insertAndMove
+} from './persist';
 import config from '../../../config';
-import { getMetadata, resizeToCover, resizeToInside } from './transform';
+import {
+    getMetadata,
+    resizeToCover,
+    resizeToInside,
+} from './transform';
 import { extractHashAndMetadata } from './inspect';
 import ignoreErrorCodes from '../../../utils/ignoreErrorCodes';
 
@@ -93,7 +101,7 @@ export const uploadProcessor = (
     tasksMap.set(id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
-        setTimeout(() => tasksMap.delete(id), config.tasksResultsTTL);
+        setTimeout(() => tasksMap.delete(id), config.tasksResultsTTLMs);
 
         await Promise.all(ignoreErrorCodes(
             [originalTmp, croppedTmp, optimizedTmp].map(fs.unlink),
