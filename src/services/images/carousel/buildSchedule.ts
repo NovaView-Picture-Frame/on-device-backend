@@ -7,10 +7,7 @@ import type { State } from './machine';
 
 type RunningState = Extract<State, { phase: 'running' }>;
 
-const getStartIndex = (
-    now: Date,
-    startTime: Date,
-) => {
+const getStartIndex = (now: Date, startTime: Date) => {
     const elapsed = now.getTime() - startTime.getTime();
     if (elapsed < 0) throw new Error(
         "Invalid time: now is before startTime."

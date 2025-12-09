@@ -58,4 +58,4 @@ export const config = {
 
     carouselDefaultIntervalMs: yamlConfig.carousel_default_interval_ms,
     carouselWindowSize: yamlConfig.carousel_window_size,
-}
+};

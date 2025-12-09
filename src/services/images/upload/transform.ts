@@ -5,66 +5,73 @@ import { config } from '../../../config';
 
 class StreamAbortedError extends Error {}
 
-const abortableSharp = async <T>(
-    sharpInstance: Sharp,
-    signal: AbortSignal,
-    run: (sharp: Sharp) => Promise<T>
-) => {
-    signal.throwIfAborted();
+const abortableSharp = async <T>(input: {
+    sharpInstance: Sharp;
+    signal: AbortSignal;
+    run: (sharp: Sharp) => Promise<T>;
+}) => {
+    input.signal.throwIfAborted();
 
     const { promise, resolve, reject } = Promise.withResolvers<T>();
     const onAbort = () => {
         reject(new StreamAbortedError());
-        sharpInstance.destroy();
+        input.sharpInstance.destroy();
     }
 
-    signal.addEventListener('abort', onAbort, { once: true });
-    run(sharpInstance).then(resolve, reject);
+    input.signal.addEventListener(
+        'abort',
+        onAbort,
+        { once: true }
+    );
+    input.run(input.sharpInstance).then(resolve, reject);
 
     return await promise
         .catch(err => {
             if (err instanceof StreamAbortedError) throw err;
             throw new InvalidBufferError();
         })
-        .finally(() => signal.removeEventListener('abort', onAbort));
+        .finally(() => input.signal.removeEventListener('abort', onAbort));
 }
 
-export const getMetadata = async (sharpInstance: Sharp, signal: AbortSignal) => abortableSharp(
-    sharpInstance,
-    signal,
-    sharp => sharp.metadata(),
-);
-
-export const resizeToCover = async (
+export const getMetadata = async (
     sharpInstance: Sharp,
-    path: string,
     signal: AbortSignal,
-) => abortableSharp(
+) => abortableSharp({
     sharpInstance,
     signal,
-    sharp => sharp
+    run: sharp => sharp.metadata(),
+});
+
+export const resizeToCover = async (input: {
+    sharpInstance: Sharp;
+    path: string;
+    signal: AbortSignal;
+}) => abortableSharp({
+    sharpInstance: input.sharpInstance,
+    signal: input.signal,
+    run: sharp => sharp
         .resize(config.screenWidth, config.screenHeight, {
             fit: 'cover',
             position: 'entropy',
         })
         .keepIccProfile()
         .png()
-        .toFile(path)
-);
+        .toFile(input.path),
+});
 
-export const resizeToInside = async (
+export const resizeToInside = async (input: {
     sharpInstance: Sharp,
     path: string,
     signal: AbortSignal,
-) => abortableSharp(
-    sharpInstance,
-    signal,
-    sharp => sharp
+}) => abortableSharp({
+    sharpInstance: input.sharpInstance,
+    signal: input.signal,
+    run: sharp => sharp
         .resize(config.previewMaxWidth, config.previewMaxHeight, {
             fit: 'inside',
             withoutEnlargement: true,
         })
         .keepIccProfile()
         .avif()
-        .toFile(path)
-);
+        .toFile(input.path),
+});

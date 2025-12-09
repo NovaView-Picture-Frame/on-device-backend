@@ -1,7 +1,7 @@
 import {
     cropTasksMap,
     buildTaskEventsHandler,
-    type TaskEventsGetter
+    type TaskEventsGetter,
 } from '../services/images';
 
 const getTaskEvents: TaskEventsGetter = taskId => {

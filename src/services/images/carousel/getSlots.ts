@@ -3,19 +3,21 @@ import { randomBytes, createHash } from 'crypto';
 import { config } from '../../../config';
 import type { Slot } from '../../../models/carousel';
 
-const seed = randomBytes(32);
-
-const getRound = (IDs: number[], index: number) => {
-    const getKey = (id: typeof IDs[number]) =>
+const getRound = (input: {
+    IDs: number[];
+    index: number;
+    seed: Buffer;
+}) => {
+    const getKey = (id: typeof input.IDs[number]) =>
         createHash('sha256')
-            .update(seed)
+            .update(input.seed)
             .update(':')
-            .update(String(index))
+            .update(String(input.index))
             .update(':')
             .update(String(id))
             .digest();
 
-    return IDs
+    return input.IDs
         .map(id => ({
             id,
             key: getKey(id),
@@ -59,10 +61,11 @@ export const getSlots = (input: {
         const roundCount = Math.ceil(endIndex / length);
 
         const rounds = Array.from({ length: roundCount }, (_, offset) =>
-            getRound(
-                input.IDs,
-                startRound + offset,
-            )
+            getRound({
+                IDs: input.IDs,
+                index: startRound + offset,
+                seed: randomBytes(32),
+            })
         );
 
         return rounds

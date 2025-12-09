@@ -53,7 +53,11 @@ export const uploadHandler = async (ctx: Context) => {
 
     const taskId = randomUUID();
     const tee = new PassThrough();
-    const hashAndMetadata = uploadProcessor(taskId, tee, signal);
+    const hashAndMetadata = uploadProcessor({
+        id: taskId,
+        stream: tee,
+        signal,
+    });
     const timer = setTimeout(() => timeoutController.abort(), config.uploadTimeoutMs);
 
     hashAndMetadata.then(

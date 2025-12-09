@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import {
     geocoding,
     saveStream,
-    insertAndMove
+    insertAndMove,
 } from './persist';
 import { config } from '../../../config';
 import {
@@ -15,6 +15,7 @@ import {
     resizeToInside,
 } from './transform';
 import { extractHashAndMetadata } from './inspect';
+import { onImagesChanged } from '../carousel';
 import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
 
 export { InvalidBufferError } from './errors';
@@ -29,51 +30,73 @@ export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     readonly persist: ReturnType<typeof insertAndMove>;
 }>();
 
-export const uploadProcessor = (
-    id: ReturnType<typeof randomUUID>,
-    stream: Readable,
-    signal: AbortSignal,
-) => {
-	const originalTmp = `${config.paths.originals._tmp}/${id}`;
-	const croppedTmp = `${config.paths.cropped._tmp}/${id}`;
-	const optimizedTmp = `${config.paths.optimized._tmp}/${id}`;
+export const uploadProcessor = (input: {
+    id: ReturnType<typeof randomUUID>;
+    stream: Readable;
+    signal: AbortSignal;
+}) => {
+	const originalTmp = `${config.paths.originals._tmp}/${input.id}`;
+	const croppedTmp = `${config.paths.cropped._tmp}/${input.id}`;
+	const optimizedTmp = `${config.paths.optimized._tmp}/${input.id}`;
 
     const teeForSharp = new PassThrough();
     const teeForFS = new PassThrough();
-    stream.pipe(teeForSharp);
-    stream.pipe(teeForFS);
+    input.stream.pipe(teeForSharp);
+    input.stream.pipe(teeForFS);
 
     const transform = sharp();
     teeForSharp.pipe(transform);
 
-    const sharpMetadata = getMetadata(transform.clone(), signal);
-    const saveOriginal = saveStream(teeForFS, originalTmp, signal);
+    const sharpMetadata = getMetadata(transform.clone(), input.signal);
+    const saveOriginal = saveStream({
+        stream: teeForFS,
+        path: originalTmp,
+        signal: input.signal,
+    });
     const hashAndMetadata = Promise.all([sharpMetadata, saveOriginal])
-        .then(([meta, { path, size }]) => extractHashAndMetadata(path, size, meta));
+        .then(([meta, { path, size }]) => extractHashAndMetadata({
+            path,
+            size,
+            meta,
+        }));
 
     const lookupPlace = hashAndMetadata.then(
         ({ metadata: { GPSLatitude, GPSLongitude } }) => {
             if (GPSLatitude === undefined || GPSLongitude === undefined) return null;
-            return geocoding(GPSLatitude, GPSLongitude, signal); 
+            return geocoding({
+                lat: GPSLatitude,
+                long: GPSLongitude,
+                signal: input.signal,
+            }); 
         }
     );
 
-    const crop = Promise.all([sharpMetadata, resizeToCover(transform.clone(), croppedTmp, signal)])
-        .then(([metadata, coverOutput]) => {
-            const scale = Math.max( 
-                config.screenWidth / metadata.width,
-                config.screenHeight / metadata.height,
-            );
+    const crop = Promise.all([
+        sharpMetadata,
+        resizeToCover({
+            sharpInstance: transform.clone(),
+            path: croppedTmp,
+            signal: input.signal,
+        })
+    ]).then(([metadata, coverOutput]) => {
+        const scale = Math.max( 
+            config.screenWidth / metadata.width,
+            config.screenHeight / metadata.height,
+        );
 
-            return {
-                left: Math.abs(coverOutput.cropOffsetLeft ?? 0),
-                top: Math.abs(coverOutput.cropOffsetTop ?? 0),
-                width: Math.round(metadata.width * scale),
-                height: Math.round(metadata.height * scale),
-            }
-        });
+        return {
+            left: Math.abs(coverOutput.cropOffsetLeft ?? 0),
+            top: Math.abs(coverOutput.cropOffsetTop ?? 0),
+            width: Math.round(metadata.width * scale),
+            height: Math.round(metadata.height * scale),
+        }
+    });
 
-    const optimize = resizeToInside(transform.clone(), optimizedTmp, signal);
+    const optimize = resizeToInside({
+        sharpInstance: transform.clone(),
+        path: optimizedTmp,
+        signal: input.signal,
+    });
 
     const persist = Promise.all([
         hashAndMetadata,
@@ -81,15 +104,20 @@ export const uploadProcessor = (
         crop,
         optimize,
         saveOriginal,
-    ]).then(([{ hash, metadata }, place, extractRegion]) => insertAndMove({
-        originalTmp,
-        croppedTmp,
-        optimizedTmp,
-        hash,
-        metadata,
-        place,
-        extractRegion,
-    }));
+    ]).then(async ([{ hash, metadata }, place, extractRegion]) => {
+        const id = insertAndMove({
+            originalTmp,
+            croppedTmp,
+            optimizedTmp,
+            hash,
+            metadata,
+            place,
+            extractRegion,
+        });
+        onImagesChanged();
+
+        return id;
+    });
 
     const tasks = {
         lookupPlace,
@@ -98,10 +126,10 @@ export const uploadProcessor = (
         optimize,
         persist,
     };
-    tasksMap.set(id, tasks);
+    tasksMap.set(input.id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
-        setTimeout(() => tasksMap.delete(id), config.tasksResultsTTLMs);
+        setTimeout(() => tasksMap.delete(input.id), config.tasksResultsTTLMs);
 
         await Promise.all(ignoreErrorCodes(
             [originalTmp, croppedTmp, optimizedTmp].map(fs.unlink),

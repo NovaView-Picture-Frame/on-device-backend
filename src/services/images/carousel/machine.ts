@@ -108,7 +108,7 @@ export const reduceCarousel = (
 
         case 'IMAGES_CHANGED': {
             if (state.phase === 'idle') return {
-                nextState: state
+                nextState: state,
             };
 
             return {

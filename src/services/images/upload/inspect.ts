@@ -38,11 +38,11 @@ const pickByKeys = <
     return result;
 }
 
-export const extractHashAndMetadata = async (
-    path: string,
-    size: number,
-    meta: Metadata,
-): Promise<{
+export const extractHashAndMetadata = async (input: {
+    path: string;
+    size: number;
+    meta: Metadata;
+}): Promise<{
     hash: Image['hash'];
     metadata: Image['metadata'];
 }> => {
@@ -59,7 +59,7 @@ export const extractHashAndMetadata = async (
         GPSTimeStamp,
 
         ...rest
-    } = await exiftool.read(path, { imageHashType: 'SHA256' });
+    } = await exiftool.read(input.path, { imageHashType: 'SHA256' });
     if (ImageDataHash === undefined) throw new InvalidBufferError();
 
     const exifToolMetadata = {
@@ -95,10 +95,10 @@ export const extractHashAndMetadata = async (
             imageRecordSchema.shape.metadata.keyof().options,
         ),
 
-        FileSize: size,
-        FileFormat: meta.format,
-        ImageWidth: meta.width,
-        ImageHeight: meta.height,
+        FileSize: input.size,
+        FileFormat: input.meta.format,
+        ImageWidth: input.meta.width,
+        ImageHeight: input.meta.height,
     };
 
     return {

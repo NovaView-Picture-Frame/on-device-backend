@@ -21,15 +21,15 @@ const nominatimSchema = z.object({
     fullName: raw.display_name,
 }));
 
-export const geocoding = async (
-    latitude: number,
-    longitude: number,
-    signal: AbortSignal,
-) => {
+export const geocoding = async (input: {
+    lat: number;
+    long: number;
+    signal: AbortSignal;
+}) => {
     const baseUrl = 'https://nominatim.openstreetmap.org/reverse';
     const params = new URLSearchParams({
-        lat: latitude.toString(),
-        lon: longitude.toString(),
+        lat: input.lat.toString(),
+        lon: input.long.toString(),
         zoom: '10',
         addressdetails: '0',
         format: 'jsonv2',
@@ -40,7 +40,7 @@ export const geocoding = async (
             'User-Agent': config.nominatimUserAgent,
             'Accept-Language': 'en',
         },
-        signal,
+        signal: input.signal,
     });
     if (!res.ok) return null;
 
@@ -49,16 +49,21 @@ export const geocoding = async (
     return nominatimResult.data;
 }
 
-export const saveStream = async (
+export const saveStream = async (input: {
     stream: Readable,
     path: string,
     signal: AbortSignal,
-) => {
-    const sink = createWriteStream(path);
-    await pipeline(stream, sink, { signal });
+}) => {
+    const sink = createWriteStream(input.path);
+    await pipeline(
+        input.stream,
+        sink,
+        {
+            signal: input.signal,
+        });
 
     return {
-        path,
+        path: input.path,
         size: sink.bytesWritten,
     }
 }

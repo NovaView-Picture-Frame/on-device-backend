@@ -14,22 +14,22 @@ export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
     key: ReturnType<typeof getTaskKey> | null;
     readonly tasks: {
         readonly crop: Promise<
-            Parameters<typeof updateAndMove>[0]['extractRegion']
+            Parameters<typeof updateAndMove>[0]['record']['extractRegion']
         >;
         readonly persist: ReturnType<typeof updateAndMove>;
     }
 }>();
 
-export const cropProcessor = (
+export const cropProcessor = (input: {
     current: ExtractRegionRecord,
     left: ExtractRegionRecord['extractRegion']['left'],
     top: ExtractRegionRecord['extractRegion']['top'],
-) => {
+}) => {
     const next = {
-        id: current.id,
+        id: input.current.id,
         extractRegion: {
-            left,
-            top,
+            left: input.left,
+            top: input.top,
         },
     };
 
@@ -40,17 +40,17 @@ export const cropProcessor = (
     const taskId = randomUUID();
     const croppedTmp = `${config.paths.cropped._tmp}/${next.id}_${taskId}`;
 
-    const crop = resizeAndExtract(
-        next,
-        `${config.paths.originals._base}/${next.id}`,
-        croppedTmp
-    ).then(() => next.extractRegion);
+    const crop = resizeAndExtract({
+        record: next,
+        src: `${config.paths.originals._base}/${next.id}`,
+        dest: croppedTmp,
+    }).then(() => next.extractRegion);
 
-    const persist = crop.then(() => updateAndMove(
-        next,
+    const persist = crop.then(() => updateAndMove({
+        record: next,
         croppedTmp,
-        `${config.paths.cropped._base}/${next.id}`
-    ))
+        cropped: `${config.paths.cropped._base}/${next.id}`,
+    }));
 
     tasksMap.set(taskId, {
         key: taskKey,
@@ -63,8 +63,7 @@ export const cropProcessor = (
         setTimeout(() => tasksMap.delete(taskId), config.tasksResultsTTLMs);
 
         await Promise.all([
-            ignoreErrorCodes(fs.unlink(croppedTmp),
-            'ENOENT')
+            ignoreErrorCodes(fs.unlink(croppedTmp), 'ENOENT'),
         ]);
     });
 

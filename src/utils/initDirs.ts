@@ -1,10 +1,17 @@
 import fs from 'node:fs/promises';
 
-export type DirTree = { _withTmp?: boolean; _base?: never; _tmp?: never } & (
+export type DirTree = {
+    _withTmp?: boolean;
+    _base?: never;
+    _tmp?: never;
+} & (
     { [k: string]: DirTree } | {}
 );
 
-function* walkTree(tree: DirTree, path = ''): Generator<[string, DirTree]> {
+function* walkTree(
+    tree: DirTree,
+    path = '',
+): Generator<[string, DirTree]> {
     yield [path, tree];
     for (const [k, v] of Object.entries(tree))
         if (typeof v === 'object')

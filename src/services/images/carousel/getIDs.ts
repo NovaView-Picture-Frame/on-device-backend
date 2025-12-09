@@ -22,4 +22,4 @@ export const getIDs = (order: Order) => {
         case 'takenDesc':
         return listIDByTaken();
     }
-};
+}

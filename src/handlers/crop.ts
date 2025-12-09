@@ -20,9 +20,16 @@ const bodySchema = z.object({
         (extract_left_ratio === 0 || extract_top_ratio === 0),
 );
 
-const toOffset = (size: number, ratio: number, limit: number): number => {
-    const offset = ~~(size * ratio);
-    if (offset + limit > size) throw new HttpBadRequestError("Offset out of bounds");
+const toOffset = (input: {
+    size: number;
+    ratio: number;
+    limit: number;
+}): number => {
+    const offset = ~~(input.size * input.ratio);
+    if (offset + input.limit > input.size) throw new HttpBadRequestError(
+        "Offset out of bounds"
+    );
+
     return offset;
 }
 
@@ -36,17 +43,17 @@ export const cropHandler = (ctx: RouterContext) => {
     const extractRegionRecord = getExtractRegionRecordByID(paramsResult.data.id);
     if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
-    const left = toOffset(
-        extractRegionRecord.extractRegion.width,
-        bodyResult.data.extract_left_ratio,
-        config.screenWidth
-    );
+    const left = toOffset({
+        size: extractRegionRecord.extractRegion.width,
+        ratio: bodyResult.data.extract_left_ratio,
+        limit: config.screenWidth,
+    });
 
-    const top = toOffset(
-        extractRegionRecord.extractRegion.height,
-        bodyResult.data.extract_top_ratio,
-        config.screenHeight
-    );
+    const top = toOffset({
+        size: extractRegionRecord.extractRegion.height,
+        ratio: bodyResult.data.extract_top_ratio,
+        limit: config.screenHeight,
+    });
 
     if (
         left === extractRegionRecord.extractRegion.left &&
@@ -64,7 +71,11 @@ export const cropHandler = (ctx: RouterContext) => {
     ctx.body = {
         data: {
             type: "processing",
-            taskId: cropProcessor(extractRegionRecord, left, top),
+            taskId: cropProcessor({
+                current: extractRegionRecord,
+                left,
+                top,
+            }),
         },
     };
 }

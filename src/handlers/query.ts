@@ -56,7 +56,11 @@ const queryResolver = resolver({
                 "Unexpected error: payload is undefined."
             );
 
-            return queryList(size, parseSelection(payload), cursor);
+            return queryList({
+                size,
+                selection: parseSelection(payload),
+                cursor: cursor ?? null,
+            });
         }),
 });
 

@@ -9,7 +9,7 @@ import type {
     ImageInsert,
     ImageRecordDB,
     ExtractRegionRecordDB,
-    ExtractOffsetUpdateDB
+    ExtractOffsetUpdateDB,
 } from '../../models/images';
 
 const getByHashStmt = db.prepare<ImageRecordDB['hash'], ExtractRegionRecordDB>(/* sql */`

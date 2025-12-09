@@ -7,33 +7,30 @@ import type {
     ImageRecordDB,
 } from '../../../models/images';
 
-export const querySingle = (
-    id: ImageRecord['id'],
-    selection: Selection
-) => {
+export const querySingle = (id: ImageRecord['id'], selection: Selection) => {
     const stmt = db.prepare<ImageRecordDB['id'], string>(/* sql */`
         SELECT ${buildSelector(selection)}
         FROM images
         WHERE id = ?
     `).pluck();
-    
+
     const result = stmt.get(id);
     return result ? JSON.parse(result) : null;
 }
 
-export const queryList = (
-    size: number,
-    selection: Selection,
-    cursor?: ImageRecord['id'],
-) => {
+export const queryList = (input: {
+    size: number;
+    selection: Selection;
+    cursor: ImageRecord['id'] | null;
+}) => {
     const stmt = db.prepare<
         {
             size: number;
-            cursor: ImageRecordDB['id'] | null
+            cursor: ImageRecordDB['id'] | null;
         },
         string
     >(/* sql */`
-        SELECT ${buildSelector(selection)}
+        SELECT ${buildSelector(input.selection)}
         FROM images
         WHERE (:cursor IS NULL OR id < :cursor)
         ORDER BY id DESC
@@ -41,8 +38,8 @@ export const queryList = (
     `).pluck();
 
     const results = stmt.all({
-        size,
-        cursor: cursor ?? null,
+        size: input.size,
+        cursor: input.cursor,
     });
     return JSON.parse(`[${results.join(',')}]`);
 }
