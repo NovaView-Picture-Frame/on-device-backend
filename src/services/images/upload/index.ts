@@ -1,7 +1,7 @@
-import { randomUUID } from 'node:crypto';
 import { PassThrough, type Readable } from 'node:stream';
 import fs from 'node:fs/promises';
 import sharp from 'sharp';
+import type { UUID } from 'node:crypto';
 
 import {
     geocoding,
@@ -20,7 +20,7 @@ import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
 
 export { InvalidBufferError } from './errors';
 
-export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
+export const tasksMap = new Map<UUID, {
     readonly lookupPlace: ReturnType<typeof geocoding>;
     readonly saveOriginal: ReturnType<typeof saveStream>;
     readonly crop: Promise<
@@ -31,7 +31,7 @@ export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
 }>();
 
 export const uploadProcessor = (input: {
-    id: ReturnType<typeof randomUUID>;
+    id: UUID;
     stream: Readable;
     signal: AbortSignal;
 }) => {

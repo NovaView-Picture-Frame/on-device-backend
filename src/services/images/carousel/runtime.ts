@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto';
+import { randomBytes, type UUID } from 'crypto';
 import type { WebSocket } from 'ws';
 
 import { config } from '../../../config.js';
@@ -9,7 +9,7 @@ import type { State, Event, Action } from './types';
 import type { Order } from '../../../models/carousel';
 
 let globalState: State = initialState;
-const clients = new Set<WebSocket>();
+const clientsMap = new Map<UUID, WebSocket>();
 
 const send = (ws: WebSocket, text: string) => {
     if (ws.readyState !== ws.OPEN) return;
@@ -28,11 +28,16 @@ const dispatchMessage = (action?: Action) => {
 
     switch (action.type) {
         case 'SEND_TO_ONE':
-            send(action.ws, text);
+            const ws = clientsMap.get(action.deviceId);
+            if (!ws) throw new Error(
+                `No WebSocket found for deviceId: ${action.deviceId}`
+            );
+
+            send(ws, text);
             break;
 
         case 'BROADCAST':
-            for (const ws of clients) send(ws, text);
+            for (const ws of clientsMap.values()) send(ws, text);
             break;
     }
 }
@@ -53,21 +58,21 @@ const buildRandomOrder = (): { order: 'random'; seed: Buffer } => ({
 
 const buildClientConnectedEvent = (input: {
     state: State,
-    ws: WebSocket,
+    deviceId: UUID,
     now: Date,
 }): Event => {
     if (input.state.phase === 'idle') {
         if (config.carouselDefaultOrder === 'random') return {
             type: 'CLIENT_CONNECTED',
             now: input.now,
-            ws: input.ws,
+            deviceId: input.deviceId,
             ...buildRandomOrder(),
         };
 
         return {
             type: 'CLIENT_CONNECTED',
             now: input.now,
-            ws: input.ws,
+            deviceId: input.deviceId,
             order: config.carouselDefaultOrder,
         };
     }
@@ -75,7 +80,7 @@ const buildClientConnectedEvent = (input: {
     if (input.state.order === 'random') return {
         type: 'CLIENT_CONNECTED',
         now: input.now,
-        ws: input.ws,
+        deviceId: input.deviceId,
         order: 'random',
         seed: input.state.seed,
     };
@@ -83,7 +88,7 @@ const buildClientConnectedEvent = (input: {
     return {
         type: 'CLIENT_CONNECTED',
         now: input.now,
-        ws: input.ws,
+        deviceId: input.deviceId,
         order: input.state.order,
     };
 }
@@ -102,27 +107,28 @@ const buildSwitchOrderEvent = (order: Order, now: Date): Event => {
     };
 }
 
-export const handleConnected = (ws: WebSocket) => {
-    clients.add(ws);
-
+export const handleConnected = (ws: WebSocket, deviceId: UUID) => {
+    clientsMap.set(deviceId, ws);
     dispatchEvent((state, now) => buildClientConnectedEvent({
         state,
-        ws,
+        deviceId,
         now,
     }))
+
+    return deviceId;
 }
 
-export const handleClosed = (ws: WebSocket) => {
-    clients.delete(ws);
+export const handleClosed = (deviceId: UUID) => {
+    clientsMap.delete(deviceId);
 
-    if (clients.size === 0) globalState = initialState;
+    if (clientsMap.size === 0) globalState = initialState;
 }
 
-export const requestSchedule = (ws: WebSocket) =>
+export const requestSchedule = (deviceId: UUID) =>
     dispatchEvent((_, now) => ({
         type: 'REQUEST_SCHEDULE',
         now,
-        ws,
+        deviceId,
     }));
 
 export const switchOrder = (order: Order) =>

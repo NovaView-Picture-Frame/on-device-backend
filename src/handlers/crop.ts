@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import { getExtractRegionRecordByID } from '../repositories/images';
+import { getExtractRegionRecordById } from '../repositories/images';
 import { config } from '../config'
 import { cropProcessor } from '../services/images';
 
@@ -40,7 +40,7 @@ export const cropHandler = (ctx: RouterContext) => {
     const bodyResult = bodySchema.safeParse(ctx.request.body);
     if (!bodyResult.success) throw new HttpBadRequestError("Invalid request body");
 
-    const extractRegionRecord = getExtractRegionRecordByID(paramsResult.data.id);
+    const extractRegionRecord = getExtractRegionRecordById(paramsResult.data.id);
     if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
     const left = toOffset({

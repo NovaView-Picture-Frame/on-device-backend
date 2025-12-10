@@ -1,12 +1,12 @@
 import fs from 'node:fs/promises';
 
-import { deleteByID } from '../../repositories/images';
+import { deleteById } from '../../repositories/images';
 import { onImagesChanged } from './carousel';
 import { ignoreErrorCodes } from '../../utils/ignoreErrorCodes';
 import { config } from '../../config';
 
-export const deleteProcessor = async (id: Parameters<typeof deleteByID>[0]) => {
-    if (!deleteByID(id)) return;
+export const deleteProcessor = async (id: Parameters<typeof deleteById>[0]) => {
+    if (!deleteById(id)) return;
 
     onImagesChanged();
     await Promise.all(ignoreErrorCodes(

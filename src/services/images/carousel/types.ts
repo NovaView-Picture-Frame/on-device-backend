@@ -1,4 +1,5 @@
-import type { WebSocket } from 'ws'; 
+import type { UUID } from 'crypto';
+
 import type { Order } from '../../../models/carousel';
 
 type OrderOption =
@@ -19,13 +20,13 @@ export const initialState: State = { phase: 'idle' };
 type ClientConnectedEvent = {
     type: 'CLIENT_CONNECTED';
     now: Date;
-    ws: WebSocket;
+    deviceId: UUID;
 } & OrderOption;
 
 type RequestScheduleEvent = {
     type: 'REQUEST_SCHEDULE';
     now: Date;
-    ws: WebSocket;
+    deviceId: UUID;
 };
 
 type SwitchOrderEvent = {
@@ -47,7 +48,7 @@ export type Event =
 type SendToOneAction = {
     type: 'SEND_TO_ONE';
     now: Date;
-    ws: WebSocket;
+    deviceId: UUID;
 };
 
 type BroadcastAction = {

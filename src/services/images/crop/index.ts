@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, type UUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 
 import { updateAndMove } from './persist';
@@ -10,7 +10,7 @@ import type { ExtractOffsetUpdate, ExtractRegionRecord } from '../../../models/i
 const getTaskKey = (offset: ExtractOffsetUpdate) =>
     `${offset.id}-${offset.extractRegion.left}-${offset.extractRegion.top}`;
 
-export const tasksMap = new Map<ReturnType<typeof randomUUID>, {
+export const tasksMap = new Map<UUID, {
     key: ReturnType<typeof getTaskKey> | null;
     readonly tasks: {
         readonly crop: Promise<

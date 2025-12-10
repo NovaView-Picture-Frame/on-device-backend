@@ -27,4 +27,11 @@ export const ClientMessageSchema = z.discriminatedUnion('type', [
     z.object({
         type: z.literal('requestSchedule'),
     }),
+    z.object({
+        type: z.literal('preloadComplete'),
+        payload: z.object({
+            id: z.string().nonempty(),
+            timeStamp: z.coerce.date(),
+        }),
+    }),
 ]);

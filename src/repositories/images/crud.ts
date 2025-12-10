@@ -28,7 +28,7 @@ export const getExtractRegionRecordByHash =(hash: ImageRecord['hash']): ExtractR
     return record ? toExtractRegionRecord(record) : null;
 }
 
-const getByIDStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sql */`
+const getByIdStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sql */`
     SELECT
         id,
         extract_region_left,
@@ -39,8 +39,8 @@ const getByIDStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sq
     WHERE id = ?
 `);
 
-export const getExtractRegionRecordByID =(id: ImageRecord['id']): ExtractRegionRecord | null => {
-    const record = getByIDStmt.get(id);
+export const getExtractRegionRecordById =(id: ImageRecord['id']): ExtractRegionRecord | null => {
+    const record = getByIdStmt.get(id);
     return record ? toExtractRegionRecord(record) : null;
 }
 
@@ -96,10 +96,10 @@ export const updateOffset = (input: ExtractOffsetUpdate) =>
         extract_region_top: input.extractRegion.top,
     }).changes > 0;
 
-const deleteByIDStmt = db.prepare<ImageRecordDB['id']>(/* sql */`
+const deleteByIdStmt = db.prepare<ImageRecordDB['id']>(/* sql */`
     DELETE FROM images
     WHERE id = ?
 `);
 
-export const deleteByID = (id: ImageRecord['id']) =>
-    deleteByIDStmt.run(id).changes > 0;
+export const deleteById = (id: ImageRecord['id']) =>
+    deleteByIdStmt.run(id).changes > 0;

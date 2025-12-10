@@ -1,17 +1,17 @@
-import { randomUUID } from 'node:crypto';
 import stream from 'node:stream';
 import { z } from 'zod';
+import type { UUID } from 'node:crypto';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
 import { config } from '../../config';
 
-export type TaskEventsGetter = (taskId: ReturnType<typeof randomUUID>) =>
+export type TaskEventsGetter = (taskId: UUID) =>
     Record<string, Promise<object | null>> | undefined;
 
 const paramsSchema = z.object({
     taskId: z.uuidv4().pipe(
-        z.custom<Parameters<TaskEventsGetter>[0]>()
+        z.custom<UUID>()
     ),
 });
 

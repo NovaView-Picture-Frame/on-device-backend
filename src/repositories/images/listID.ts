@@ -1,39 +1,39 @@
 import { db } from '../../db';
 import type { ImageRecordDB } from '../../models/images';
 
-const listIDUnorderedStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
+const listIdUnorderedStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
     SELECT id
     FROM images
 `).pluck();
 
-export const listIDUnordered = () => listIDUnorderedStmt.all();
+export const listIdUnordered = () => listIdUnorderedStmt.all();
 
-const listIDByCreatedAscStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
+const listIdByCreatedAscStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
     SELECT id
     FROM images
     ORDER BY created_at ASC
 `).pluck();
 
-const listIDByCreatedDescStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
+const listIdByCreatedDescStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
     SELECT id
     FROM images
     ORDER BY created_at DESC
 `).pluck();
 
-export const listIDByCreated = (ascending = false) =>
-    ascending ? listIDByCreatedAscStmt.all() : listIDByCreatedDescStmt.all();
+export const listIdByCreated = (ascending = false) =>
+    ascending ? listIdByCreatedAscStmt.all() : listIdByCreatedDescStmt.all();
 
-const listIDByTakenAscStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
+const listIdByTakenAscStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
     SELECT id
     FROM images
     ORDER BY COALESCE(_taken_at, created_at) ASC
 `).pluck();
 
-const listIDByTakenDescStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
+const listIdByTakenDescStmt = db.prepare<[], ImageRecordDB['id']>(/* sql */`
     SELECT id
     FROM images
     ORDER BY COALESCE(_taken_at, created_at) DESC
 `).pluck();
 
-export const listIDByTaken = (ascending = false) =>
-    ascending ? listIDByTakenAscStmt.all() : listIDByTakenDescStmt.all();
+export const listIdByTaken = (ascending = false) =>
+    ascending ? listIdByTakenAscStmt.all() : listIdByTakenDescStmt.all();

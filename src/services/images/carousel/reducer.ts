@@ -27,7 +27,7 @@ export const reducer = (
                     action: {
                         type: 'SEND_TO_ONE',
                         now: event.now,
-                        ws: event.ws,
+                        deviceId: event.deviceId,
                     },
                 }
                 else return {
@@ -39,7 +39,7 @@ export const reducer = (
                     action: {
                         type: 'SEND_TO_ONE',
                         now: event.now,
-                        ws: event.ws,
+                        deviceId: event.deviceId,
                     },
                 }
 
@@ -48,7 +48,7 @@ export const reducer = (
                 action: {
                     type: 'SEND_TO_ONE',
                     now: event.now,
-                    ws: event.ws,
+                    deviceId: event.deviceId,
                 },
             }
 
@@ -62,7 +62,7 @@ export const reducer = (
                 action: {
                     type: 'SEND_TO_ONE',
                     now: event.now,
-                    ws: event.ws,
+                    deviceId: event.deviceId,
                 },
             }
 

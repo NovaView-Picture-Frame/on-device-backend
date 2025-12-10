@@ -1,15 +1,15 @@
 export {
     getExtractRegionRecordByHash,
-    getExtractRegionRecordByID,
+    getExtractRegionRecordById,
     upsert,
     updateOffset,
-    deleteByID,
+    deleteById,
 } from './crud';
 
 export { querySingle, queryList } from './query';
 
 export {
-    listIDUnordered,
-    listIDByCreated,
-    listIDByTaken,
-} from './listID';
+    listIdUnordered,
+    listIdByCreated,
+    listIdByTaken,
+} from './listId';

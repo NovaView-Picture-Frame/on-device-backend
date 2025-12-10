@@ -1,5 +1,5 @@
 import { config } from '../../../config';
-import { getIDs } from './getIDs';
+import { getIds } from './getIds';
 import { getSlots } from './getSlots';
 
 import type { ScheduleMessage } from '../../../models/carousel';
@@ -18,12 +18,12 @@ export const buildScheduleMessage = (
     state: RunningState,
     now: Date,
 ): ScheduleMessage => {
-    const IDs = getIDs(state.order);
+    const Ids = getIds(state.order);
     const { startTime } = state;
     const startIndex = getStartIndex(now, startTime);
 
     const baseInput = {
-        IDs,
+        Ids,
         startTime,
         start: startIndex,
         length: config.carouselWindowSize,

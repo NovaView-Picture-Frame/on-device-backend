@@ -1,25 +1,25 @@
 import {
-    listIDUnordered,
-    listIDByCreated,
-    listIDByTaken,
+    listIdUnordered,
+    listIdByCreated,
+    listIdByTaken,
 } from '../../../repositories/images';
 import type { Order } from '../../../models/carousel';
 
-export const getIDs = (order: Order) => {
+export const getIds = (order: Order) => {
     switch (order) {
         case 'random':
-        return listIDUnordered();
+        return listIdUnordered();
 
         case 'createdAsc':
-        return listIDByCreated(true);
+        return listIdByCreated(true);
 
         case 'createdDesc':
-        return listIDByCreated();
+        return listIdByCreated();
 
         case 'takenAsc':
-        return listIDByTaken(true);
+        return listIdByTaken(true);
 
         case 'takenDesc':
-        return listIDByTaken();
+        return listIdByTaken();
     }
 }
