@@ -9,8 +9,6 @@ export const OrderSchema = z.enum([
 ]);
 
 export type Order = z.infer<typeof OrderSchema>;
-export const DEFAULT_ORDER: Order = 'random';
-
 export interface Slot {
     id: string;
     startTime: Date;

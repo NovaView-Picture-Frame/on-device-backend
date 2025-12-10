@@ -1,7 +1,20 @@
-import { randomBytes, createHash } from 'crypto';
+import { createHash } from 'crypto';
 
 import { config } from '../../../config';
 import type { Slot } from '../../../models/carousel';
+
+interface BaseInput {
+    IDs: number[];
+    startTime: Date;
+    start: number;
+    length: number;
+}
+
+type RandomOption =
+    | { random: true; seed: Buffer; }
+    | { random: false; seed?: never; };
+
+type GetSlotsInput = BaseInput & RandomOption;
 
 const getRound = (input: {
     IDs: number[];
@@ -40,13 +53,7 @@ const buildSlot = (input: {
     },
 })
 
-export const getSlots = (input: {
-    IDs: number[];
-    startTime: Date;
-    start: number;
-    length: number;
-    random?: boolean;
-}) => {
+export const getSlots = (input: GetSlotsInput) => {
     if (input.start < 0 || input.length < 0) throw new Error(
         `Invalid arguments: 'start' and 'length' must be non-negative.`
     );
@@ -54,7 +61,7 @@ export const getSlots = (input: {
     const { length } = input.IDs;
     if (length === 0) return [];
 
-    if (input?.random) {
+    if (input.random) {
         const startRound = ~~(input.start / length);
         const startIndex = input.start % length;
         const endIndex = startIndex + input.length;
@@ -64,7 +71,7 @@ export const getSlots = (input: {
             getRound({
                 IDs: input.IDs,
                 index: startRound + offset,
-                seed: randomBytes(32),
+                seed: input.seed,
             })
         );
 

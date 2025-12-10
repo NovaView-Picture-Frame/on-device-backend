@@ -19,7 +19,6 @@ export const carouselHandler = (ws: WebSocket) => {
             switch (message.type) {
                 case 'requestSchedule':
                     requestSchedule(ws);
-
                     break;
             }
         } catch {

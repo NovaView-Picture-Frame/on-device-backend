@@ -11,6 +11,7 @@ import { GraphQLError } from 'graphql';
 import type { ResolverPayload } from '@gqloom/core';
 
 import { imageQuerySchema, type Selection } from '../models/images';
+import { config } from '../config';
 import { querySingle, queryList } from '../repositories/images';
 
 const parseSelection = (payload: ResolverPayload): Selection => {
@@ -49,7 +50,11 @@ const queryResolver = resolver({
     images: query(z.array(imageQuerySchema))
         .input({
             cursor: z.int().positive().optional(),
-            size: z.int().positive().max(50).default(50),
+            size: z
+                .int()
+                .positive()
+                .max(config.queryMaxPageSize)
+                .default(config.queryDefaultPageSize),
         })
         .resolve(({ size, cursor }, payload) => {
             if (!payload) throw new GraphQLError(

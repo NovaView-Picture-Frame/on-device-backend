@@ -3,15 +3,20 @@ screen_height: 1080
 preview_max_width: 1920
 preview_max_height: 1080
 
-data_dir: 'data'
-database: 'data.sqlite'
+data_dir: data
+database: data.sqlite
 size_limit_bytes: 15728640
 
 port: 3000
 upload_timeout_ms: 10000
 sse_keepalive_interval_ms: 15000
 tasks_results_ttl_ms: 600000
+query_default_page_size: 50
+query_max_page_size: 100
+
 nominatim_user_agent: on-device-backend
 
+carousel_acceptable_delay_ms: 2000
 carousel_default_interval_ms: 5000
 carousel_window_size: 24
+carousel_default_order: random

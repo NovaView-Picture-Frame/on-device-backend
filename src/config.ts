@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import { z } from 'zod';
 import yaml from 'yaml';
 
+import { OrderSchema } from './models/carousel';
 import { initDirs, type DirTree } from './utils/initDirs';
 
 const argsSchema = z.tuple([
@@ -23,10 +24,15 @@ const configSchema = z.object({
     upload_timeout_ms: z.int().positive(),
     sse_keepalive_interval_ms: z.int().positive(),
     tasks_results_ttl_ms: z.int().positive(),
+    query_default_page_size: z.int().positive(),
+    query_max_page_size: z.int().positive(),
+
     nominatim_user_agent: z.string().nonempty(),
 
+    carousel_acceptable_delay_ms: z.int().positive(),
     carousel_default_interval_ms: z.int().positive(),
     carousel_window_size: z.int().positive(),
+    carousel_default_order: OrderSchema,
 }).strict();
 
 const dirTree = {
@@ -54,8 +60,13 @@ export const config = {
     uploadTimeoutMs: yamlConfig.upload_timeout_ms,
     sseKeepaliveIntervalMs: yamlConfig.sse_keepalive_interval_ms,
     tasksResultsTTLMs: yamlConfig.tasks_results_ttl_ms,
+    queryDefaultPageSize: yamlConfig.query_default_page_size,
+    queryMaxPageSize: yamlConfig.query_max_page_size,
+
     nominatimUserAgent: yamlConfig.nominatim_user_agent,
 
+    carouselAcceptableDelayMs: yamlConfig.carousel_acceptable_delay_ms,
     carouselDefaultIntervalMs: yamlConfig.carousel_default_interval_ms,
     carouselWindowSize: yamlConfig.carousel_window_size,
+    carouselDefaultOrder: yamlConfig.carousel_default_order,
 };
