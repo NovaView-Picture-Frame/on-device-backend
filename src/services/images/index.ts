@@ -6,6 +6,6 @@ export {
 
 export { cropProcessor, tasksMap as cropTasksMap } from './crop';
 
-export { buildTaskEventsHandler, type TaskEventsGetter } from './buildTaskEventsHandler';
+export { buildTaskEventsHandler, type TaskEventsGetter } from '../../http/buildTaskEventsHandler';
 
 export { deleteProcessor } from './delete';

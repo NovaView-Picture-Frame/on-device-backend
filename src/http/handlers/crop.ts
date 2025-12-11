@@ -1,10 +1,10 @@
 import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
-import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import { getExtractRegionRecordById } from '../repositories/images';
-import { appConfig } from '../config'
-import { cropProcessor } from '../services/images';
+import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
+import { getExtractRegionRecordById } from '../../repositories/images';
+import { appConfig } from '../../config'
+import { cropProcessor } from '../../services/images';
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),

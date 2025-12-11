@@ -10,9 +10,9 @@ import { ZodWeaver } from '@gqloom/zod';
 import { GraphQLError } from 'graphql';
 import type { ResolverPayload } from '@gqloom/core';
 
-import { imageQuerySchema, type Selection } from '../models/images';
-import { appConfig } from '../config';
-import { querySingle, queryList } from '../repositories/images';
+import { imageQuerySchema, type Selection } from '../../models/images';
+import { appConfig } from '../../config';
+import { querySingle, queryList } from '../../repositories/images';
 
 const parseSelection = (payload: ResolverPayload): Selection => {
     const rootMap = getDeepResolvingFields(payload);

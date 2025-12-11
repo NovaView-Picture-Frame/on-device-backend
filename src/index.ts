@@ -1,38 +1,16 @@
 import koa from 'koa';
-import bodyParser from '@koa/bodyparser';
-import Router from '@koa/router';
 import { WebSocketServer } from 'ws';
 import { exiftool } from 'exiftool-vendored';
 
 import { errorHandler } from './middleware/errorHandler';
+import { buildHttpRouters } from './http/router';
 import { appConfig } from './config';
-
-import { infoHandler } from './handlers/info';
-import { uploadHandler } from './handlers/upload';
-import { uploadEventsHandler } from './handlers/uploadEvents';
-import { queryHandler } from './handlers/query';
-import { previewHandler } from './handlers/preview';
-import { deleteHandler } from './handlers/delete';
-import { cropHandler } from './handlers/crop';
-import { cropEventsHandler } from './handlers/cropEvents';
-import { carouselHandler } from './handlers/carousel';
+import { carouselHandler } from './ws/handlers/carousel';
 
 const app = new koa();
 app.use(errorHandler);
 
-const router = new Router()
-    .get('/info', infoHandler)
-    .post('/upload', uploadHandler)
-    .get('/upload/:taskId/events', uploadEventsHandler)
-    .post('/query', queryHandler)
-    .get('/preview/:id', previewHandler)
-    .delete('/delete/:id', deleteHandler)
-    .get('/crop/:taskId/events', cropEventsHandler);
-
-const bodyRouter = new Router()
-    .use(bodyParser())
-    .post('/crop/:id', cropHandler);
-
+const { router, bodyRouter } = buildHttpRouters();
 app.use(router.routes());
 app.use(bodyRouter.routes());
 
@@ -60,5 +38,5 @@ const shutdown = async (signal: string) => {
     }
 }
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+process.addListener('SIGTERM', () => shutdown('SIGTERM'));
+process.addListener('SIGINT', () => shutdown('SIGINT'));

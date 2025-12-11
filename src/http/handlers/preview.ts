@@ -3,9 +3,9 @@ import fs from 'node:fs/promises';
 import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
-import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import { getExtractRegionRecordById } from '../repositories/images';
-import { paths } from '../config';
+import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
+import { getExtractRegionRecordById } from '../../repositories/images';
+import { paths } from '../../config';
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),

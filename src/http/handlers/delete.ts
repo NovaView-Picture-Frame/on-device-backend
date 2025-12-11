@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import type { RouterContext } from '@koa/router';
 
-import { HttpBadRequestError } from '../middleware/errorHandler';
-import { deleteProcessor } from '../services/images';
+import { HttpBadRequestError } from '../../middleware/errorHandler';
+import { deleteProcessor } from '../../services/images';
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),

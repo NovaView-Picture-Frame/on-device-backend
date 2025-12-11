@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 
-import { appConfig } from '../config';
+import { appConfig } from '../../config';
 
 const body = {
     data: {

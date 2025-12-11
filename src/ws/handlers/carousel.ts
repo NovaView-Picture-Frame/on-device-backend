@@ -6,11 +6,11 @@ import {
     handleConnected,
     handleClosed,
     requestSchedule,
-} from '../services/images/carousel';
-import { ClientMessageSchema } from '../models/carousel';
+} from '../../services/images/carousel';
+import { ClientMessageSchema } from '../../models/carousel';
 import type { UUID } from 'node:crypto';
 
-const headerSchema = z.object({
+export const headerSchema = z.object({
     'device-id': z.uuidv4().pipe(
         z.custom<UUID>()
     ),

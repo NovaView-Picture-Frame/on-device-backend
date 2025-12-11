@@ -3,8 +3,8 @@ import { z } from 'zod';
 import type { UUID } from 'node:crypto';
 import type { RouterContext } from '@koa/router';
 
-import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
-import { appConfig } from '../../config';
+import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
+import { appConfig } from '../config';
 
 export type TaskEventsGetter = (taskId: UUID) =>
     Record<string, Promise<object | null>> | undefined;
@@ -60,7 +60,7 @@ export const buildTaskEventsHandler = (getTaskEvents: TaskEventsGetter) =>
             finish();
         });
 
-        ctx.req.on('close', finish);
+        ctx.req.addListener('close', finish);
         ctx.set({
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache, no-transform',

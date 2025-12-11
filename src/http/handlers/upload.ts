@@ -4,12 +4,12 @@ import { pipeline } from 'node:stream/promises';
 import { z } from 'zod';
 import type { Context } from 'koa';
 
-import { appConfig } from '../config';
-import { HttpBadRequestError } from '../middleware/errorHandler';
-import { getExtractRegionRecordByHash } from '../repositories/images';
-import { uploadProcessor, InvalidBufferError } from '../services/images';
-import { createMaxSizeTransform, MaxSizeError } from '../services/images/upload/transform';
-import type { ExtractRegionRecord } from '../models/images';
+import { appConfig } from '../../config';
+import { HttpBadRequestError } from '../../middleware/errorHandler';
+import { getExtractRegionRecordByHash } from '../../repositories/images';
+import { uploadProcessor, InvalidBufferError } from '../../services/images';
+import { createMaxSizeTransform, MaxSizeError } from '../../services/images/upload/transform';
+import type { ExtractRegionRecord } from '../../models/images';
 
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
