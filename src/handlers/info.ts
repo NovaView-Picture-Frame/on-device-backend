@@ -1,12 +1,12 @@
 import type { Context } from 'koa';
 
-import { config } from '../config';
+import { appConfig } from '../config';
 
 const body = {
     data: {
-        screen_width: config.screenWidth,
-        screen_height: config.screenHeight,
-        size_limit: config.sizeLimitBytes,
+        screen_width: appConfig.device.screen.width,
+        screen_height: appConfig.device.screen.height,
+        size_limit: appConfig.services.upload.size_limit_bytes,
     },
 };
 

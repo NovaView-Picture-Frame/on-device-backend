@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import { z } from 'zod';
 import type { Readable } from 'node:stream';
 
-import { config } from '../../../config';
+import { appConfig, paths } from '../../../config';
 import { imageRecordSchema } from '../../../models/images';
 import { upsert } from '../../../repositories/images';
 import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
@@ -37,7 +37,7 @@ export const geocoding = async (input: {
 
     const res = await fetch(`${baseUrl}?${params.toString()}`, {
         headers: {
-            'User-Agent': config.nominatimUserAgent,
+            'User-Agent': appConfig.external.nominatim.user_agent,
             'Accept-Language': 'en',
         },
         signal: input.signal,
@@ -81,9 +81,9 @@ export const insertAndMove = async (input: {
 
     if (created) {
         const moves: [string, string][] = [
-            [input.originalTmp, `${config.paths.originals._base}/${id}`],
-            [input.croppedTmp, `${config.paths.cropped._base}/${id}`],
-            [input.optimizedTmp, `${config.paths.optimized._base}/${id}`],
+            [input.originalTmp, `${paths.originals._base}/${id}`],
+            [input.croppedTmp, `${paths.cropped._base}/${id}`],
+            [input.optimizedTmp, `${paths.optimized._base}/${id}`],
         ];
 
         await Promise.all(ignoreErrorCodes(

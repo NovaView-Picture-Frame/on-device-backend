@@ -5,7 +5,7 @@ import { WebSocketServer } from 'ws';
 import { exiftool } from 'exiftool-vendored';
 
 import { errorHandler } from './middleware/errorHandler';
-import { config } from './config';
+import { appConfig } from './config';
 
 import { infoHandler } from './handlers/info';
 import { uploadHandler } from './handlers/upload';
@@ -36,8 +36,8 @@ const bodyRouter = new Router()
 app.use(router.routes());
 app.use(bodyRouter.routes());
 
-const httpServer = app.listen(config.port, () =>
-    console.log(`Server listening on port ${config.port}`)
+const httpServer = app.listen(appConfig.server.port, () =>
+    console.log(`Server listening on port ${appConfig.server.port}`)
 );
 
 const wsServer = new WebSocketServer({

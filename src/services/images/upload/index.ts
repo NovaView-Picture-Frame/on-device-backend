@@ -8,12 +8,12 @@ import {
     saveStream,
     insertAndMove,
 } from './persist';
-import { config } from '../../../config';
+import { appConfig, paths } from '../../../config';
 import {
     getMetadata,
     resizeToCover,
     resizeToInside,
-} from './transform';
+} from './processor';
 import { extractHashAndMetadata } from './inspect';
 import { onImagesChanged } from '../carousel';
 import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
@@ -35,9 +35,9 @@ export const uploadProcessor = (input: {
     stream: Readable;
     signal: AbortSignal;
 }) => {
-	const originalTmp = `${config.paths.originals._tmp}/${input.id}`;
-	const croppedTmp = `${config.paths.cropped._tmp}/${input.id}`;
-	const optimizedTmp = `${config.paths.optimized._tmp}/${input.id}`;
+	const originalTmp = `${paths.originals._tmp}/${input.id}`;
+	const croppedTmp = `${paths.cropped._tmp}/${input.id}`;
+	const optimizedTmp = `${paths.optimized._tmp}/${input.id}`;
 
     const teeForSharp = new PassThrough();
     const teeForFS = new PassThrough();
@@ -80,8 +80,8 @@ export const uploadProcessor = (input: {
         })
     ]).then(([metadata, coverOutput]) => {
         const scale = Math.max( 
-            config.screenWidth / metadata.width,
-            config.screenHeight / metadata.height,
+            appConfig.device.screen.width / metadata.width,
+            appConfig.device.screen.height / metadata.height,
         );
 
         return {
@@ -105,7 +105,7 @@ export const uploadProcessor = (input: {
         optimize,
         saveOriginal,
     ]).then(async ([{ hash, metadata }, place, extractRegion]) => {
-        const id = insertAndMove({
+        const id = await insertAndMove({
             originalTmp,
             croppedTmp,
             optimizedTmp,
@@ -129,7 +129,10 @@ export const uploadProcessor = (input: {
     tasksMap.set(input.id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
-        setTimeout(() => tasksMap.delete(input.id), config.tasksResultsTTLMs);
+        setTimeout(
+            () => tasksMap.delete(input.id),
+            appConfig.runtime.tasks_results_ttl_ms
+        );
 
         await Promise.all(ignoreErrorCodes(
             [originalTmp, croppedTmp, optimizedTmp].map(fs.unlink),

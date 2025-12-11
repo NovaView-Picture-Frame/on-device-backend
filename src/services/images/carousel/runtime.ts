@@ -1,7 +1,7 @@
 import { randomBytes, type UUID } from 'crypto';
 import type { WebSocket } from 'ws';
 
-import { config } from '../../../config.js';
+import { appConfig } from '../../../config';
 import { initialState } from './types';
 import { buildScheduleMessage } from './buildSchedule';
 import { reducer } from './reducer';
@@ -62,7 +62,7 @@ const buildClientConnectedEvent = (input: {
     now: Date,
 }): Event => {
     if (input.state.phase === 'idle') {
-        if (config.carouselDefaultOrder === 'random') return {
+        if (appConfig.services.carousel.default_order === 'random') return {
             type: 'CLIENT_CONNECTED',
             now: input.now,
             deviceId: input.deviceId,
@@ -73,7 +73,7 @@ const buildClientConnectedEvent = (input: {
             type: 'CLIENT_CONNECTED',
             now: input.now,
             deviceId: input.deviceId,
-            order: config.carouselDefaultOrder,
+            order: appConfig.services.carousel.default_order ,
         };
     }
 

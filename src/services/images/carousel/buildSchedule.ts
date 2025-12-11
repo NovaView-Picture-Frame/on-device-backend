@@ -1,4 +1,4 @@
-import { config } from '../../../config';
+import { appConfig } from '../../../config';
 import { getIds } from './getIds';
 import { getSlots } from './getSlots';
 
@@ -11,7 +11,7 @@ const getStartIndex = (now: Date, startTime: Date) => {
         "Invalid time: now is before startTime.",
     );
 
-    return ~~(elapsed / config.carouselDefaultIntervalMs);
+    return ~~(elapsed / appConfig.services.carousel.default_interval_ms);
 };
 
 export const buildScheduleMessage = (
@@ -26,7 +26,7 @@ export const buildScheduleMessage = (
         Ids,
         startTime,
         start: startIndex,
-        length: config.carouselWindowSize,
+        length: appConfig.services.carousel.schedule_window_size,
     };
 
     const slots = state.order === 'random'
@@ -42,7 +42,7 @@ export const buildScheduleMessage = (
 
     return {
         type: 'newSchedule',
-        acceptableDelay: config.carouselAcceptableDelayMs,
+        acceptableDelay: appConfig.services.carousel.acceptable_delay_ms,
         slots,
     };
 };

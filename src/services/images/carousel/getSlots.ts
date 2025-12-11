@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 
-import { config } from '../../../config';
+import { appConfig } from '../../../config';
 import type { Slot } from '../../../models/carousel';
 
 interface BaseInput {
@@ -46,7 +46,7 @@ const buildSlot = (input: {
 }): Slot => ({
     id: `slot-${input.index}`,
     startTime: new Date(
-        input.startTime.getTime() + input.index * config.carouselDefaultIntervalMs
+        input.startTime.getTime() + input.index * appConfig.services.carousel.default_interval_ms
     ),
     payload: {
         id: input.id,

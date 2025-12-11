@@ -3,7 +3,7 @@ import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
 import { getExtractRegionRecordById } from '../repositories/images';
-import { config } from '../config'
+import { appConfig } from '../config'
 import { cropProcessor } from '../services/images';
 
 const paramsSchema = z.object({
@@ -46,13 +46,13 @@ export const cropHandler = (ctx: RouterContext) => {
     const left = toOffset({
         size: extractRegionRecord.extractRegion.width,
         ratio: bodyResult.data.extract_left_ratio,
-        limit: config.screenWidth,
+        limit: appConfig.device.screen.width,
     });
 
     const top = toOffset({
         size: extractRegionRecord.extractRegion.height,
         ratio: bodyResult.data.extract_top_ratio,
-        limit: config.screenHeight,
+        limit: appConfig.device.screen.height,
     });
 
     if (

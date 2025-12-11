@@ -4,16 +4,18 @@ import { pipeline } from 'node:stream/promises';
 import { z } from 'zod';
 import type { Context } from 'koa';
 
-import { config } from '../config';
+import { appConfig } from '../config';
 import { HttpBadRequestError } from '../middleware/errorHandler';
 import { getExtractRegionRecordByHash } from '../repositories/images';
 import { uploadProcessor, InvalidBufferError } from '../services/images';
-import { createMaxSizeTransform, MaxSizeError } from '../utils/transforms';
+import { createMaxSizeTransform, MaxSizeError } from '../services/images/upload/transform';
 import type { ExtractRegionRecord } from '../models/images';
 
 const headerSchema = z.object({
     'content-type': z.string().regex(/^image\//i).optional(),
-    'content-length': z.coerce.number().int().positive().max(config.sizeLimitBytes).optional(),
+    'content-length': z.coerce.number().int().positive().max(
+        appConfig.services.upload.size_limit_bytes
+    ).optional(),
     'content-hash': z.string().length(64).regex(/^\p{Hex_Digit}+$/v).optional(),
     'file-name': z.string().max(255).optional(),
 });
@@ -58,7 +60,7 @@ export const uploadHandler = async (ctx: Context) => {
         stream: tee,
         signal,
     });
-    const timer = setTimeout(() => timeoutController.abort(), config.uploadTimeoutMs);
+    const timer = setTimeout(() => timeoutController.abort(), appConfig.services.upload.timeout_ms);
 
     hashAndMetadata.then(
         ({ hash }) => {
@@ -75,7 +77,7 @@ export const uploadHandler = async (ctx: Context) => {
         await Promise.all([
             pipeline(
                 ctx.req,
-                createMaxSizeTransform(config.sizeLimitBytes),
+                createMaxSizeTransform(appConfig.services.upload.size_limit_bytes),
                 tee,
                 { signal }
             ),
@@ -98,7 +100,7 @@ export const uploadHandler = async (ctx: Context) => {
         taskController.abort();
 
         if (err instanceof MaxSizeError) throw new HttpBadRequestError(
-            `Max ${config.sizeLimitBytes} bytes`
+            `Max ${appConfig.services.upload.size_limit_bytes} bytes`
         );
 
         if (err instanceof InvalidBufferError) throw new HttpBadRequestError(

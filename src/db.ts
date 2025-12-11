@@ -1,9 +1,9 @@
 import Database from 'better-sqlite3';
 
-import { config } from './config';
+import { appConfig, paths } from './config';
 
 export const db = new Database(
-    `${config.paths._base}/${config.database}`, {
+    `${paths._base}/${appConfig.server.database}`, {
         nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`,
     },
 );
@@ -37,10 +37,10 @@ db.exec(/* sql */`
         created_at             TEXT     NOT NULL                    DEFAULT CURRENT_TIMESTAMP,
 
         CHECK(extract_region_left = 0 OR extract_region_top = 0),
-        CHECK(extract_region_width = ${config.screenWidth} OR extract_region_height = ${config.screenHeight}),
+        CHECK(extract_region_width = ${appConfig.device.screen.width} OR extract_region_height = ${appConfig.device.screen.height}),
         CHECK(
-            extract_region_left + ${config.screenWidth} <= extract_region_width OR
-            extract_region_top  + ${config.screenHeight} <= extract_region_height
+            extract_region_left + ${appConfig.device.screen.width} <= extract_region_width OR
+            extract_region_top  + ${appConfig.device.screen.height} <= extract_region_height
         ),
 
         CHECK (

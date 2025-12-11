@@ -5,7 +5,7 @@ import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
 import { getExtractRegionRecordById } from '../repositories/images';
-import { config } from '../config';
+import { paths } from '../config';
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),
@@ -18,7 +18,7 @@ export const previewHandler = async (ctx: RouterContext) => {
     const extractRegionRecord = getExtractRegionRecordById(paramsResult.data.id);
     if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
-    const path = `${config.paths.optimized._base}/${extractRegionRecord.id}`;
+    const path = `${paths.optimized._base}/${extractRegionRecord.id}`;
     const stats = await fs.stat(path);
 
     ctx.set('Content-Length', stats.size.toString());

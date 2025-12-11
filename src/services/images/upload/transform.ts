@@ -1,77 +1,16 @@
-import type { Sharp } from 'sharp';
+import { Transform } from 'node:stream';
 
-import { InvalidBufferError } from './errors';
-import { config } from '../../../config';
+export class MaxSizeError extends Error {};
 
-class StreamAbortedError extends Error {}
+export const createMaxSizeTransform = (limit: number) => {
+    let total = 0;
 
-const abortableSharp = async <T>(input: {
-    sharpInstance: Sharp;
-    signal: AbortSignal;
-    run: (sharp: Sharp) => Promise<T>;
-}) => {
-    input.signal.throwIfAborted();
-
-    const { promise, resolve, reject } = Promise.withResolvers<T>();
-    const onAbort = () => {
-        reject(new StreamAbortedError());
-        input.sharpInstance.destroy();
-    }
-
-    input.signal.addEventListener(
-        'abort',
-        onAbort,
-        { once: true }
-    );
-    input.run(input.sharpInstance).then(resolve, reject);
-
-    return await promise
-        .catch(err => {
-            if (err instanceof StreamAbortedError) throw err;
-            throw new InvalidBufferError();
-        })
-        .finally(() => input.signal.removeEventListener('abort', onAbort));
+    return new Transform({
+        transform(chunk, _, callback) {
+            total += chunk.length;
+            total > limit
+                ? callback(new MaxSizeError())
+                : callback(null, chunk);
+        },
+    });
 }
-
-export const getMetadata = async (
-    sharpInstance: Sharp,
-    signal: AbortSignal,
-) => abortableSharp({
-    sharpInstance,
-    signal,
-    run: sharp => sharp.metadata(),
-});
-
-export const resizeToCover = async (input: {
-    sharpInstance: Sharp;
-    path: string;
-    signal: AbortSignal;
-}) => abortableSharp({
-    sharpInstance: input.sharpInstance,
-    signal: input.signal,
-    run: sharp => sharp
-        .resize(config.screenWidth, config.screenHeight, {
-            fit: 'cover',
-            position: 'entropy',
-        })
-        .keepIccProfile()
-        .png()
-        .toFile(input.path),
-});
-
-export const resizeToInside = async (input: {
-    sharpInstance: Sharp,
-    path: string,
-    signal: AbortSignal,
-}) => abortableSharp({
-    sharpInstance: input.sharpInstance,
-    signal: input.signal,
-    run: sharp => sharp
-        .resize(config.previewMaxWidth, config.previewMaxHeight, {
-            fit: 'inside',
-            withoutEnlargement: true,
-        })
-        .keepIccProfile()
-        .avif()
-        .toFile(input.path),
-});

@@ -4,7 +4,7 @@ import type { UUID } from 'node:crypto';
 import type { RouterContext } from '@koa/router';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
-import { config } from '../../config';
+import { appConfig } from '../../config';
 
 export type TaskEventsGetter = (taskId: UUID) =>
     Record<string, Promise<object | null>> | undefined;
@@ -32,7 +32,7 @@ export const buildTaskEventsHandler = (getTaskEvents: TaskEventsGetter) =>
 
         const keepAlive = setInterval(
             () => sse.write(':\n\n'),
-            config.sseKeepaliveIntervalMs
+            appConfig.runtime.sse_keepalive_interval_ms
         );
 
         const finish = () => {

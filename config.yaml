@@ -1,22 +1,36 @@
-screen_width: 1920
-screen_height: 1080
-preview_max_width: 1920
-preview_max_height: 1080
+device:
+  screen:
+    width: 1080
+    height: 1920
 
-data_dir: data
-database: data.sqlite
-size_limit_bytes: 15728640
+server:
+  port: 3000
+  data_dir: data
+  database: data.sqlite
 
-port: 3000
-upload_timeout_ms: 10000
-sse_keepalive_interval_ms: 15000
-tasks_results_ttl_ms: 600000
-query_default_page_size: 50
-query_max_page_size: 100
+runtime:
+  sse_keepalive_interval_ms: 15000
+  tasks_results_ttl_ms: 600000
 
-nominatim_user_agent: on-device-backend
+services:
+  upload:
+    timeout_ms: 10000
+    size_limit_bytes: 15728640
 
-carousel_acceptable_delay_ms: 2000
-carousel_default_interval_ms: 5000
-carousel_window_size: 24
-carousel_default_order: random
+  query:
+    default_page_size: 50
+    max_page_size: 100
+
+  preview:
+    max_width: 1920
+    max_height: 1080
+
+  carousel:
+    default_order: random
+    default_interval_ms: 5000
+    acceptable_delay_ms: 2000
+    schedule_window_size: 24
+
+external:
+  nominatim:
+    user_agent: on-device-backend

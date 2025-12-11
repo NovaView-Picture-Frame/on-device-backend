@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 
-import { config } from '../../../config';
+import { appConfig } from '../../../config';
 import type { ExtractOffsetUpdate } from '../../../models/images';
 
 export const resizeAndExtract = (input: {
@@ -8,14 +8,14 @@ export const resizeAndExtract = (input: {
     src: string,
     dest: string,
 }) => sharp(input.src)
-    .resize(config.screenWidth, config.screenHeight, {
+    .resize(appConfig.device.screen.width, appConfig.device.screen.height, {
         fit: 'outside',
     })
     .extract({
         left: input.record.extractRegion.left,
         top: input.record.extractRegion.top,
-        width: config.screenWidth,
-        height: config.screenHeight,
+        width: appConfig.device.screen.width,
+        height: appConfig.device.screen.height,
     })
     .keepIccProfile()
     .png()

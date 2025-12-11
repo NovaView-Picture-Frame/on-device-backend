@@ -2,8 +2,8 @@ import { randomUUID, type UUID } from 'node:crypto';
 import fs from 'node:fs/promises';
 
 import { updateAndMove } from './persist';
-import { config } from '../../../config';
-import { resizeAndExtract } from './transform';
+import { appConfig, paths } from '../../../config';
+import { resizeAndExtract } from './processor';
 import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
 import type { ExtractOffsetUpdate, ExtractRegionRecord } from '../../../models/images';
 
@@ -38,18 +38,18 @@ export const cropProcessor = (input: {
         if (existingEntry.key === taskKey) return existingTaskId;
 
     const taskId = randomUUID();
-    const croppedTmp = `${config.paths.cropped._tmp}/${next.id}_${taskId}`;
+    const croppedTmp = `${paths.cropped._tmp}/${next.id}_${taskId}`;
 
     const crop = resizeAndExtract({
         record: next,
-        src: `${config.paths.originals._base}/${next.id}`,
+        src: `${paths.originals._base}/${next.id}`,
         dest: croppedTmp,
     }).then(() => next.extractRegion);
 
     const persist = crop.then(() => updateAndMove({
         record: next,
         croppedTmp,
-        cropped: `${config.paths.cropped._base}/${next.id}`,
+        cropped: `${paths.cropped._base}/${next.id}`,
     }));
 
     tasksMap.set(taskId, {
@@ -60,7 +60,10 @@ export const cropProcessor = (input: {
     Promise.allSettled([persist]).finally(async () => {
         const entry = tasksMap.get(taskId);
         if (entry) entry.key = null;
-        setTimeout(() => tasksMap.delete(taskId), config.tasksResultsTTLMs);
+        setTimeout(
+            () => tasksMap.delete(taskId),
+            appConfig.runtime.tasks_results_ttl_ms
+        );
 
         await Promise.all([
             ignoreErrorCodes(fs.unlink(croppedTmp), 'ENOENT'),
