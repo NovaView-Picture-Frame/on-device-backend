@@ -5,7 +5,7 @@ import {
     weave,
 } from '@gqloom/core';
 import { z } from 'zod';
-import { createHandler } from 'graphql-http/lib/use/koa';
+import { createHandler } from 'graphql-http/lib/use/fastify';
 import { ZodWeaver } from '@gqloom/zod';
 import { GraphQLError } from 'graphql';
 import type { ResolverPayload } from '@gqloom/core';

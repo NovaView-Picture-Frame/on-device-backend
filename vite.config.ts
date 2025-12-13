@@ -35,7 +35,7 @@ export default defineConfig({
                 {
                     src: 'node_modules/sharp/src/build/Release/sharp-*.node',
                     dest: 'node_modules/@img',
-                    rename: (name, _ext, _path) => `${name}/sharp.node`,
+                    rename: name => `${name}/sharp.node`,
                 },
                 {
                     src: 'node_modules/better-sqlite3/build/Release/better_sqlite3.node',

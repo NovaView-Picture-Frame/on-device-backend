@@ -1,70 +1,68 @@
-import stream from 'node:stream';
 import { z } from 'zod';
 import type { UUID } from 'node:crypto';
-import type { RouterContext } from '@koa/router';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
-import { appConfig } from '../config';
 
-export type TaskEventsGetter = (taskId: UUID) =>
-    Record<string, Promise<object | null>> | undefined;
+type TaskEvents = Record<string, Promise<object | null>>;
+export type TaskEventsGetter = (taskId: UUID) => TaskEvents | undefined;
+
+interface Context {
+    taskEvents: TaskEvents;
+}
 
 const paramsSchema = z.object({
-    taskId: z.uuidv4().pipe(
-        z.custom<UUID>()
-    ),
+    taskId: z.uuidv4().pipe(z.custom<UUID>()),
 });
 
-export const buildTaskEventsHandler = (getTaskEvents: TaskEventsGetter) =>
-    (ctx: RouterContext) => {
-        const paramsResult = paramsSchema.safeParse(ctx.params);
-        if (!paramsResult.success) throw new HttpBadRequestError(
-            "Invalid URL parameters"
-        );
+const contextMap = new WeakMap<FastifyRequest, Context>();
 
-        const tasks = getTaskEvents(paramsResult.data.taskId);
-        if (!tasks) throw new HttpNotFoundError(
-            "Task not found"
-        );
+export const buildPre = (getTaskEvents: TaskEventsGetter) =>
+    async (req: FastifyRequest) => {
+        const paramsResult = paramsSchema.safeParse(req.params);
+        if (!paramsResult.success) {
+            throw new HttpBadRequestError("Invalid URL parameters");
+        }
 
-        const sse = new stream.PassThrough();
-        sse.write("event: connected\ndata:\n\n");
+        const taskEvents = getTaskEvents(paramsResult.data.taskId);
+        if (!taskEvents) {
+            throw new HttpNotFoundError("Task not found");
+        }
 
-        const keepAlive = setInterval(
-            () => sse.write(':\n\n'),
-            appConfig.runtime.sse_keepalive_interval_ms
-        );
-
-        const finish = () => {
-            clearInterval(keepAlive);
-            sse.end();
+        req.headers = {
+            ...req.headers,
+            accept: 'text/event-stream',
         };
 
-        const writeEvent = (event: string, data: object) => sse.write(
-            `event: ${event}\ndata: ${JSON.stringify({ data })}\n\n`
+        contextMap.set(req, { taskEvents });
+    }
+
+export const buildBase = () =>
+    async (req: FastifyRequest, reply: FastifyReply) => {
+        const context = contextMap.get(req);
+        if (!context) throw new Error("Context not found for request");
+
+        const safeSend = (...args: Parameters<typeof reply.sse.send>) =>
+            reply.sse.send(...args).catch(() => reply.sse.close());
+
+        const notifiers = Object.entries(context.taskEvents).map(
+            ([taskName, taskEventPromise]) =>
+                taskEventPromise.then(
+                    resolve => resolve !== null
+                        ? safeSend({ event: `${taskName}Complete`, data: resolve })
+                        : null,
+                    reject => reject !== null
+                        ? safeSend({ event: `${taskName}Error`, data: reject })
+                        : null
+                )
         );
 
-        Promise.allSettled(
-            Object.entries(tasks).map(([taskName, taskEventPromise]) =>
-                taskEventPromise.then(
-                    resolve => resolve !== null && writeEvent(
-                        `${taskName}Complete`, resolve
-                    ),
-                    reject => reject !== null && writeEvent(
-                        `${taskName}Error`, reject
-                    )
-                )
-            )
-        ).then(() => {
-            sse.write(`event: done\ndata:\n\n`);
-            finish();
-        });
-
-        ctx.req.addListener('close', finish);
-        ctx.set({
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache, no-transform',
-            'Connection': 'keep-alive',
-        });
-        ctx.body = sse;
+        try {
+            await safeSend({ event: "connected", data: {} });
+            await Promise.allSettled(notifiers);
+            await safeSend({ event: "done", data: {} });
+        } finally {
+            reply.sse.close();
+            contextMap.delete(req);
+        }
     }

@@ -1,7 +1,7 @@
 device:
   screen:
-    width: 1080
-    height: 1920
+    width: 1920
+    height: 1080
 
 server:
   port: 3000
@@ -9,7 +9,6 @@ server:
   database: data.sqlite
 
 runtime:
-  sse_keepalive_interval_ms: 15000
   tasks_results_ttl_ms: 600000
 
 services:

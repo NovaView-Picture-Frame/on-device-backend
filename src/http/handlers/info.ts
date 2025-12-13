@@ -1,5 +1,3 @@
-import type { Context } from 'koa';
-
 import { appConfig } from '../../config';
 
 const body = {
@@ -10,5 +8,4 @@ const body = {
     },
 };
 
-export const infoHandler = (ctx: Context) =>
-    ctx.body = body;
+export const infoHandler = () => body;

@@ -22,7 +22,6 @@ export const configSchema = z.object({
     }),
 
     runtime: z.object({
-        sse_keepalive_interval_ms: z.int().positive(),
         tasks_results_ttl_ms: z.int().positive(),
     }),
 

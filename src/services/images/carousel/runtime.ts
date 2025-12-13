@@ -107,20 +107,19 @@ const buildSwitchOrderEvent = (order: Order, now: Date): Event => {
     };
 }
 
-export const handleConnected = (ws: WebSocket, deviceId: UUID) => {
+export const handleConnected = (deviceId: UUID, ws: WebSocket) => {
     clientsMap.set(deviceId, ws);
     dispatchEvent((state, now) => buildClientConnectedEvent({
         state,
         deviceId,
         now,
     }))
-
-    return deviceId;
 }
 
-export const handleClosed = (deviceId: UUID) => {
-    clientsMap.delete(deviceId);
+export const handleClosed = (deviceId: UUID, ws: WebSocket) => {
+    if (ws !== clientsMap.get(deviceId)) return;
 
+    clientsMap.delete(deviceId);
     if (clientsMap.size === 0) globalState = initialState;
 }
 

@@ -1,7 +1,7 @@
 import { createReadStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import { z } from 'zod';
-import type { RouterContext } from '@koa/router';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
 import { getExtractRegionRecordById } from '../../repositories/images';
@@ -11,8 +11,8 @@ const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),
 });
 
-export const previewHandler = async (ctx: RouterContext) => {
-    const paramsResult = paramsSchema.safeParse(ctx.params);
+export const previewHandler = async (req: FastifyRequest, reply: FastifyReply) => {
+    const paramsResult = paramsSchema.safeParse(req.params);
     if (!paramsResult.success) throw new HttpBadRequestError("Invalid URL parameters");
 
     const extractRegionRecord = getExtractRegionRecordById(paramsResult.data.id);
@@ -21,7 +21,7 @@ export const previewHandler = async (ctx: RouterContext) => {
     const path = `${paths.optimized._base}/${extractRegionRecord.id}`;
     const stats = await fs.stat(path);
 
-    ctx.set('Content-Length', stats.size.toString());
-    ctx.type = 'image/avif';
-    ctx.body = createReadStream(path);
+    reply.header('Content-Length', stats.size.toString());
+    reply.type('image/avif');
+    return createReadStream(path);
 }

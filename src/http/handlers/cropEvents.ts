@@ -1,8 +1,9 @@
 import {
-    cropTasksMap,
-    buildTaskEventsHandler,
-    type TaskEventsGetter,
-} from '../../services/images';
+    buildPre,
+    buildBase,
+    type TaskEventsGetter
+} from '../buildTaskEventsHandler';
+import { cropTasksMap } from '../../services/images';
 
 const getTaskEvents: TaskEventsGetter = taskId => {
     const tasks = cropTasksMap.get(taskId);
@@ -20,4 +21,7 @@ const getTaskEvents: TaskEventsGetter = taskId => {
     }
 }
 
-export const cropEventsHandler = buildTaskEventsHandler(getTaskEvents);
+export const cropEventsHandler = {
+    pre: buildPre(getTaskEvents),
+    base: buildBase(),
+};

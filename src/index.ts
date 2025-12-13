@@ -1,42 +1,52 @@
-import koa from 'koa';
-import { WebSocketServer } from 'ws';
+import { fastify } from 'fastify';
 import { exiftool } from 'exiftool-vendored';
 
 import { errorHandler } from './middleware/errorHandler';
-import { buildHttpRouters } from './http/router';
+import {
+    httpRoutes,
+    sseRoutes,
+    rawHttpRoutes,
+} from './http/routers';
+import { wsRoutes } from './ws/routers';
 import { appConfig } from './config';
-import { carouselHandler } from './ws/handlers/carousel';
 
-const app = new koa();
-app.use(errorHandler);
+const app = fastify();
 
-const { router, bodyRouter } = buildHttpRouters();
-app.use(router.routes());
-app.use(bodyRouter.routes());
+app.setErrorHandler(errorHandler);
+app.register(httpRoutes);
+app.register(sseRoutes);
+app.register(rawHttpRoutes);
+app.register(wsRoutes);
 
-const httpServer = app.listen(appConfig.server.port, () =>
-    console.log(`Server listening on port ${appConfig.server.port}`)
-);
+let closing = false;
+const cleanUp = async (exitCode: 0 | 1) => {
+    if (closing) return;
+    closing = true;
 
-const wsServer = new WebSocketServer({
-    server: httpServer,
-    path: '/carousel',
-});
+    await app.close().catch(err => console.error(
+        "Error closing server: ", err
+    ));
+    await exiftool.end().catch(err => console.error(
+        "Error closing exiftool: ", err
+    ));
 
-wsServer.addListener('connection', carouselHandler);
-
-const shutdown = async (signal: string) => {
-    console.log(`Received ${signal}, shutting down...`);
-    try {
-        httpServer.close();
-        wsServer.close();
-        await exiftool.end();
-        process.exit(0);
-    } catch (err) {
-        console.error("Shutdown error:", err);
-        process.exit(1);
-    }
+    process.exit(exitCode);
 }
 
-process.addListener('SIGTERM', () => shutdown('SIGTERM'));
-process.addListener('SIGINT', () => shutdown('SIGINT'));
+const shutdown = (signal: NodeJS.Signals) => {
+    console.log(`Received ${signal}, shutting down...`);
+    return cleanUp(0);
+}
+
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+process.once('SIGINT', () => shutdown('SIGINT'));
+
+try {
+    const versionForWarmup = await exiftool.version();
+    console.log(`EXIFTool version ${versionForWarmup} ready for requests`);
+    const address = await app.listen({ port: appConfig.server.port });
+    console.log(`Server listening at ${address}`);
+} catch (err) {
+    console.error("Error starting server: ", err);
+    await cleanUp(1);
+}

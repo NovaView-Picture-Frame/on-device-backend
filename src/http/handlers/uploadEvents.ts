@@ -1,8 +1,9 @@
 import {
-    uploadTasksMap,
-    buildTaskEventsHandler,
+    buildPre,
+    buildBase,
     type TaskEventsGetter
-} from '../../services/images';
+} from '../buildTaskEventsHandler';
+import { uploadTasksMap } from '../../services/images';
 
 const getTaskEvents: TaskEventsGetter = taskId => {
     const tasks = uploadTasksMap.get(taskId);
@@ -32,4 +33,7 @@ const getTaskEvents: TaskEventsGetter = taskId => {
     }
 }
 
-export const uploadEventsHandler = buildTaskEventsHandler(getTaskEvents);
+export const uploadEventsHandler = {
+    pre: buildPre(getTaskEvents),
+    base: buildBase(),
+};

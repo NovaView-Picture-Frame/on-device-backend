@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { RouterContext } from '@koa/router';
+import type { FastifyRequest } from 'fastify';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
 import { getExtractRegionRecordById } from '../../repositories/images';
@@ -26,49 +26,45 @@ const toOffset = (input: {
     limit: number;
 }): number => {
     const offset = ~~(input.size * input.ratio);
-    if (offset + input.limit > input.size) throw new HttpBadRequestError(
+    if (input.size + offset > input.limit) throw new HttpBadRequestError(
         "Offset out of bounds"
     );
 
     return offset;
 }
 
-export const cropHandler = (ctx: RouterContext) => {
-    const paramsResult = paramsSchema.safeParse(ctx.params);
+export const cropHandler = (req: FastifyRequest) => {
+    const paramsResult = paramsSchema.safeParse(req.params);
     if (!paramsResult.success) throw new HttpBadRequestError("Invalid URL parameters");
 
-    const bodyResult = bodySchema.safeParse(ctx.request.body);
+    const bodyResult = bodySchema.safeParse(req.body);
     if (!bodyResult.success) throw new HttpBadRequestError("Invalid request body");
 
     const extractRegionRecord = getExtractRegionRecordById(paramsResult.data.id);
     if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
     const left = toOffset({
-        size: extractRegionRecord.extractRegion.width,
+        size: appConfig.device.screen.width,
         ratio: bodyResult.data.extract_left_ratio,
-        limit: appConfig.device.screen.width,
+        limit: extractRegionRecord.extractRegion.width,
     });
 
     const top = toOffset({
-        size: extractRegionRecord.extractRegion.height,
+        size: appConfig.device.screen.height,
         ratio: bodyResult.data.extract_top_ratio,
-        limit: appConfig.device.screen.height,
+        limit: extractRegionRecord.extractRegion.height,
     });
 
     if (
         left === extractRegionRecord.extractRegion.left &&
         top === extractRegionRecord.extractRegion.top
-    ) {
-        ctx.body = {
-            data: {
-                type: "unchanged",
-            },
-        };
+    ) return {
+        data: {
+            type: "unchanged",
+        },
+    };
 
-        return;
-    }
-
-    ctx.body = {
+    return {
         data: {
             type: "processing",
             taskId: cropProcessor({
@@ -77,5 +73,5 @@ export const cropHandler = (ctx: RouterContext) => {
                 top,
             }),
         },
-    };
+    }
 }

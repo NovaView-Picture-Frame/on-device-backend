@@ -1,4 +1,4 @@
-import type { Context, Next } from 'koa';
+import type { FastifyInstance } from 'fastify'
 
 abstract class HttpError extends Error {
     abstract status: number;
@@ -11,22 +11,13 @@ abstract class HttpError extends Error {
 export class HttpBadRequestError extends HttpError { status = 400; };
 export class HttpNotFoundError extends HttpError { status = 404; };
 
-export const errorHandler = async (ctx: Context, next: Next) => {
-    try {
-        await next();
-    } catch (err) {
-        if (err instanceof HttpError) {
-            ctx.status = err.status;
-            ctx.body = {
-                error: err.message,
-            };
-        } else {
-            ctx.status = 500;
-            ctx.body = {
-                error: "Internal Server Error",
-            };
-
-            console.error("Unexpected error: ", err);
+export const errorHandler: FastifyInstance['errorHandler'] =
+    (error, _, reply) => {
+        if (error instanceof HttpError) {
+            reply.status(error.status).send({ error: error.message });
+            return;
         }
-    }
-}
+
+        reply.status(500).send({ error: "Internal Server Error" });
+        console.error("Unexpected error: ", error);
+    };

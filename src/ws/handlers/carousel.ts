@@ -1,31 +1,43 @@
 import { z } from 'zod';
+import type { UUID } from 'node:crypto';
+import type { FastifyRequest } from 'fastify';
 import type { WebSocket, RawData } from 'ws';
-import type { IncomingMessage } from 'http';
 
+import { HttpBadRequestError } from '../../middleware/errorHandler';
 import {
     handleConnected,
     handleClosed,
     requestSchedule,
 } from '../../services/images/carousel';
 import { ClientMessageSchema } from '../../models/carousel';
-import type { UUID } from 'node:crypto';
 
-export const headerSchema = z.object({
+interface Context {
+    deviceId: UUID;
+}
+
+const headerSchema = z.object({
     'device-id': z.uuidv4().pipe(
         z.custom<UUID>()
     ),
 });
 
-export const carouselHandler = (ws: WebSocket, req: IncomingMessage) => {
-    const headerResult = headerSchema.safeParse(req.headers);
-    if (!headerResult.success) {
-        ws.close(1008, "Invalid headers");
-        return;
-    }
+const contextMap = new WeakMap<FastifyRequest, Context>();
 
-    const deviceId = headerResult.data['device-id'];
-    handleConnected(ws, deviceId);
-    console.log(`WebSocket connected for device: ${deviceId}`);
+export const carouselUpgradeHandler = async (req: FastifyRequest) => {
+    const headerResult = headerSchema.safeParse(req.headers);
+    if (!headerResult.success) throw new HttpBadRequestError("Invalid headers");
+
+    contextMap.set(req, {
+        deviceId: headerResult.data['device-id'],
+    });
+}
+
+export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
+    const context = contextMap.get(req);
+    if (!context) throw new Error("Context not found for WebSocket");
+
+    handleConnected(context.deviceId, ws);
+    console.log(`WebSocket connected for device: ${context.deviceId}`);
 
     ws.on('message', (raw: RawData) => {
         try {
@@ -35,23 +47,25 @@ export const carouselHandler = (ws: WebSocket, req: IncomingMessage) => {
 
             switch (message.type) {
                 case 'requestSchedule':
-                    requestSchedule(deviceId);
+                    requestSchedule(context.deviceId);
+                    console.log(`Schedule requested at ${new Date().toISOString()} (device: ${context.deviceId})`);
                     break;
 
                 case 'preloadComplete':
-                    console.log(`Preload complete: ${message.payload.id} at ${message.payload.timeStamp.toISOString()} (device: ${deviceId})`);
+                    console.log(`Preload complete: ${message.payload.id} at ${message.payload.timeStamp.toISOString()} (device: ${context.deviceId})`);
                     break;
             }
         } catch {
             ws.send(JSON.stringify({
-                type: 'error',
+                type: "error",
                 message: "Invalid message",
             }));
         }
     });
 
     ws.on('close', () => {
-        handleClosed(deviceId);
-        console.log(`WebSocket closed for device: ${deviceId}`);
+        handleClosed(context.deviceId, ws);
+        contextMap.delete(req);
+        console.log(`WebSocket closed for device: ${context.deviceId}`);
     });
-};
+}

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { z } from 'zod';
-import type { Context } from 'koa';
+import type { FastifyRequest, FastifyReply } from 'fastify';
 
 import { appConfig } from '../../config';
 import { HttpBadRequestError } from '../../middleware/errorHandler';
@@ -12,7 +12,7 @@ import { createMaxSizeTransform, MaxSizeError } from '../../services/images/uplo
 import type { ExtractRegionRecord } from '../../models/images';
 
 const headerSchema = z.object({
-    'content-type': z.string().regex(/^image\//i).optional(),
+    'content-type': z.string().regex(/^image\/[^;]+/i).optional(),
     'content-length': z.coerce.number().int().positive().max(
         appConfig.services.upload.size_limit_bytes
     ).optional(),
@@ -20,16 +20,16 @@ const headerSchema = z.object({
     'file-name': z.string().max(255).optional(),
 });
 
-const respondExisting = (ctx: Context, record: ExtractRegionRecord) =>
-    ctx.body = {
+const respondExisting = (reply: FastifyReply, record: ExtractRegionRecord) =>
+    reply.send({
         data: {
             type: "existing",
             record,
         },
-    };
+    });
 
-export const uploadHandler = async (ctx: Context) => {
-    const headerResult = headerSchema.safeParse(ctx.request.headers);
+export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply) => {
+    const headerResult = headerSchema.safeParse(request.headers);
     if (!headerResult.success) throw new HttpBadRequestError(
         "Invalid headers"
     );
@@ -39,7 +39,7 @@ export const uploadHandler = async (ctx: Context) => {
         const extractRegionRecord = getExtractRegionRecordByHash(headerHash);
 
         if (extractRegionRecord) {
-            respondExisting(ctx, extractRegionRecord);
+            respondExisting(reply, extractRegionRecord);
             return;
         }
     }
@@ -68,7 +68,7 @@ export const uploadHandler = async (ctx: Context) => {
             if (!extractRegionRecord) return;
 
             existingController.abort();
-            respondExisting(ctx, extractRegionRecord);
+            respondExisting(reply, extractRegionRecord);
         },
         () => {}
     );
@@ -76,7 +76,7 @@ export const uploadHandler = async (ctx: Context) => {
     try {
         await Promise.all([
             pipeline(
-                ctx.req,
+                request.raw,
                 createMaxSizeTransform(appConfig.services.upload.size_limit_bytes),
                 tee,
                 { signal }
@@ -86,12 +86,12 @@ export const uploadHandler = async (ctx: Context) => {
 
         if (existingController.signal.aborted) return;
 
-        ctx.body = {
+        reply.send({
             data: {
                 type: "processing",
                 taskId,
             },
-        };
+        });
     } catch (err) {
         if (timeoutController.signal.aborted) throw new HttpBadRequestError(
             "Request timeout"
