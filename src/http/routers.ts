@@ -22,7 +22,7 @@ export const sseRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(fastifySSE);
 
     fastify.get(
-        '/upload/:taskId/events',
+        '/upload/events/:taskId',
         {
             sse: true,
             preHandler: uploadEventsHandler.pre,
@@ -30,7 +30,7 @@ export const sseRoutes = async (fastify: FastifyInstance) => {
         uploadEventsHandler.base,
     );
     fastify.get(
-        '/crop/:taskId/events',
+        '/crop/events/:taskId',
         {
             sse: true,
             preHandler: cropEventsHandler.pre,

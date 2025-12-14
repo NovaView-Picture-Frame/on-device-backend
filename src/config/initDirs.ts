@@ -18,11 +18,11 @@ function* walkTree(
             yield* walkTree(v, path ? `${path}/${k}` : k);
 }
 
-type NodePaths = {
+interface NodePaths {
     _base?: string;
     _tmp?: string;
     [key: string]: NodePaths | string;
-};
+}
 
 const getNodeAtPath = (root: NodePaths, path: string) => path
     ? path.split('/').reduce(

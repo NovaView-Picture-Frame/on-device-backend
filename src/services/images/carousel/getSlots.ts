@@ -55,7 +55,7 @@ const buildSlot = (input: {
 
 export const getSlots = (input: GetSlotsInput) => {
     if (input.start < 0 || input.length < 0) throw new Error(
-        `Invalid arguments: 'start' and 'length' must be non-negative.`
+        "Invalid arguments: 'start' and 'length' must be non-negative."
     );
 
     const { length } = input.Ids;

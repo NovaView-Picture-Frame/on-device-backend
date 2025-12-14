@@ -1,7 +1,9 @@
 export {
-    handleClosed,
-    handleConnected,
+    activate,
+    deactivate,
     requestSchedule,
     switchOrder,
     onImagesChanged,
+    handleConnected,
+    handleClosed,
 } from './runtime';

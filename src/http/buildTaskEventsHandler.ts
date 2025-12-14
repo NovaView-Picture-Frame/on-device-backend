@@ -4,8 +4,13 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 
 import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
 
-type TaskEvents = Record<string, Promise<object | null>>;
-export type TaskEventsGetter = (taskId: UUID) => TaskEvents | undefined;
+interface TaskEvents {
+    [taskName: string]: Promise<object | null>;
+}
+
+export interface TaskEventsGetter {
+    (taskId: UUID): TaskEvents | undefined;
+}
 
 interface Context {
     taskEvents: TaskEvents;

@@ -9,10 +9,10 @@
 	"devDependencies": {
 		"@fastify/sse": "^0.4.0",
 		"@fastify/websocket": "^11.2.0",
-		"@gqloom/core": "^0.14.1",
+		"@gqloom/core": "^0.14.2",
 		"@gqloom/zod": "^0.13.0",
 		"@types/better-sqlite3": "^7.6.13",
-		"@types/node": "^25.0.1",
+		"@types/node": "^25.0.2",
 		"@types/ws": "^8.18.1",
 		"better-sqlite3": "^12.5.0",
 		"exiftool-vendored": "^34.0.0",

@@ -3,7 +3,7 @@ import { getIds } from './getIds';
 import { getSlots } from './getSlots';
 
 import type { ScheduleMessage } from '../../../models/carousel';
-import type { RunningState } from './types';
+import type { State } from './types';
 
 const getStartIndex = (now: Date, startTime: Date) => {
     const elapsed = now.getTime() - startTime.getTime();
@@ -12,10 +12,10 @@ const getStartIndex = (now: Date, startTime: Date) => {
     );
 
     return ~~(elapsed / appConfig.services.carousel.default_interval_ms);
-};
+}
 
 export const buildScheduleMessage = (
-    state: RunningState,
+    state: Extract<State, { phase: 'running' }>,
     now: Date,
 ): ScheduleMessage => {
     const Ids = getIds(state.order);
@@ -44,5 +44,5 @@ export const buildScheduleMessage = (
         type: 'newSchedule',
         acceptableDelay: appConfig.services.carousel.acceptable_delay_ms,
         slots,
-    };
-};
+    }
+}

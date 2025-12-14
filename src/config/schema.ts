@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { OrderSchema } from '../models/carousel';
+import { orderSchema } from '../models/carousel';
 
 export const argsSchema = z.tuple([
     z.literal('-c'),
@@ -42,7 +42,7 @@ export const configSchema = z.object({
         }),
 
         carousel: z.object({
-            default_order: OrderSchema,
+            default_order: orderSchema,
             default_interval_ms: z.int().positive(),
             acceptable_delay_ms: z.int().positive(),
             schedule_window_size: z.int().positive(),

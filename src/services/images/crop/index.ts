@@ -10,14 +10,16 @@ import type { ExtractOffsetUpdate, ExtractRegionRecord } from '../../../models/i
 const getTaskKey = (offset: ExtractOffsetUpdate) =>
     `${offset.id}-${offset.extractRegion.left}-${offset.extractRegion.top}`;
 
+interface Tasks {
+    readonly crop: Promise<
+        Parameters<typeof updateAndMove>[0]['record']['extractRegion']
+    >;
+    readonly persist: ReturnType<typeof updateAndMove>;
+}
+
 export const tasksMap = new Map<UUID, {
     key: ReturnType<typeof getTaskKey> | null;
-    readonly tasks: {
-        readonly crop: Promise<
-            Parameters<typeof updateAndMove>[0]['record']['extractRegion']
-        >;
-        readonly persist: ReturnType<typeof updateAndMove>;
-    }
+    readonly tasks: Tasks;
 }>();
 
 export const cropProcessor = (input: {

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const OrderSchema = z.enum([
+export const orderSchema = z.enum([
     'random',
     'createdAsc',
     'createdDesc',
@@ -8,7 +8,15 @@ export const OrderSchema = z.enum([
     'takenDesc',
 ]);
 
-export type Order = z.infer<typeof OrderSchema>;
+export type Order = z.infer<typeof orderSchema>;
+
+export const orderSwitchModeSchema = z.enum([
+    'restart',
+    'continue',
+]);
+
+export type OrderSwitchMode = z.infer<typeof orderSwitchModeSchema>;
+
 export interface Slot {
     id: string;
     startTime: Date;
