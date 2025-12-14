@@ -1,59 +1,71 @@
 import type { UUID } from 'crypto';
 
-import type { Order } from '../../../models/carousel';
+import type { Order, OrderSwitchMode } from '../../../models/carousel';
 
 type OrderOption =
-    | { order: 'random'; seed: Buffer }
-    | { order: Exclude<Order, 'random'>; seed?: never };
+    | {
+        order: Extract<Order, 'random'>;
+        seed: Buffer;
+    }
+    | {
+        order: Exclude<Order, 'random'>;
+        seed?: never;
+    };
 
-type IdleState = { phase: 'idle' };
+interface IdleState {
+    phase: 'idle';
+    order: Order;
+}
 
-export type RunningState = {
+type RunningState = {
     phase: 'running';
     startTime: Date;
 } & OrderOption;
 
 export type State = IdleState | RunningState;
 
-export const initialState: State = { phase: 'idle' };
-
-type ClientConnectedEvent = {
-    type: 'CLIENT_CONNECTED';
-    now: Date;
-    deviceId: UUID;
+type ActivateEvent = {
+    type: 'ACTIVATE';
 } & OrderOption;
 
-type RequestScheduleEvent = {
+interface DeactivateEvent {
+    type: 'DEACTIVATE';
+}
+
+interface RequestScheduleEvent {
     type: 'REQUEST_SCHEDULE';
-    now: Date;
     deviceId: UUID;
-};
+}
+
+interface SetOrderEvent {
+    type: 'SET_ORDER';
+    order: Order;
+}
 
 type SwitchOrderEvent = {
     type: 'SWITCH_ORDER';
-    now: Date;
+    mode: OrderSwitchMode;
 } & OrderOption;
 
-type ImagesChangedEvent = {
+interface ImagesChangedEvent {
     type: 'IMAGES_CHANGED';
-    now: Date;
-};
+}
 
 export type Event =
-    | ClientConnectedEvent
+    | ActivateEvent
+    | DeactivateEvent
     | RequestScheduleEvent
+    | SetOrderEvent
     | SwitchOrderEvent
     | ImagesChangedEvent;
 
-type SendToOneAction = {
+interface SendToOneAction {
     type: 'SEND_TO_ONE';
-    now: Date;
     deviceId: UUID;
-};
+}
 
-type BroadcastAction = {
+interface BroadcastAction {
     type: 'BROADCAST';
-    now: Date;
-};
+}
 
 export type Action = SendToOneAction | BroadcastAction;

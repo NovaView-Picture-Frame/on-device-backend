@@ -60,7 +60,10 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
         stream: tee,
         signal,
     });
-    const timer = setTimeout(() => timeoutController.abort(), appConfig.services.upload.timeout_ms);
+    const timer = setTimeout(
+        () => timeoutController.abort(),
+        appConfig.services.upload.timeout_ms,
+    );
 
     hashAndMetadata.then(
         ({ hash }) => {

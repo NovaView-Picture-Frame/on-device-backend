@@ -1,140 +1,118 @@
+import WebSocket from 'ws';
 import { randomBytes, type UUID } from 'crypto';
-import type { WebSocket } from 'ws';
 
 import { appConfig } from '../../../config';
-import { initialState } from './types';
 import { buildScheduleMessage } from './buildSchedule';
 import { reducer } from './reducer';
 import type { State, Event, Action } from './types';
-import type { Order } from '../../../models/carousel';
+import type { Order, OrderSwitchMode } from '../../../models/carousel';
 
-let globalState: State = initialState;
 const clientsMap = new Map<UUID, WebSocket>();
 
-const send = (ws: WebSocket, text: string) => {
-    if (ws.readyState !== ws.OPEN) return;
+let state: State = {
+    phase: 'idle',
+    order: appConfig.services.carousel.default_order,
+}
 
+const generateSeed = () => randomBytes(32);
+
+const send = (ws: WebSocket, text: string) => {
+    if (ws.readyState !== WebSocket.OPEN) return;
     ws.send(text);
 }
 
-const dispatchMessage = (action?: Action) => {
-    if (!action) return;
-    if (globalState.phase !== 'running') {
-        throw new Error("Unexpected action: running in non-running state.");
-    }
+const sendSchedule = (handledAt: Date, action: Action) => {
+    if (state.phase !== 'running') throw new Error(
+        "Unexpected action: running in non-running state."
+    );
 
-    const message = buildScheduleMessage(globalState, action.now);
+    const message = buildScheduleMessage(state, handledAt);
     const text = JSON.stringify(message);
 
     switch (action.type) {
-        case 'SEND_TO_ONE':
+        case 'SEND_TO_ONE': {
             const ws = clientsMap.get(action.deviceId);
-            if (!ws) throw new Error(
-                `No WebSocket found for deviceId: ${action.deviceId}`
-            );
+            if (!ws) throw new Error(`No WebSocket found for deviceId: ${action.deviceId}`);
 
             send(ws, text);
             break;
+        }
 
         case 'BROADCAST':
             for (const ws of clientsMap.values()) send(ws, text);
-            break;
+        break;
     }
 }
 
-const dispatchEvent = (
-    buildEvent: (state: State, now: Date) => Event
-) => {
-    const event = buildEvent(globalState, new Date());
-    const { nextState, action } = reducer(globalState, event);
-    globalState = nextState;
-    dispatchMessage(action);
+const dispatch = (event: Event) => {
+    const handledAt = new Date();
+
+    const { nextState, action } = reducer({
+        state,
+        event,
+        handledAt,
+    });
+
+    state = nextState;
+    action && sendSchedule(handledAt, action);
 }
 
-const buildRandomOrder = (): { order: 'random'; seed: Buffer } => ({
-    order: 'random',
-    seed: randomBytes(32),
-})
+export const activate = () => dispatch(
+    state.order === 'random'
+        ? {
+            type: 'ACTIVATE',
+            order: 'random',
+            seed: generateSeed(),
+        } : {
+            type: 'ACTIVATE',
+            order: state.order,
+        }
+);
 
-const buildClientConnectedEvent = (input: {
-    state: State,
-    deviceId: UUID,
-    now: Date,
-}): Event => {
-    if (input.state.phase === 'idle') {
-        if (appConfig.services.carousel.default_order === 'random') return {
-            type: 'CLIENT_CONNECTED',
-            now: input.now,
-            deviceId: input.deviceId,
-            ...buildRandomOrder(),
-        };
+export const deactivate = () => dispatch({ type: 'DEACTIVATE' });
 
-        return {
-            type: 'CLIENT_CONNECTED',
-            now: input.now,
-            deviceId: input.deviceId,
-            order: appConfig.services.carousel.default_order ,
-        };
+export const requestSchedule = (deviceId: UUID) => dispatch({
+    type: 'REQUEST_SCHEDULE',
+    deviceId,
+});
+
+export const switchOrder = (order: Order, mode: OrderSwitchMode) => {
+    if (state.phase === 'idle') {
+        dispatch({ type: 'SET_ORDER', order });
+        return;
     }
 
-    if (input.state.order === 'random') return {
-        type: 'CLIENT_CONNECTED',
-        now: input.now,
-        deviceId: input.deviceId,
-        order: 'random',
-        seed: input.state.seed,
-    };
-
-    return {
-        type: 'CLIENT_CONNECTED',
-        now: input.now,
-        deviceId: input.deviceId,
-        order: input.state.order,
-    };
+    dispatch(
+        order === 'random'
+            ? {
+                type: 'SWITCH_ORDER',
+                mode, order,
+                seed: generateSeed(),
+            } : {
+                type: 'SWITCH_ORDER',
+                mode, order,
+            }
+    );
 }
 
-const buildSwitchOrderEvent = (order: Order, now: Date): Event => {
-    if (order === 'random') return {
-        type: 'SWITCH_ORDER',
-        now,
-        ...buildRandomOrder(),
-    };
-
-    return {
-        type: 'SWITCH_ORDER',
-        now,
-        order,
-    };
-}
+export const onImagesChanged = () => dispatch({ type: 'IMAGES_CHANGED' });
 
 export const handleConnected = (deviceId: UUID, ws: WebSocket) => {
     clientsMap.set(deviceId, ws);
-    dispatchEvent((state, now) => buildClientConnectedEvent({
-        state,
-        deviceId,
-        now,
-    }))
+
+    if (state.phase === 'idle') {
+        activate();
+        console.log("WebSocket Activated")
+    }
+    console.log("WebSocket connected for device: ", deviceId);
 }
 
 export const handleClosed = (deviceId: UUID, ws: WebSocket) => {
     if (ws !== clientsMap.get(deviceId)) return;
-
     clientsMap.delete(deviceId);
-    if (clientsMap.size === 0) globalState = initialState;
+    console.log("WebSocket closed for device: ", deviceId);
+
+    if (clientsMap.size !== 0) return;
+    deactivate();
+    console.log("WebSocket Deactivated");
 }
-
-export const requestSchedule = (deviceId: UUID) =>
-    dispatchEvent((_, now) => ({
-        type: 'REQUEST_SCHEDULE',
-        now,
-        deviceId,
-    }));
-
-export const switchOrder = (order: Order) =>
-    dispatchEvent((_, now) => buildSwitchOrderEvent(order, now));
-
-export const onImagesChanged = () =>
-    dispatchEvent((_, now) => ({
-        type: 'IMAGES_CHANGED',
-        now,
-    }));

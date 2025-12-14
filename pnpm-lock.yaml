@@ -15,17 +15,17 @@ importers:
         specifier: ^11.2.0
         version: 11.2.0
       '@gqloom/core':
-        specifier: ^0.14.1
-        version: 0.14.1(graphql@16.12.0)
+        specifier: ^0.14.2
+        version: 0.14.2(graphql@16.12.0)
       '@gqloom/zod':
         specifier: ^0.13.0
-        version: 0.13.0(@gqloom/core@0.14.1(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)
+        version: 0.13.0(@gqloom/core@0.14.2(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
       '@types/node':
-        specifier: ^25.0.1
-        version: 25.0.1
+        specifier: ^25.0.2
+        version: 25.0.2
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.1
@@ -52,7 +52,7 @@ importers:
         version: 12.1.0
       rolldown-vite:
         specifier: ^7.2.11
-        version: 7.2.11(@types/node@25.0.1)(esbuild@0.25.12)(yaml@2.8.2)
+        version: 7.2.11(@types/node@25.0.2)(esbuild@0.25.12)(yaml@2.8.2)
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
@@ -61,7 +61,7 @@ importers:
         version: 5.9.3
       vite-plugin-static-copy:
         specifier: ^3.1.4
-        version: 3.1.4(vite@7.1.7(@types/node@25.0.1)(lightningcss@1.30.2)(yaml@2.8.2))
+        version: 3.1.4(vite@7.1.7(@types/node@25.0.2)(lightningcss@1.30.2)(yaml@2.8.2))
       ws:
         specifier: ^8.18.3
         version: 8.18.3
@@ -269,8 +269,8 @@ packages:
   '@fastify/websocket@11.2.0':
     resolution: {integrity: sha512-3HrDPbAG1CzUCqnslgJxppvzaAZffieOVbLp1DAy1huCSynUWPifSvfdEDUR8HlJLp3sp1A36uOM2tJogADS8w==}
 
-  '@gqloom/core@0.14.1':
-    resolution: {integrity: sha512-Glin1mf/P5BTJX90indArEPAWWrBwzkUqcjZOSIECXAVHUxrCen2yUnLBYy3NRK5TncCCBux5QmR8qgL3Flwaw==}
+  '@gqloom/core@0.14.2':
+    resolution: {integrity: sha512-bE1Y/OI37465KtIve+mTE8R5qmTGUR02StUkfa3s5hLydmde0l2O/PFHIqYCVkMartJmmCsLkMyfci/+nRuqwg==}
     peerDependencies:
       graphql: '>= 16.8.0'
 
@@ -656,8 +656,8 @@ packages:
   '@types/luxon@3.7.1':
     resolution: {integrity: sha512-H3iskjFIAn5SlJU7OuxUmTEpebK6TKB8rxZShDslBMZJ5u9S//KM1sbdAisiSrqwLQncVjnpi2OK2J51h+4lsg==}
 
-  '@types/node@25.0.1':
-    resolution: {integrity: sha512-czWPzKIAXucn9PtsttxmumiQ9N0ok9FrBwgRWrwmVLlp86BrMExzvXRLFYRJ+Ex3g6yqj+KuaxfX1JTgV2lpfg==}
+  '@types/node@25.0.2':
+    resolution: {integrity: sha512-gWEkeiyYE4vqjON/+Obqcoeffmk0NF15WSBwSs7zwVA2bAbTaE0SJ7P0WNGoJn8uE7fiaV5a7dKYIJriEqOrmA==}
 
   '@types/ws@8.18.1':
     resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
@@ -1617,13 +1617,13 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@gqloom/core@0.14.1(graphql@16.12.0)':
+  '@gqloom/core@0.14.2(graphql@16.12.0)':
     dependencies:
       graphql: 16.12.0
 
-  '@gqloom/zod@0.13.0(@gqloom/core@0.14.1(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)':
+  '@gqloom/zod@0.13.0(@gqloom/core@0.14.2(graphql@16.12.0))(graphql@16.12.0)(zod@4.1.13)':
     dependencies:
-      '@gqloom/core': 0.14.1(graphql@16.12.0)
+      '@gqloom/core': 0.14.2(graphql@16.12.0)
       graphql: 16.12.0
       zod: 4.1.13
 
@@ -1878,19 +1878,19 @@ snapshots:
 
   '@types/better-sqlite3@7.6.13':
     dependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
 
   '@types/estree@1.0.8': {}
 
   '@types/luxon@3.7.1': {}
 
-  '@types/node@25.0.1':
+  '@types/node@25.0.2':
     dependencies:
       undici-types: 7.16.0
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
 
   abbrev@4.0.0: {}
 
@@ -2473,7 +2473,7 @@ snapshots:
 
   rfdc@1.4.1: {}
 
-  rolldown-vite@7.2.11(@types/node@25.0.1)(esbuild@0.25.12)(yaml@2.8.2):
+  rolldown-vite@7.2.11(@types/node@25.0.2)(esbuild@0.25.12)(yaml@2.8.2):
     dependencies:
       '@oxc-project/runtime': 0.101.0
       fdir: 6.5.0(picomatch@4.0.3)
@@ -2483,7 +2483,7 @@ snapshots:
       rolldown: 1.0.0-beta.53
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
       esbuild: 0.25.12
       fsevents: 2.3.3
       yaml: 2.8.2
@@ -2685,15 +2685,15 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  vite-plugin-static-copy@3.1.4(vite@7.1.7(@types/node@25.0.1)(lightningcss@1.30.2)(yaml@2.8.2)):
+  vite-plugin-static-copy@3.1.4(vite@7.1.7(@types/node@25.0.2)(lightningcss@1.30.2)(yaml@2.8.2)):
     dependencies:
       chokidar: 3.6.0
       p-map: 7.0.3
       picocolors: 1.1.1
       tinyglobby: 0.2.15
-      vite: 7.1.7(@types/node@25.0.1)(lightningcss@1.30.2)(yaml@2.8.2)
+      vite: 7.1.7(@types/node@25.0.2)(lightningcss@1.30.2)(yaml@2.8.2)
 
-  vite@7.1.7(@types/node@25.0.1)(lightningcss@1.30.2)(yaml@2.8.2):
+  vite@7.1.7(@types/node@25.0.2)(lightningcss@1.30.2)(yaml@2.8.2):
     dependencies:
       esbuild: 0.25.12
       fdir: 6.5.0(picomatch@4.0.3)
@@ -2702,7 +2702,7 @@ snapshots:
       rollup: 4.53.3
       tinyglobby: 0.2.15
     optionalDependencies:
-      '@types/node': 25.0.1
+      '@types/node': 25.0.2
       fsevents: 2.3.3
       lightningcss: 1.30.2
       yaml: 2.8.2

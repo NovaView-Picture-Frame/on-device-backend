@@ -20,15 +20,15 @@ import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
 
 export { InvalidBufferError } from './errors';
 
-export const tasksMap = new Map<UUID, {
+interface Tasks {
     readonly lookupPlace: ReturnType<typeof geocoding>;
     readonly saveOriginal: ReturnType<typeof saveStream>;
-    readonly crop: Promise<
-        Parameters<typeof insertAndMove>[0]['extractRegion']
-    >;
-	readonly optimize: ReturnType<typeof resizeToInside>;
+    readonly crop: Promise<Parameters<typeof insertAndMove>[0]['extractRegion']>;
+    readonly optimize: ReturnType<typeof resizeToInside>;
     readonly persist: ReturnType<typeof insertAndMove>;
-}>();
+}
+
+export const tasksMap = new Map<UUID, Tasks>();
 
 export const uploadProcessor = (input: {
     id: UUID;

@@ -8,9 +8,11 @@ export const resizeAndExtract = (input: {
     src: string,
     dest: string,
 }) => sharp(input.src)
-    .resize(appConfig.device.screen.width, appConfig.device.screen.height, {
-        fit: 'outside',
-    })
+    .resize(
+        appConfig.device.screen.width,
+        appConfig.device.screen.height,
+        { fit: 'outside'},
+    )
     .extract({
         left: input.record.extractRegion.left,
         top: input.record.extractRegion.top,

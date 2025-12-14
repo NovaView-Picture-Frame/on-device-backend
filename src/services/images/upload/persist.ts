@@ -58,9 +58,8 @@ export const saveStream = async (input: {
     await pipeline(
         input.stream,
         sink,
-        {
-            signal: input.signal,
-        });
+        { signal: input.signal },
+    );
 
     return {
         path: input.path,

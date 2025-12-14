@@ -21,7 +21,7 @@ const abortableSharp = async <T>(input: {
     input.signal.addEventListener(
         'abort',
         onAbort,
-        { once: true }
+        { once: true },
     );
     input.run(input.sharpInstance).then(resolve, reject);
 
@@ -50,10 +50,14 @@ export const resizeToCover = async (input: {
     sharpInstance: input.sharpInstance,
     signal: input.signal,
     run: sharp => sharp
-        .resize(appConfig.device.screen.width, appConfig.device.screen.height, {
-            fit: 'cover',
-            position: 'entropy',
-        })
+        .resize(
+            appConfig.device.screen.width,
+            appConfig.device.screen.height, 
+            {
+                fit: 'cover',
+                position: 'entropy',
+            },
+        )
         .keepIccProfile()
         .png()
         .toFile(input.path),

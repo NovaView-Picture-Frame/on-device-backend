@@ -73,10 +73,10 @@ const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
 
 export const upsert = db.transaction((input: Image) => {
     const id = insertStmt.get(toInsert(input));
-    if (id !== undefined) return { id, created: true };
+    if (id !== undefined) return { id, created: true }
 
     const record = getExtractRegionRecordByHash(input.hash);
-    if (record) return { id: record.id, created: false };
+    if (record) return { id: record.id, created: false }
 
     throw new DatabaseError()
 });

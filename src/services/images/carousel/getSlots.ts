@@ -48,14 +48,12 @@ const buildSlot = (input: {
     startTime: new Date(
         input.startTime.getTime() + input.index * appConfig.services.carousel.default_interval_ms
     ),
-    payload: {
-        id: input.id,
-    },
+    payload: { id: input.id },
 })
 
 export const getSlots = (input: GetSlotsInput) => {
     if (input.start < 0 || input.length < 0) throw new Error(
-        `Invalid arguments: 'start' and 'length' must be non-negative.`
+        "Invalid arguments: 'start' and 'length' must be non-negative."
     );
 
     const { length } = input.Ids;

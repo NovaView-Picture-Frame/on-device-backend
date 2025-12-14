@@ -59,10 +59,8 @@ export const cropHandler = (req: FastifyRequest) => {
         left === extractRegionRecord.extractRegion.left &&
         top === extractRegionRecord.extractRegion.top
     ) return {
-        data: {
-            type: "unchanged",
-        },
-    };
+        data: { type: "unchanged" },
+    }
 
     return {
         data: {

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { UUID } from 'node:crypto';
-import type { FastifyRequest } from 'fastify';
 import type { WebSocket, RawData } from 'ws';
+import type { FastifyRequest } from 'fastify';
 
 import { HttpBadRequestError } from '../../middleware/errorHandler';
 import {
@@ -36,9 +36,6 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
     const context = contextMap.get(req);
     if (!context) throw new Error("Context not found for WebSocket");
 
-    handleConnected(context.deviceId, ws);
-    console.log(`WebSocket connected for device: ${context.deviceId}`);
-
     ws.on('message', (raw: RawData) => {
         try {
             const message = ClientMessageSchema.parse(
@@ -66,6 +63,7 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
     ws.on('close', () => {
         handleClosed(context.deviceId, ws);
         contextMap.delete(req);
-        console.log(`WebSocket closed for device: ${context.deviceId}`);
     });
+
+    handleConnected(context.deviceId, ws);
 }
