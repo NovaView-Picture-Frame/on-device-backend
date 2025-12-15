@@ -1,4 +1,4 @@
-import WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { randomBytes, type UUID } from 'crypto';
 
 import { appConfig } from '../../../config';

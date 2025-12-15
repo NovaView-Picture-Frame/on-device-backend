@@ -18,12 +18,11 @@ export const buildScheduleMessage = (
     state: Extract<State, { phase: 'running' }>,
     now: Date,
 ): ScheduleMessage => {
-    const Ids = getIds(state.order);
     const { startTime } = state;
     const startIndex = getStartIndex(now, startTime);
 
     const baseInput = {
-        Ids,
+        ids: getIds(state.order),
         startTime,
         start: startIndex,
         length: appConfig.services.carousel.schedule_window_size,

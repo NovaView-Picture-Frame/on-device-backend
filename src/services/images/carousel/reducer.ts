@@ -15,91 +15,93 @@ export const reducer = (input: {
     nextState: State;
     action?: Action;
 } => {
-    switch (input.event.type) {
-        case 'ACTIVATE':
-            if (input.state.phase === 'running') return { nextState: input.state }
+    const { state, event, handledAt } = input;
 
-            return input.event.order === 'random'
+    switch (event.type) {
+        case 'ACTIVATE':
+            if (state.phase === 'running') return { nextState: state }
+
+            return event.order === 'random'
                 ? {
                     nextState: {
                         phase: 'running',
-                        startTime: input.handledAt,
-                        order: input.event.order,
-                        seed: input.event.seed,
+                        startTime: handledAt,
+                        order: event.order,
+                        seed: event.seed,
                     },
                 } : {
                     nextState: {
                         phase: 'running',
-                        startTime: input.handledAt,
-                        order: input.event.order,
+                        startTime: handledAt,
+                        order: event.order,
                     },
                 }
 
         case 'DEACTIVATE': {
-            if (input.state.phase === 'idle') return { nextState: input.state }
+            if (state.phase === 'idle') return { nextState: state }
 
             return {
                 nextState: {
                     phase: 'idle',
-                    order: input.state.order,
+                    order: state.order,
                 },
             }
         }
 
         case 'REQUEST_SCHEDULE':
-            if (input.state.phase === 'idle') throw new Error(
-                unexpectedEventMessage(input.event, input.state)
+            if (state.phase === 'idle') throw new Error(
+                unexpectedEventMessage(event, state)
             );
 
             return {
-                nextState: input.state,
+                nextState: state,
                 action: {
                     type: 'SEND_TO_ONE',
-                    deviceId: input.event.deviceId,
+                    deviceId: event.deviceId,
                 },
             }
 
         case 'SET_ORDER':
-            if (input.state.phase !== 'idle') throw new Error(
-                unexpectedEventMessage(input.event, input.state)
+            if (state.phase !== 'idle') throw new Error(
+                unexpectedEventMessage(event, state)
             );
             
             return {
                 nextState: {
-                    phase: input.state.phase,
-                    order: input.event.order,
+                    phase: state.phase,
+                    order: event.order,
                 },
             }
 
         case 'SWITCH_ORDER':
-            if (input.state.phase === 'idle') throw new Error(
-                unexpectedEventMessage(input.event, input.state)
+            if (state.phase === 'idle') throw new Error(
+                unexpectedEventMessage(event, state)
             );
 
             return {
-                nextState: input.event.order === 'random'
+                nextState: event.order === 'random'
                     ? {
                         phase: 'running',
-                        startTime: input.event.mode === 'restart'
-                            ? input.handledAt
-                            : input.state.startTime,
-                        order: input.event.order,
-                        seed: input.event.seed,
+                        startTime: event.mode === 'restart'
+                            ? handledAt
+                            : state.startTime,
+                        order: event.order,
+                        seed: event.seed,
                     } : {
                         phase: 'running',
-                        startTime: input.event.mode === 'restart'
-                            ? input.handledAt
-                            : input.state.startTime,
-                        order: input.event.order,
+                        startTime: event.mode === 'restart'
+                            ? handledAt
+                            : state.startTime,
+                        order: event.order,
                     },
                 action: { type: 'BROADCAST' },
             }
 
         case 'IMAGES_CHANGED':
-            if (input.state.phase === 'idle') return { nextState: input.state }
+            if (state.phase === 'idle') return { nextState: state }
 
             return {
-                nextState: input.state,
+                nextState: state,
                 action: { type: 'BROADCAST' },
             }
         }

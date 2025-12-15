@@ -35,23 +35,25 @@ export const uploadProcessor = (input: {
     stream: Readable;
     signal: AbortSignal;
 }) => {
-	const originalTmp = `${paths.originals._tmp}/${input.id}`;
-	const croppedTmp = `${paths.cropped._tmp}/${input.id}`;
-	const optimizedTmp = `${paths.optimized._tmp}/${input.id}`;
+    const { id, stream, signal } = input;
+
+	const originalTmp = `${paths.originals._tmp}/${id}`;
+	const croppedTmp = `${paths.cropped._tmp}/${id}`;
+	const optimizedTmp = `${paths.optimized._tmp}/${id}`;
 
     const teeForSharp = new PassThrough();
     const teeForFS = new PassThrough();
-    input.stream.pipe(teeForSharp);
-    input.stream.pipe(teeForFS);
+    stream.pipe(teeForSharp);
+    stream.pipe(teeForFS);
 
     const transform = sharp();
     teeForSharp.pipe(transform);
 
-    const sharpMetadata = getMetadata(transform.clone(), input.signal);
+    const sharpMetadata = getMetadata(transform.clone(), signal);
     const saveOriginal = saveStream({
         stream: teeForFS,
         path: originalTmp,
-        signal: input.signal,
+        signal,
     });
     const hashAndMetadata = Promise.all([sharpMetadata, saveOriginal])
         .then(([meta, { path, size }]) => extractHashAndMetadata({
@@ -66,7 +68,7 @@ export const uploadProcessor = (input: {
             return geocoding({
                 lat: GPSLatitude,
                 long: GPSLongitude,
-                signal: input.signal,
+                signal,
             }); 
         }
     );
@@ -76,7 +78,7 @@ export const uploadProcessor = (input: {
         resizeToCover({
             sharpInstance: transform.clone(),
             path: croppedTmp,
-            signal: input.signal,
+            signal,
         })
     ]).then(([metadata, coverOutput]) => {
         const scale = Math.max( 
@@ -95,7 +97,7 @@ export const uploadProcessor = (input: {
     const optimize = resizeToInside({
         sharpInstance: transform.clone(),
         path: optimizedTmp,
-        signal: input.signal,
+        signal,
     });
 
     const persist = Promise.all([
@@ -126,11 +128,11 @@ export const uploadProcessor = (input: {
         optimize,
         persist,
     };
-    tasksMap.set(input.id, tasks);
+    tasksMap.set(id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
         setTimeout(
-            () => tasksMap.delete(input.id),
+            () => tasksMap.delete(id),
             appConfig.runtime.tasks_results_ttl_ms
         );
 

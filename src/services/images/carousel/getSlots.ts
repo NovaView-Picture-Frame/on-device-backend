@@ -4,7 +4,7 @@ import { appConfig } from '../../../config';
 import type { Slot } from '../../../models/carousel';
 
 interface BaseInput {
-    Ids: number[];
+    ids: number[];
     startTime: Date;
     start: number;
     length: number;
@@ -17,11 +17,11 @@ type RandomOption =
 type GetSlotsInput = BaseInput & RandomOption;
 
 const getRound = (input: {
-    Ids: number[];
+    ids: number[];
     index: number;
     seed: Buffer;
 }) => {
-    const getKey = (id: typeof input.Ids[number]) =>
+    const getKey = (id: typeof input.ids[number]) =>
         createHash('sha256')
             .update(input.seed)
             .update(':')
@@ -30,7 +30,7 @@ const getRound = (input: {
             .update(String(id))
             .digest();
 
-    return input.Ids
+    return input.ids
         .map(id => ({
             id,
             key: getKey(id),
@@ -52,24 +52,26 @@ const buildSlot = (input: {
 })
 
 export const getSlots = (input: GetSlotsInput) => {
-    if (input.start < 0 || input.length < 0) throw new Error(
+    const { ids, startTime, start, length, random, seed } = input;
+
+    if (start < 0 || length < 0) throw new Error(
         "Invalid arguments: 'start' and 'length' must be non-negative."
     );
 
-    const { length } = input.Ids;
-    if (length === 0) return [];
+    const idsLength = ids.length;
+    if (idsLength === 0) return [];
 
-    if (input.random) {
-        const startRound = ~~(input.start / length);
-        const startIndex = input.start % length;
-        const endIndex = startIndex + input.length;
-        const roundCount = Math.ceil(endIndex / length);
+    if (random) {
+        const startRound = ~~(start / idsLength);
+        const startIndex = start % idsLength;
+        const endIndex = startIndex + length;
+        const roundCount = Math.ceil(endIndex / idsLength);
 
         const rounds = Array.from({ length: roundCount }, (_, offset) =>
             getRound({
-                Ids: input.Ids,
+                ids,
                 index: startRound + offset,
-                seed: input.seed,
+                seed,
             })
         );
 
@@ -77,21 +79,21 @@ export const getSlots = (input: GetSlotsInput) => {
             .flat()
             .slice(startIndex, endIndex)
             .map((id, offset) => buildSlot({
-                index: input.start + offset,
-                startTime: input.startTime,
+                index: start + offset,
+                startTime,
                 id,
             }));
     } else {
-        return Array.from({ length: input.length }, (_, offset) => {
-            const index = input.start + offset;
-            const id = input.Ids[index % length];
+        return Array.from({ length }, (_, offset) => {
+            const index = start + offset;
+            const id = ids[index % idsLength];
             if (id === undefined) throw new Error(
                 `Unexpected error: No ID found at index ${index}.`
             );
 
             return buildSlot({
                 index,
-                startTime: input.startTime,
+                startTime,
                 id,
             });
         });

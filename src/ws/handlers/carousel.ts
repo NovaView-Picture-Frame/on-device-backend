@@ -4,6 +4,8 @@ import type { WebSocket, RawData } from 'ws';
 import type { FastifyRequest } from 'fastify';
 
 import { HttpBadRequestError } from '../../middleware/errorHandler';
+import { appConfig } from '../../config';
+import { setupHeartbeat } from '../heartbeat';
 import {
     handleConnected,
     handleClosed,
@@ -35,6 +37,16 @@ export const carouselUpgradeHandler = async (req: FastifyRequest) => {
 export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
     const context = contextMap.get(req);
     if (!context) throw new Error("Context not found for WebSocket");
+
+    setupHeartbeat({
+        ws,
+        intervalMs: appConfig.runtime.websocket_heartbeat_interval_ms,
+        timeoutMs: appConfig.runtime.websocket_heartbeat_timeout_ms,
+        onFail: ({ reason }) => {
+            console.log(`Heartbeat failed (${reason}) for device: ${context.deviceId}`);
+            ws.terminate();
+        },
+    });
 
     ws.on('message', (raw: RawData) => {
         try {
