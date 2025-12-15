@@ -70,9 +70,7 @@ export const cropProcessor = (input: {
             appConfig.runtime.tasks_results_ttl_ms
         );
 
-        await Promise.all([
-            ignoreErrorCodes(fs.unlink(croppedTmp), 'ENOENT'),
-        ]);
+        await ignoreErrorCodes(fs.unlink(croppedTmp), 'ENOENT');
     });
 
     return taskId;

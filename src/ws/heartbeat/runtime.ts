@@ -41,7 +41,7 @@ export const setupHeartbeat = (input: {
         if (cleaned) return;
         cleaned = true;
 
-        intervalTimer && clearInterval(intervalTimer);
+        if (intervalTimer) clearInterval(intervalTimer);
         intervalTimer = null;
         clearTimeoutTimer();
 

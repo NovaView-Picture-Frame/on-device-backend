@@ -8,9 +8,11 @@ export const createMaxSizeTransform = (limit: number) => {
     return new Transform({
         transform(chunk, _, callback) {
             total += chunk.length;
-            total > limit
-                ? callback(new MaxSizeError())
-                : callback(null, chunk);
+            if (total > limit) {
+                callback(new MaxSizeError());
+            } else {
+                callback(null, chunk);
+            }
         },
     });
 }

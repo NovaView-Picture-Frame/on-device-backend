@@ -54,7 +54,7 @@ const dispatch = (event: Event) => {
     });
 
     state = nextState;
-    action && sendSchedule(handledAt, action);
+    if (action) sendSchedule(handledAt, action);
 }
 
 export const activate = () => dispatch(

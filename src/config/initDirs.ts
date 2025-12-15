@@ -72,7 +72,9 @@ export const initDirs = async <const T extends DirTree>(root: string, tree: T) =
         promises.push(fs.mkdir(
             cur._base = root + relPath, { recursive: true }
         ));
-        node._withTmp && promises.push(fs.mkdir(
+
+        if (!node._withTmp) continue;
+        promises.push(fs.mkdir(
             cur._tmp = tmpRoot + relPath, { recursive: true }
         ));
     }
