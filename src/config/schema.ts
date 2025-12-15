@@ -1,9 +1,9 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { orderSchema } from '../models/carousel';
+import { orderSchema } from "../models/carousel";
 
 export const argsSchema = z.tuple([
-    z.literal('-c'),
+    z.literal("-c"),
     z.string().regex(/\.yaml$/),
 ]);
 
@@ -56,4 +56,4 @@ export const configSchema = z.object({
             user_agent: z.string().nonempty(),
         }),
     }),
-}).strict()
+}).strict();

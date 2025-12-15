@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance } from "fastify";
 
 abstract class HttpError extends Error {
     abstract status: number;
@@ -8,16 +8,20 @@ abstract class HttpError extends Error {
     }
 }
 
-export class HttpBadRequestError extends HttpError { status = 400; };
-export class HttpNotFoundError extends HttpError { status = 404; };
+export class HttpBadRequestError extends HttpError {
+    status = 400;
+}
 
-export const errorHandler: FastifyInstance['errorHandler'] =
-    (error, _, reply) => {
-        if (error instanceof HttpError) {
-            reply.status(error.status).send({ error: error.message });
-            return;
-        }
+export class HttpNotFoundError extends HttpError {
+    status = 404;
+}
 
-        reply.status(500).send({ error: "Internal Server Error" });
-        console.error("Unexpected error: ", error);
-    };
+export const errorHandler: FastifyInstance["errorHandler"] = (error, _, reply) => {
+    if (error instanceof HttpError) {
+        reply.status(error.status).send({ error: error.message });
+        return;
+    }
+
+    reply.status(500).send({ error: "Internal Server Error" });
+    console.error("Unexpected error: ", error);
+};

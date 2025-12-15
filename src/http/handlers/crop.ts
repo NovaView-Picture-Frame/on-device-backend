@@ -1,24 +1,24 @@
-import { z } from 'zod';
-import type { FastifyRequest } from 'fastify';
+import { z } from "zod";
+import type { FastifyRequest } from "fastify";
 
-import { HttpBadRequestError, HttpNotFoundError } from '../../middleware/errorHandler';
-import { getExtractRegionRecordById } from '../../repositories/images';
-import { appConfig } from '../../config'
-import { cropProcessor } from '../../services/images';
+import { HttpBadRequestError, HttpNotFoundError } from "../../middleware/errorHandler";
+import { getExtractRegionRecordById } from "../../repositories/images";
+import { appConfig } from "../../config";
+import { cropProcessor } from "../../services/images";
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),
 });
 
 const bodySchema = z.object({
-    extract_left_ratio: z.coerce.number().min(0).lt(1),
-    extract_top_ratio: z.coerce.number().min(0).lt(1),
-})
-.strict()
-.refine(
-    ({ extract_left_ratio, extract_top_ratio }) =>
-        (extract_left_ratio === 0 || extract_top_ratio === 0),
-);
+        extract_left_ratio: z.coerce.number().min(0).lt(1),
+        extract_top_ratio: z.coerce.number().min(0).lt(1),
+    })
+    .strict()
+    .refine(
+        ({ extract_left_ratio, extract_top_ratio }) =>
+            extract_left_ratio === 0 || extract_top_ratio === 0,
+    );
 
 const toOffset = (input: {
     size: number;
@@ -31,7 +31,7 @@ const toOffset = (input: {
     );
 
     return offset;
-}
+};
 
 export const cropHandler = (req: FastifyRequest) => {
     const paramsResult = paramsSchema.safeParse(req.params);
@@ -60,7 +60,7 @@ export const cropHandler = (req: FastifyRequest) => {
         top === extractRegionRecord.extractRegion.top
     ) return {
         data: { type: "unchanged" },
-    }
+    };
 
     return {
         data: {
@@ -71,5 +71,5 @@ export const cropHandler = (req: FastifyRequest) => {
                 top,
             }),
         },
-    }
-}
+    };
+};

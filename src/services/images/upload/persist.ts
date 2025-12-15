@@ -1,13 +1,13 @@
-import { createWriteStream } from 'node:fs';
-import { pipeline } from 'node:stream/promises';
-import fs from 'node:fs/promises';
-import { z } from 'zod';
-import type { Readable } from 'node:stream';
+import { createWriteStream } from "node:fs";
+import { pipeline } from "node:stream/promises";
+import fs from "node:fs/promises";
+import { z } from "zod";
+import type { Readable } from "node:stream";
 
-import { appConfig, paths } from '../../../config';
-import { imageRecordSchema } from '../../../models/images';
-import { upsert } from '../../../repositories/images';
-import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
+import { appConfig, paths } from "../../../config";
+import { imageRecordSchema } from "../../../models/images";
+import { upsert } from "../../../repositories/images";
+import { ignoreErrorCodes } from "../../../utils/ignoreErrorCodes";
 
 type PlaceSchema = ReturnType<typeof imageRecordSchema.shape.place.unwrap>;
 
@@ -26,19 +26,19 @@ export const geocoding = async (input: {
     long: number;
     signal: AbortSignal;
 }) => {
-    const baseUrl = 'https://nominatim.openstreetmap.org/reverse';
+    const baseUrl = "https://nominatim.openstreetmap.org/reverse";
     const params = new URLSearchParams({
         lat: input.lat.toString(),
         lon: input.long.toString(),
-        zoom: '10',
-        addressdetails: '0',
-        format: 'jsonv2',
+        zoom: "10",
+        addressdetails: "0",
+        format: "jsonv2",
     });
 
     const res = await fetch(`${baseUrl}?${params.toString()}`, {
         headers: {
-            'User-Agent': appConfig.external.nominatim.user_agent,
-            'Accept-Language': 'en',
+            "User-Agent": appConfig.external.nominatim.user_agent,
+            "Accept-Language": "en",
         },
         signal: input.signal,
     });
@@ -47,34 +47,27 @@ export const geocoding = async (input: {
     const nominatimResult = nominatimSchema.safeParse(await res.json());
     if (!nominatimResult.success) return null;
     return nominatimResult.data;
-}
+};
 
 export const saveStream = async (input: {
-    stream: Readable,
-    path: string,
-    signal: AbortSignal,
+    stream: Readable;
+    path: string;
+    signal: AbortSignal;
 }) => {
     const sink = createWriteStream(input.path);
-    await pipeline(
-        input.stream,
-        sink,
-        { signal: input.signal },
-    );
+    await pipeline(input.stream, sink, { signal: input.signal });
 
-    return {
-        path: input.path,
-        size: sink.bytesWritten,
-    }
-}
+    return { path: input.path, size: sink.bytesWritten };
+};
 
 export const insertAndMove = async (input: {
-    originalTmp: string,
-    croppedTmp: string,
-    optimizedTmp: string,
-    hash: Parameters<typeof upsert>[0]['hash'];
-    extractRegion: Parameters<typeof upsert>[0]['extractRegion'];
-    metadata: Parameters<typeof upsert>[0]['metadata'];
-    place: Parameters<typeof upsert>[0]['place'];
+    originalTmp: string;
+    croppedTmp: string;
+    optimizedTmp: string;
+    hash: Parameters<typeof upsert>[0]["hash"];
+    extractRegion: Parameters<typeof upsert>[0]["extractRegion"];
+    metadata: Parameters<typeof upsert>[0]["metadata"];
+    place: Parameters<typeof upsert>[0]["place"];
 }) => {
     const { id, created } = upsert(input);
 
@@ -87,9 +80,9 @@ export const insertAndMove = async (input: {
 
         await Promise.all(ignoreErrorCodes(
             moves.map(move => fs.link(...move)),
-            'EEXIST',
+            "EEXIST",
         ));
     }
 
     return id;
-}
+};

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const extractRegionSchema = z.object({
     left: z.int(),
@@ -86,9 +86,9 @@ export const imageRecordSchema = z.object({
 });
 
 export type ImageRecord = z.infer<typeof imageRecordSchema>;
-export type Image = Omit<ImageRecord, 'id'>;
+export type Image = Omit<ImageRecord, "id">;
 
-export type ExtractRegionRecord = Pick<ImageRecord, 'id' | 'extractRegion'>;
-export interface ExtractOffsetUpdate extends Pick<ImageRecord, 'id'> {
-    extractRegion: Pick<ImageRecord['extractRegion'], 'left' | 'top'>;
+export type ExtractRegionRecord = Pick<ImageRecord, "id" | "extractRegion">;
+export interface ExtractOffsetUpdate extends Pick<ImageRecord, "id"> {
+    extractRegion: Pick<ImageRecord["extractRegion"], "left" | "top">;
 }

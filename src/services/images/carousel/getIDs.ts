@@ -1,25 +1,12 @@
-import {
-    listIdUnordered,
-    listIdByCreated,
-    listIdByTaken,
-} from '../../../repositories/images';
-import type { Order } from '../../../models/carousel';
+import { listIdUnordered, listIdByCreated, listIdByTaken } from "../../../repositories/images";
+import type { Order } from "../../../models/carousel";
 
-export const getIds = (order: Order) => {
-    switch (order) {
-        case 'random':
-        return listIdUnordered();
+const orderMapping = {
+    random: () => listIdUnordered(),
+    createdAsc: () => listIdByCreated(true),
+    createdDesc: () => listIdByCreated(),
+    takenAsc: () => listIdByTaken(true),
+    takenDesc: () => listIdByTaken(),
+};
 
-        case 'createdAsc':
-        return listIdByCreated(true);
-
-        case 'createdDesc':
-        return listIdByCreated();
-
-        case 'takenAsc':
-        return listIdByTaken(true);
-
-        case 'takenDesc':
-        return listIdByTaken();
-    }
-}
+export const getIds = (order: Order) => orderMapping[order]();

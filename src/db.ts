@@ -1,14 +1,12 @@
-import Database from 'better-sqlite3';
+import Database from "better-sqlite3";
 
-import { appConfig, paths } from './config';
+import { appConfig, paths } from "./config";
 
-export const db = new Database(
-    `${paths._base}/${appConfig.server.database}`, {
-        nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`,
-    },
-);
+export const db = new Database(`${paths._base}/${appConfig.server.database}`, {
+    nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`,
+});
 
-db.exec(/* sql */`
+db.exec(/* sql */ `
     CREATE TABLE IF NOT EXISTS images (
         id                     INTEGER  PRIMARY KEY  AUTOINCREMENT,
         hash                   TEXT     NOT NULL     UNIQUE         CHECK(length(hash) = 64),
@@ -18,12 +16,12 @@ db.exec(/* sql */`
         extract_region_width   INTEGER  NOT NULL                    CHECK(extract_region_width > 0),
         extract_region_height  INTEGER  NOT NULL                    CHECK(extract_region_height > 0),
 
-        metadata_jsonb         BLOB     NOT NULL                    CHECK(json_valid(metadata_jsonb, 8) AND json_type(metadata_jsonb) = 'object' AND json(metadata_jsonb) != '{}'),
+        metadata_jsonb         BLOB     NOT NULL                    CHECK(json_valid(metadata_jsonb, 8) AND json_type(metadata_jsonb) = "object" AND json(metadata_jsonb) != "{}"),
         _taken_at              TEXT AS (
             datetime(
-                replace(substr(json_extract(metadata_jsonb, '$.DateTimeOriginal'), 1, 10), ':', '-') 
-                || ' ' ||
-                substr(json_extract(metadata_jsonb, '$.DateTimeOriginal'), 12)
+                replace(substr(json_extract(metadata_jsonb, "$.DateTimeOriginal"), 1, 10), ":", "-") 
+                || " " ||
+                substr(json_extract(metadata_jsonb, "$.DateTimeOriginal"), 12)
             )
         ) STORED,
 
@@ -54,4 +52,4 @@ db.exec(/* sql */`
     ) STRICT;
 `);
 
-db.pragma('journal_mode = WAL');
+db.pragma("journal_mode = WAL");

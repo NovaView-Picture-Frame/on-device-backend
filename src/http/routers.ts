@@ -1,28 +1,28 @@
-import fastifySSE from '@fastify/sse';
-import type { FastifyInstance } from 'fastify';
+import fastifySSE from "@fastify/sse";
+import type { FastifyInstance } from "fastify";
 
-import { infoHandler } from './handlers/info';
-import { uploadHandler } from './handlers/upload';
-import { uploadEventsHandler } from './handlers/uploadEvents';
-import { queryHandler } from './handlers/query';
-import { previewHandler } from './handlers/preview';
-import { deleteHandler } from './handlers/delete';
-import { cropHandler } from './handlers/crop';
-import { cropEventsHandler } from './handlers/cropEvents';
+import { infoHandler } from "./handlers/info";
+import { uploadHandler } from "./handlers/upload";
+import { uploadEventsHandler } from "./handlers/uploadEvents";
+import { queryHandler } from "./handlers/query";
+import { previewHandler } from "./handlers/preview";
+import { deleteHandler } from "./handlers/delete";
+import { cropHandler } from "./handlers/crop";
+import { cropEventsHandler } from "./handlers/cropEvents";
 
 export const httpRoutes = (fastify: FastifyInstance) => {
-    fastify.get('/info', infoHandler);
-    fastify.post('/query', queryHandler);
-    fastify.get('/preview/:id', previewHandler);
-    fastify.delete('/delete/:id', deleteHandler);
-    fastify.post('/crop/:id', cropHandler);
-}
+    fastify.get("/info", infoHandler);
+    fastify.post("/query", queryHandler);
+    fastify.get("/preview/:id", previewHandler);
+    fastify.delete("/delete/:id", deleteHandler);
+    fastify.post("/crop/:id", cropHandler);
+};
 
 export const sseRoutes = async (fastify: FastifyInstance) => {
     await fastify.register(fastifySSE);
 
     fastify.get(
-        '/upload/events/:taskId',
+        "/upload/events/:taskId",
         {
             sse: true,
             preHandler: uploadEventsHandler.pre,
@@ -30,19 +30,17 @@ export const sseRoutes = async (fastify: FastifyInstance) => {
         uploadEventsHandler.base,
     );
     fastify.get(
-        '/crop/events/:taskId',
+        "/crop/events/:taskId",
         {
             sse: true,
             preHandler: cropEventsHandler.pre,
         },
         cropEventsHandler.base,
     );
-}
+};
 
 export const rawHttpRoutes = (fastify: FastifyInstance) => {
-    fastify.addContentTypeParser('*', (_, payload, done) =>
-        done(null, payload)
-    );
+    fastify.addContentTypeParser("*", (_, payload, done) => done(null, payload));
 
-    fastify.post('/upload', uploadHandler);
-}
+    fastify.post("/upload", uploadHandler);
+};

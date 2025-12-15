@@ -33,8 +33,8 @@ importers:
         specifier: ^12.5.0
         version: 12.5.0
       exiftool-vendored:
-        specifier: ^34.0.0
-        version: 34.0.0
+        specifier: ^34.1.0
+        version: 34.1.0
       fastify:
         specifier: ^5.6.2
         version: 5.6.2
@@ -828,17 +828,17 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  exiftool-vendored.exe@13.43.0:
-    resolution: {integrity: sha512-EENHNz86tYY5yHGPtGB2mto3FIGstQvEhrcU34f7fm4RMxBKNfTWYOGkhU1jzvjOi+V4575LQX/FUES1TwgUbQ==}
+  exiftool-vendored.exe@13.44.0:
+    resolution: {integrity: sha512-PzQrrz9k4YzxtcX1r/hEy+xzj6MKXXiEBCU+FhYlipr4fuKKeXgspB7kliPSfSSFAChYoSH294zd23ZUXgB4TQ==}
     os: [win32]
 
-  exiftool-vendored.pl@13.43.0:
-    resolution: {integrity: sha512-0ApWaQ/pxaliPK7HzTxVA0sg/wZ8vl7UtFVhCyWhGQg01WfZkFrKwKmELB0Bnn01WTfgIuMadba8ccmFvpmJag==}
+  exiftool-vendored.pl@13.44.0:
+    resolution: {integrity: sha512-KPqyZK5guU/HKJ4x7OdxC0bqwClz34AtQYeirvvGFBjvfpG6Ewt+Kx9TEd/JbvJyLgMS5k5GHvkH5R5iAL+Arg==}
     os: ['!win32']
     hasBin: true
 
-  exiftool-vendored@34.0.0:
-    resolution: {integrity: sha512-rhIe4XGE7kh76nwytwHtq6qK/pc1mpOBHRV++gudFeG2PfAp3XIVQbFWCLK3S4l9I4AWYOe4mxk8mW8l1oHRTw==}
+  exiftool-vendored@34.1.0:
+    resolution: {integrity: sha512-piPUu8oaBT0JQcR0gH/ZLjnTrHu51lMs+GjAQPrtVyvt8bfB1vzTWYbw+9jN4qyO8HwCweJuj7xivmWS0/fa/A==}
     engines: {node: '>=20.0.0'}
 
   expand-template@2.0.3:
@@ -2111,13 +2111,13 @@ snapshots:
       '@esbuild/win32-ia32': 0.27.1
       '@esbuild/win32-x64': 0.27.1
 
-  exiftool-vendored.exe@13.43.0:
+  exiftool-vendored.exe@13.44.0:
     optional: true
 
-  exiftool-vendored.pl@13.43.0:
+  exiftool-vendored.pl@13.44.0:
     optional: true
 
-  exiftool-vendored@34.0.0:
+  exiftool-vendored@34.1.0:
     dependencies:
       '@photostructure/tz-lookup': 11.3.0
       '@types/luxon': 3.7.1
@@ -2125,8 +2125,8 @@ snapshots:
       he: 1.2.0
       luxon: 3.7.2
     optionalDependencies:
-      exiftool-vendored.exe: 13.43.0
-      exiftool-vendored.pl: 13.43.0
+      exiftool-vendored.exe: 13.44.0
+      exiftool-vendored.pl: 13.44.0
 
   expand-template@2.0.3: {}
 

@@ -1,14 +1,8 @@
-import { randomBytes } from 'node:crypto';
-import { WebSocket } from 'ws';
+import { randomBytes } from "node:crypto";
+import { WebSocket } from "ws";
 
-import { reducer } from './reducer';
-import type {
-    State,
-    Event,
-    Action,
-    OnOkInput,
-    OnFailInput,
-} from './types';
+import { reducer } from "./reducer";
+import type { State, Event, Action, OnOkInput, OnFailInput } from "./types";
 
 export const setupHeartbeat = (input: {
     ws: WebSocket;
@@ -19,11 +13,7 @@ export const setupHeartbeat = (input: {
 }) => {
     const { ws, intervalMs, timeoutMs, onOk, onFail } = input;
 
-    let state: State = {
-        phase: 'running',
-        sub: 'idle',
-        consecutive: 0,
-    };
+    let state: State = { phase: "running", sub: "idle", consecutive: 0 };
 
     const queue: Event[] = [];
     let intervalTimer: NodeJS.Timeout | null = null;
@@ -35,7 +25,7 @@ export const setupHeartbeat = (input: {
         if (!timeoutTimer) return;
         clearTimeout(timeoutTimer);
         timeoutTimer = null;
-    }
+    };
 
     const cleanup = () => {
         if (cleaned) return;
@@ -45,15 +35,15 @@ export const setupHeartbeat = (input: {
         intervalTimer = null;
         clearTimeoutTimer();
 
-        ws.off('pong', onPong);
-        ws.off('close', stop);
-        ws.off('error', stop);
-    }
+        ws.off("pong", onPong);
+        ws.off("close", stop);
+        ws.off("error", stop);
+    };
 
     const dispatch = (event: Event) => {
-        if (cleaned && event.type !== 'STOP') return;
+        if (cleaned && event.type !== "STOP") return;
 
-        if (event.type === 'STOP') queue.length = 0;
+        if (event.type === "STOP") queue.length = 0;
         queue.push(event);
 
         if (draining) return;
@@ -64,11 +54,7 @@ export const setupHeartbeat = (input: {
                 const event = queue.shift();
                 if (!event) break;
 
-                const { nextState, actions } = reducer({
-                    state,
-                    event,
-                    handledAt: new Date(),
-                });
+                const { nextState, actions } = reducer({ state, event, handledAt: new Date() });
 
                 state = nextState;
                 actions?.forEach(exec);
@@ -78,56 +64,56 @@ export const setupHeartbeat = (input: {
         } finally {
             draining = false;
         }
-    }
+    };
 
-    const stop = () => dispatch({ type: 'STOP' });
+    const stop = () => dispatch({ type: "STOP" });
 
     const exec = (action: Action) => {
-        if (cleaned && action.type !== 'CLEANUP') return;
+        if (cleaned && action.type !== "CLEANUP") return;
 
         switch (action.type) {
-            case 'PING':
+            case "PING":
                 try {
                     ws.ping(action.heartbeatTag);
                 } catch {
                     dispatch({
-                        type: 'FAIL',
-                        reason: 'ping_error',
+                        type: "FAIL",
+                        reason: "ping_error",
                         heartbeatTag: action.heartbeatTag,
                     });
                 }
                 break;
 
-            case 'SET_TIMEOUT':
+            case "SET_TIMEOUT":
                 clearTimeoutTimer();
                 timeoutTimer = setTimeout(() => {
                     timeoutTimer = null;
                     dispatch({
-                        type: 'FAIL',
-                        reason: 'timeout',
+                        type: "FAIL",
+                        reason: "timeout",
                         heartbeatTag: action.heartbeatTag,
                     });
                 }, timeoutMs);
                 timeoutTimer.unref();
                 break;
 
-            case 'CLEAR_TIMEOUT':
+            case "CLEAR_TIMEOUT":
                 clearTimeoutTimer();
                 break;
 
-            case 'CALL_OK':
+            case "CALL_OK":
                 Promise.resolve(onOk?.({
-                    ws: ws,
-                    sentAt: action.sentAt,
-                    receivedAt: action.receivedAt,
-                    heartbeatTag: action.heartbeatTag,
+                        ws: ws,
+                        sentAt: action.sentAt,
+                        receivedAt: action.receivedAt,
+                        heartbeatTag: action.heartbeatTag,
                 })).catch(err => {
                     console.error("onOk handler error:", err);
                     stop();
                 });
                 break;
 
-            case 'CALL_FAIL':
+            case "CALL_FAIL":
                 Promise.resolve(onFail({
                     ws: ws,
                     reason: action.reason,
@@ -141,38 +127,29 @@ export const setupHeartbeat = (input: {
                 });
                 break;
 
-            case 'CLEANUP':
+            case "CLEANUP":
                 cleanup();
                 break;
         }
-    }
+    };
 
     const onPong = (data: Buffer) => {
-        if (state.phase !== 'running' || state.sub !== 'waitingPong') return;
+        if (state.phase !== "running" || state.sub !== "waitingPong") return;
 
-        dispatch({
-            type: 'PONG',
-            heartbeatTag: data,
-        });
-    }
+        dispatch({ type: "PONG", heartbeatTag: data });
+    };
 
-    ws.on('pong', onPong);
-    ws.once('close', stop);
-    ws.once('error', stop);
+    ws.on("pong", onPong);
+    ws.once("close", stop);
+    ws.once("error", stop);
 
     intervalTimer = setInterval(() => {
-        if (
-            state.phase !== 'running' ||
-            state.sub !== 'idle' ||
-            ws.readyState !== WebSocket.OPEN
-        ) return;
+        if (state.phase !== "running" || state.sub !== "idle" || ws.readyState !== WebSocket.OPEN)
+            return;
 
-        dispatch({
-            type: 'TICK',
-            heartbeatTag: randomBytes(16),
-        });
+        dispatch({ type: "TICK", heartbeatTag: randomBytes(16) });
     }, intervalMs);
     intervalTimer.unref();
 
     return stop;
-}
+};

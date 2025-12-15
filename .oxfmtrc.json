@@ -1,0 +1,5 @@
+{
+  "arrowParens": "avoid",
+  "objectWrap": "collapse",
+  "tabWidth": 4,
+}

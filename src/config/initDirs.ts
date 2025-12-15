@@ -1,20 +1,15 @@
-import fs from 'node:fs/promises';
+import fs from "node:fs/promises";
 
 export type DirTree = {
     _withTmp?: boolean;
     _base?: never;
     _tmp?: never;
-} & (
-    { [k: string]: DirTree } | {}
-);
+} & ({ [k: string]: DirTree } | {});
 
-function* walkTree(
-    tree: DirTree,
-    path = '',
-): Generator<[string, DirTree]> {
+function* walkTree(tree: DirTree, path = ""): Generator<[string, DirTree]> {
     yield [path, tree];
     for (const [k, v] of Object.entries(tree))
-        if (typeof v === 'object')
+        if (typeof v === "object")
             yield* walkTree(v, path ? `${path}/${k}` : k);
 }
 
@@ -25,12 +20,11 @@ interface NodePaths {
 }
 
 const getNodeAtPath = (root: NodePaths, path: string) => path
-    ? path.split('/').reduce(
-        (cur, k) => {
-            const next = cur[k];
-            return typeof next === 'object' && next !== null
-                ? next
-                : (cur[k] = {});
+    ? path.split("/").reduce((cur, k) => {
+        const next = cur[k];
+        return typeof next === "object" && next !== null
+            ? next
+            : (cur[k] = {});
         },
         root
     )
@@ -41,7 +35,7 @@ type BasePaths<T> = { readonly _base: string } & (
 );
 
 type Node<T> = BasePaths<T> & {
-    readonly [K in keyof Omit<T, '_withTmp' | '_base' | '_tmp'>]:
+    readonly [K in keyof Omit<T, "_withTmp" | "_base" | "_tmp">]:
     T[K] extends object ? Node<T[K]> : never;
 };
 
@@ -50,12 +44,10 @@ function assertPaths<T extends DirTree>(paths: NodePaths, tree: T):
         for (const [path, node] of walkTree(tree)) {
             const cur = getNodeAtPath(paths, path);
 
-            if (path && typeof cur._base !== 'string') throw new Error(
-                `"${path}"._base must be a string`
-            );
-            if (node._withTmp && typeof cur._tmp !== 'string') throw new Error(
-                `"${path}"._tmp must be a string (_withTmp: true)`
-            );
+            if (path && typeof cur._base !== "string")
+                throw new Error(`"${path}"._base must be a string`);
+            if (node._withTmp && typeof cur._tmp !== "string")
+                throw new Error(`"${path}"._tmp must be a string (_withTmp: true)`);
         }
     }
 
@@ -67,7 +59,7 @@ export const initDirs = async <const T extends DirTree>(root: string, tree: T) =
     const promises: ReturnType<typeof fs.mkdir>[] = [];
     for (const [path, node] of walkTree(tree)) {
         const cur = getNodeAtPath(paths, path);
-        const relPath = path ? `/${path}` : '';
+        const relPath = path ? `/${path}` : "";
 
         promises.push(fs.mkdir(
             cur._base = root + relPath, { recursive: true }
@@ -82,4 +74,4 @@ export const initDirs = async <const T extends DirTree>(root: string, tree: T) =
     await Promise.all(promises);
     assertPaths(paths, tree);
     return paths;
-}
+};

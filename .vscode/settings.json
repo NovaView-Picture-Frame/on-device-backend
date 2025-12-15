@@ -1,6 +1,7 @@
 {
     "typescript.tsdk": "node_modules/typescript/lib",
     "npm.scriptExplorerExclude": [
-        "postinstall"
-    ]
+        "postinstall",
+    ],
+    "oxc.fmt.experimental": true,
 }

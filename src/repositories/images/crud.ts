@@ -1,6 +1,6 @@
-import { db } from '../../db';
-import { toExtractRegionRecord, toInsert } from '../../models/images';
-import { DatabaseError } from './errors';
+import { db } from "../../db";
+import { toExtractRegionRecord, toInsert } from "../../models/images";
+import { DatabaseError } from "./errors";
 import type {
     ImageRecord,
     Image,
@@ -10,9 +10,9 @@ import type {
     ImageRecordDB,
     ExtractRegionRecordDB,
     ExtractOffsetUpdateDB,
-} from '../../models/images';
+} from "../../models/images";
 
-const getByHashStmt = db.prepare<ImageRecordDB['hash'], ExtractRegionRecordDB>(/* sql */`
+const getByHashStmt = db.prepare<ImageRecordDB["hash"], ExtractRegionRecordDB>(/* sql */ `
     SELECT
         id,
         extract_region_left,
@@ -23,12 +23,14 @@ const getByHashStmt = db.prepare<ImageRecordDB['hash'], ExtractRegionRecordDB>(/
     WHERE hash = ?
 `);
 
-export const getExtractRegionRecordByHash = (hash: ImageRecord['hash']): ExtractRegionRecord | null => {
+export const getExtractRegionRecordByHash = (
+    hash: ImageRecord["hash"],
+): ExtractRegionRecord | null => {
     const record = getByHashStmt.get(hash);
     return record ? toExtractRegionRecord(record) : null;
-}
+};
 
-const getByIdStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sql */`
+const getByIdStmt = db.prepare<ImageRecordDB["id"], ExtractRegionRecordDB>(/* sql */ `
     SELECT
         id,
         extract_region_left,
@@ -39,12 +41,12 @@ const getByIdStmt = db.prepare<ImageRecordDB['id'], ExtractRegionRecordDB>(/* sq
     WHERE id = ?
 `);
 
-export const getExtractRegionRecordById = (id: ImageRecord['id']): ExtractRegionRecord | null => {
+export const getExtractRegionRecordById = (id: ImageRecord["id"]): ExtractRegionRecord | null => {
     const record = getByIdStmt.get(id);
     return record ? toExtractRegionRecord(record) : null;
-}
+};
 
-const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
+const insertStmt = db.prepare<ImageInsert, ImageRecordDB["id"]>(/* sql */`
     INSERT INTO images (
         hash,
         extract_region_left,
@@ -73,15 +75,15 @@ const insertStmt = db.prepare<ImageInsert, ImageRecordDB['id']>(/* sql */`
 
 export const upsert = db.transaction((input: Image) => {
     const id = insertStmt.get(toInsert(input));
-    if (id !== undefined) return { id, created: true }
+    if (id !== undefined) return { id, created: true };
 
     const record = getExtractRegionRecordByHash(input.hash);
-    if (record) return { id: record.id, created: false }
+    if (record) return { id: record.id, created: false };
 
-    throw new DatabaseError()
+    throw new DatabaseError();
 });
 
-const updateOffsetStmt = db.prepare<ExtractOffsetUpdateDB>(/* sql */`
+const updateOffsetStmt = db.prepare<ExtractOffsetUpdateDB>(/* sql */ `
     UPDATE images
     SET
         extract_region_left = :extract_region_left,
@@ -96,10 +98,9 @@ export const updateOffset = (input: ExtractOffsetUpdate) =>
         extract_region_top: input.extractRegion.top,
     }).changes > 0;
 
-const deleteByIdStmt = db.prepare<ImageRecordDB['id']>(/* sql */`
+const deleteByIdStmt = db.prepare<ImageRecordDB["id"]>(/* sql */ `
     DELETE FROM images
     WHERE id = ?
 `);
 
-export const deleteById = (id: ImageRecord['id']) =>
-    deleteByIdStmt.run(id).changes > 0;
+export const deleteById = (id: ImageRecord["id"]) => deleteByIdStmt.run(id).changes > 0;

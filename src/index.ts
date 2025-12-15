@@ -1,14 +1,10 @@
-import { fastify } from 'fastify';
-import { exiftool } from 'exiftool-vendored';
+import { fastify } from "fastify";
+import { exiftool } from "exiftool-vendored";
 
-import { errorHandler } from './middleware/errorHandler';
-import {
-    httpRoutes,
-    sseRoutes,
-    rawHttpRoutes,
-} from './http/routers';
-import { wsRoutes } from './ws/routers';
-import { appConfig } from './config';
+import { errorHandler } from "./middleware/errorHandler";
+import { httpRoutes, sseRoutes, rawHttpRoutes } from "./http/routers";
+import { wsRoutes } from "./ws/routers";
+import { appConfig } from "./config";
 
 const app = fastify();
 
@@ -23,23 +19,19 @@ const cleanUp = async (exitCode: 0 | 1) => {
     if (closing) return;
     closing = true;
 
-    await app.close().catch(err => console.error(
-        "Error closing server: ", err
-    ));
-    await exiftool.end().catch(err => console.error(
-        "Error closing exiftool: ", err
-    ));
+    await app.close().catch(err => console.error("Error closing server: ", err));
+    await exiftool.end().catch(err => console.error("Error closing exiftool: ", err));
 
     process.exit(exitCode);
-}
+};
 
 const shutdown = (signal: NodeJS.Signals) => {
     console.log(`Received ${signal}, shutting down...`);
     return cleanUp(0);
-}
+};
 
-process.once('SIGTERM', () => shutdown('SIGTERM'));
-process.once('SIGINT', () => shutdown('SIGINT'));
+process.once("SIGTERM", () => shutdown("SIGTERM"));
+process.once("SIGINT", () => shutdown("SIGINT"));
 
 try {
     const versionForWarmup = await exiftool.version();

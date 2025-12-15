@@ -1,20 +1,13 @@
-import {
-    exiftool,
-    ExifDate,
-    ExifTime,
-    ExifDateTime,
-} from 'exiftool-vendored';
-import type { Metadata } from 'sharp';
+import { exiftool, ExifDate, ExifTime, ExifDateTime } from "exiftool-vendored";
+import type { Metadata } from "sharp";
 
-import { InvalidBufferError } from './errors';
-import { imageRecordSchema, type Image } from '../../../models/images';
+import { InvalidBufferError } from "./errors";
+import { imageRecordSchema, type Image } from "../../../models/images";
 
 const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDateTime) =>
-    input instanceof ExifDate ||
-    input instanceof ExifTime ||
-    input instanceof ExifDateTime
+    input instanceof ExifDate || input instanceof ExifTime || input instanceof ExifDateTime
         ? input.toExifString()
-        : typeof input === 'number'
+        : typeof input === "number"
             ? input.toString()
             : input;
 
@@ -36,15 +29,15 @@ const pickByKeys = <
             result[key] = object[key];
 
     return result;
-}
+};
 
 export const extractHashAndMetadata = async (input: {
     path: string;
     size: number;
     meta: Metadata;
 }): Promise<{
-    hash: Image['hash'];
-    metadata: Image['metadata'];
+    hash: Image["hash"];
+    metadata: Image["metadata"];
 }> => {
     const {
         ImageDataHash,
@@ -59,41 +52,28 @@ export const extractHashAndMetadata = async (input: {
         GPSTimeStamp,
 
         ...rest
-    } = await exiftool.read(input.path, { imageHashType: 'SHA256' });
+    } = await exiftool.read(input.path, { imageHashType: "SHA256" });
     if (ImageDataHash === undefined) throw new InvalidBufferError();
 
     const exifToolMetadata = {
         ...rest,
 
         ...(DateTimeOriginal !== undefined && {
-            DateTimeOriginal: formatTimestamp(DateTimeOriginal)
+            DateTimeOriginal: formatTimestamp(DateTimeOriginal),
         }),
-        ...(CreateDate !== undefined && {
-            CreateDate: formatTimestamp(CreateDate)
-        }),
-        ...(ModifyDate !== undefined && {
-            ModifyDate: formatTimestamp(ModifyDate)
-        }),
+        ...(CreateDate !== undefined && { CreateDate: formatTimestamp(CreateDate) }),
+        ...(ModifyDate !== undefined && { ModifyDate: formatTimestamp(ModifyDate) }),
 
-        ...(GPSLatitude !== undefined && Number.isFinite(+GPSLatitude) && {
-            GPSLatitude: +GPSLatitude
-        }),
-        ...(GPSLongitude !== undefined && Number.isFinite(+GPSLongitude) && {
-            GPSLongitude: +GPSLongitude
-        }),
-        ...(GPSDateStamp !== undefined && {
-            GPSDateStamp: formatTimestamp(GPSDateStamp)
-        }),
-        ...(GPSTimeStamp !== undefined && {
-            GPSTimeStamp: formatTimestamp(GPSTimeStamp)
-        }),
+        ...(GPSLatitude !== undefined &&
+            Number.isFinite(+GPSLatitude) && { GPSLatitude: +GPSLatitude }),
+        ...(GPSLongitude !== undefined &&
+            Number.isFinite(+GPSLongitude) && { GPSLongitude: +GPSLongitude }),
+        ...(GPSDateStamp !== undefined && { GPSDateStamp: formatTimestamp(GPSDateStamp) }),
+        ...(GPSTimeStamp !== undefined && { GPSTimeStamp: formatTimestamp(GPSTimeStamp) }),
     };
 
     const metadata = {
-        ...pickByKeys(
-            exifToolMetadata,
-            imageRecordSchema.shape.metadata.keyof().options,
-        ),
+        ...pickByKeys(exifToolMetadata, imageRecordSchema.shape.metadata.keyof().options),
 
         FileSize: input.size,
         FileFormat: input.meta.format,
@@ -101,8 +81,5 @@ export const extractHashAndMetadata = async (input: {
         ImageHeight: input.meta.height,
     };
 
-    return {
-        hash: ImageDataHash,
-        metadata,
-    }
-}
+    return { hash: ImageDataHash, metadata };
+};

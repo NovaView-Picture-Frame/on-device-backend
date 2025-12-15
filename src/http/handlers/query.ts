@@ -1,26 +1,19 @@
-import {
-    getDeepResolvingFields,
-    resolver,
-    query,
-    weave,
-} from '@gqloom/core';
-import { z } from 'zod';
-import { createHandler } from 'graphql-http/lib/use/fastify';
-import { ZodWeaver } from '@gqloom/zod';
-import { GraphQLError } from 'graphql';
-import type { ResolverPayload } from '@gqloom/core';
+import { getDeepResolvingFields, resolver, query, weave } from "@gqloom/core";
+import { z } from "zod";
+import { createHandler } from "graphql-http/lib/use/fastify";
+import { ZodWeaver } from "@gqloom/zod";
+import { GraphQLError } from "graphql";
+import type { ResolverPayload } from "@gqloom/core";
 
-import { imageQuerySchema, type Selection } from '../../models/images';
-import { appConfig } from '../../config';
-import { querySingle, queryList } from '../../repositories/images';
+import { imageQuerySchema, type Selection } from "../../models/images";
+import { appConfig } from "../../config";
+import { querySingle, queryList } from "../../repositories/images";
 
 const parseSelection = (payload: ResolverPayload): Selection => {
     const rootMap = getDeepResolvingFields(payload);
 
-    const rootSet = rootMap.get('')?.requestedFields;
-    if (!rootSet) throw new Error(
-        "Unexpected error: rootSet does not exist."
-    );
+    const rootSet = rootMap.get("")?.requestedFields;
+    if (!rootSet) throw new Error("Unexpected error: rootSet does not exist.");
 
     return Object.fromEntries(
         Array.from(rootSet, field => {
@@ -30,19 +23,17 @@ const parseSelection = (payload: ResolverPayload): Selection => {
                 field,
                 childSet
                     ? Array.from(childSet)
-                    : 'include',
+                    : "include",
             ]
         })
     );
-}
+};
 
 const queryResolver = resolver({
     image: query(imageQuerySchema.nullable())
         .input({ id: z.int().positive() })
         .resolve(({ id }, payload) => {
-            if (!payload) throw new GraphQLError(
-                "Unexpected error: payload is undefined."
-            );
+            if (!payload) throw new GraphQLError("Unexpected error: payload is undefined.");
 
             return querySingle(id, parseSelection(payload));
         }),
@@ -57,9 +48,7 @@ const queryResolver = resolver({
                 .default(appConfig.services.query.default_page_size),
         })
         .resolve(({ size, cursor }, payload) => {
-            if (!payload) throw new GraphQLError(
-                "Unexpected error: payload is undefined."
-            );
+            if (!payload) throw new GraphQLError("Unexpected error: payload is undefined.");
 
             return queryList({
                 size,
@@ -70,5 +59,5 @@ const queryResolver = resolver({
 });
 
 export const queryHandler = createHandler({
-    schema: weave(ZodWeaver, queryResolver)
+    schema: weave(ZodWeaver, queryResolver),
 });

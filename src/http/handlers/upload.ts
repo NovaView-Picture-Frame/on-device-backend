@@ -1,23 +1,23 @@
-import { randomUUID } from 'node:crypto';
-import { PassThrough } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-import { z } from 'zod';
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import { randomUUID } from "node:crypto";
+import { PassThrough } from "node:stream";
+import { pipeline } from "node:stream/promises";
+import { z } from "zod";
+import type { FastifyRequest, FastifyReply } from "fastify";
 
-import { appConfig } from '../../config';
-import { HttpBadRequestError } from '../../middleware/errorHandler';
-import { getExtractRegionRecordByHash } from '../../repositories/images';
-import { uploadProcessor, InvalidBufferError } from '../../services/images';
-import { createMaxSizeTransform, MaxSizeError } from '../../services/images/upload/transform';
-import type { ExtractRegionRecord } from '../../models/images';
+import { appConfig } from "../../config";
+import { HttpBadRequestError } from "../../middleware/errorHandler";
+import { getExtractRegionRecordByHash } from "../../repositories/images";
+import { uploadProcessor, InvalidBufferError } from "../../services/images";
+import { createMaxSizeTransform, MaxSizeError } from "../../services/images/upload/transform";
+import type { ExtractRegionRecord } from "../../models/images";
 
 const headerSchema = z.object({
-    'content-type': z.string().regex(/^image\/[^;]+/i).optional(),
-    'content-length': z.coerce.number().int().positive().max(
+    "content-type": z.string().regex(/^image\/[^;]+/i).optional(),
+    "content-length": z.coerce.number().int().positive().max(
         appConfig.services.upload.size_limit_bytes
     ).optional(),
-    'content-hash': z.string().length(64).regex(/^\p{Hex_Digit}+$/v).optional(),
-    'file-name': z.string().max(255).optional(),
+    "content-hash": z.string().length(64).regex(/^\p{Hex_Digit}+$/v).optional(),
+    "file-name": z.string().max(255).optional(),
 });
 
 const respondExisting = (reply: FastifyReply, record: ExtractRegionRecord) =>
@@ -30,11 +30,9 @@ const respondExisting = (reply: FastifyReply, record: ExtractRegionRecord) =>
 
 export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply) => {
     const headerResult = headerSchema.safeParse(request.headers);
-    if (!headerResult.success) throw new HttpBadRequestError(
-        "Invalid headers"
-    );
+    if (!headerResult.success) throw new HttpBadRequestError("Invalid headers");
 
-    const headerHash = headerResult.data['content-hash'];
+    const headerHash = headerResult.data["content-hash"];
     if (headerHash) {
         const extractRegionRecord = getExtractRegionRecordByHash(headerHash);
 
@@ -60,10 +58,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
         stream: tee,
         signal,
     });
-    const timer = setTimeout(
-        () => timeoutController.abort(),
-        appConfig.services.upload.timeout_ms,
-    );
+    const timer = setTimeout(() => timeoutController.abort(), appConfig.services.upload.timeout_ms);
 
     hashAndMetadata.then(
         ({ hash }) => {
@@ -73,7 +68,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
             existingController.abort();
             respondExisting(reply, extractRegionRecord);
         },
-        () => {}
+        () => {},
     );
 
     try {
@@ -82,7 +77,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
                 request.raw,
                 createMaxSizeTransform(appConfig.services.upload.size_limit_bytes),
                 tee,
-                { signal }
+                { signal },
             ),
             hashAndMetadata,
         ]);
@@ -96,22 +91,20 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
             },
         });
     } catch (err) {
-        if (timeoutController.signal.aborted) throw new HttpBadRequestError(
-            "Request timeout"
-        );
+        if (timeoutController.signal.aborted) throw new HttpBadRequestError("Request timeout");
 
         taskController.abort();
 
-        if (err instanceof MaxSizeError) throw new HttpBadRequestError(
-            `Max ${appConfig.services.upload.size_limit_bytes} bytes`
-        );
+        if (err instanceof MaxSizeError)
+            throw new HttpBadRequestError(
+                `Max ${appConfig.services.upload.size_limit_bytes} bytes`,
+            );
 
-        if (err instanceof InvalidBufferError) throw new HttpBadRequestError(
-            "Invalid image buffer"
-        );
+        if (err instanceof InvalidBufferError)
+            throw new HttpBadRequestError("Invalid image buffer");
 
         throw err;
     } finally {
         clearTimeout(timer);
     }
-}
+};

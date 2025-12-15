@@ -1,6 +1,6 @@
-import { Transform } from 'node:stream';
+import { Transform } from "node:stream";
 
-export class MaxSizeError extends Error {};
+export class MaxSizeError extends Error {}
 
 export const createMaxSizeTransform = (limit: number) => {
     let total = 0;
@@ -15,4 +15,4 @@ export const createMaxSizeTransform = (limit: number) => {
             }
         },
     });
-}
+};

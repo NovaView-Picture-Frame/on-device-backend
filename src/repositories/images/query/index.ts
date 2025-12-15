@@ -1,14 +1,10 @@
-import { db } from '../../../db';
-import { buildSelector} from './selector';
+import { db } from "../../../db";
+import { buildSelector } from "./selector";
 
-import type {
-    ImageRecord,
-    Selection,
-    ImageRecordDB,
-} from '../../../models/images';
+import type { ImageRecord, Selection, ImageRecordDB } from "../../../models/images";
 
-export const querySingle = (id: ImageRecord['id'], selection: Selection) => {
-    const stmt = db.prepare<ImageRecordDB['id'], string>(/* sql */`
+export const querySingle = (id: ImageRecord["id"], selection: Selection) => {
+    const stmt = db.prepare<ImageRecordDB["id"], string>(/* sql */ `
         SELECT ${buildSelector(selection)}
         FROM images
         WHERE id = ?
@@ -16,17 +12,17 @@ export const querySingle = (id: ImageRecord['id'], selection: Selection) => {
 
     const result = stmt.get(id);
     return result ? JSON.parse(result) : null;
-}
+};
 
 export const queryList = (input: {
     size: number;
     selection: Selection;
-    cursor: ImageRecord['id'] | null;
+    cursor: ImageRecord["id"] | null;
 }) => {
     const stmt = db.prepare<
         {
             size: number;
-            cursor: ImageRecordDB['id'] | null;
+            cursor: ImageRecordDB["id"] | null;
         },
         string
     >(/* sql */`
@@ -41,5 +37,5 @@ export const queryList = (input: {
         size: input.size,
         cursor: input.cursor,
     });
-    return JSON.parse(`[${results.join(',')}]`);
-}
+    return JSON.parse(`[${results.join(",")}]`);
+};

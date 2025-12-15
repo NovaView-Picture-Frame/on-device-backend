@@ -1,1 +1,1 @@
-export { setupHeartbeat } from './runtime';
+export { setupHeartbeat } from "./runtime";

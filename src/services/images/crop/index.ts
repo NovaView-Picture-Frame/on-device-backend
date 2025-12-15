@@ -1,18 +1,18 @@
-import { randomUUID, type UUID } from 'node:crypto';
-import fs from 'node:fs/promises';
+import { randomUUID, type UUID } from "node:crypto";
+import fs from "node:fs/promises";
 
-import { updateAndMove } from './persist';
-import { appConfig, paths } from '../../../config';
-import { resizeAndExtract } from './processor';
-import { ignoreErrorCodes } from '../../../utils/ignoreErrorCodes';
-import type { ExtractOffsetUpdate, ExtractRegionRecord } from '../../../models/images';
+import { updateAndMove } from "./persist";
+import { appConfig, paths } from "../../../config";
+import { resizeAndExtract } from "./processor";
+import { ignoreErrorCodes } from "../../../utils/ignoreErrorCodes";
+import type { ExtractOffsetUpdate, ExtractRegionRecord } from "../../../models/images";
 
 const getTaskKey = (offset: ExtractOffsetUpdate) =>
     `${offset.id}-${offset.extractRegion.left}-${offset.extractRegion.top}`;
 
 interface Tasks {
     readonly crop: Promise<
-        Parameters<typeof updateAndMove>[0]['record']['extractRegion']
+        Parameters<typeof updateAndMove>[0]["record"]["extractRegion"]
     >;
     readonly persist: ReturnType<typeof updateAndMove>;
 }
@@ -23,9 +23,9 @@ export const tasksMap = new Map<UUID, {
 }>();
 
 export const cropProcessor = (input: {
-    current: ExtractRegionRecord,
-    left: ExtractRegionRecord['extractRegion']['left'],
-    top: ExtractRegionRecord['extractRegion']['top'],
+    current: ExtractRegionRecord;
+    left: ExtractRegionRecord["extractRegion"]["left"];
+    top: ExtractRegionRecord["extractRegion"]["top"];
 }) => {
     const next = {
         id: input.current.id,
@@ -48,30 +48,20 @@ export const cropProcessor = (input: {
         dest: croppedTmp,
     }).then(() => next.extractRegion);
 
-    const persist = crop.then(() => updateAndMove({
-        record: next,
-        croppedTmp,
-        cropped: `${paths.cropped._base}/${next.id}`,
-    }));
+    const persist = crop.then(() =>
+        updateAndMove({ record: next, croppedTmp, cropped: `${paths.cropped._base}/${next.id}` }),
+    );
 
-    tasksMap.set(taskId, {
-        key: taskKey,
-        tasks: {
-            crop,
-            persist,
-        }
-    });
+    const tasks = { crop, persist };
+    tasksMap.set(taskId, { key: taskKey, tasks});
 
-    Promise.allSettled([persist]).finally(async () => {
+    Promise.allSettled(Object.values(tasks)).finally(async () => {
         const entry = tasksMap.get(taskId);
         if (entry) entry.key = null;
-        setTimeout(
-            () => tasksMap.delete(taskId),
-            appConfig.runtime.tasks_results_ttl_ms
-        );
+        setTimeout(() => tasksMap.delete(taskId), appConfig.runtime.tasks_results_ttl_ms);
 
-        await ignoreErrorCodes(fs.unlink(croppedTmp), 'ENOENT');
+        await ignoreErrorCodes(fs.unlink(croppedTmp), "ENOENT");
     });
 
     return taskId;
-}
+};

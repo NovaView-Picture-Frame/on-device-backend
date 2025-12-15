@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import type { UUID } from 'node:crypto';
-import type { FastifyRequest, FastifyReply } from 'fastify';
+import { z } from "zod";
+import type { UUID } from "node:crypto";
+import type { FastifyRequest, FastifyReply } from "fastify";
 
-import { HttpBadRequestError, HttpNotFoundError } from '../middleware/errorHandler';
+import { HttpBadRequestError, HttpNotFoundError } from "../middleware/errorHandler";
 
 interface TaskEvents {
     [taskName: string]: Promise<object | null>;
@@ -36,19 +36,19 @@ export const buildPre = (getTaskEvents: TaskEventsGetter) =>
 
         req.headers = {
             ...req.headers,
-            accept: 'text/event-stream',
+            accept: "text/event-stream",
         };
 
         contextMap.set(req, { taskEvents });
-    }
+    };
 
 export const buildBase = () =>
     async (req: FastifyRequest, reply: FastifyReply) => {
-        const context = contextMap.get(req);
-        if (!context) throw new Error("Context not found for request");
+    const context = contextMap.get(req);
+    if (!context) throw new Error("Context not found for request");
 
-        const safeSend = (...args: Parameters<typeof reply.sse.send>) =>
-            reply.sse.send(...args).catch(() => reply.sse.close());
+    const safeSend = (...args: Parameters<typeof reply.sse.send>) =>
+        reply.sse.send(...args).catch(() => reply.sse.close());
 
         const notifiers = Object.entries(context.taskEvents).map(
             ([taskName, taskEventPromise]) =>
@@ -60,14 +60,14 @@ export const buildBase = () =>
                         ? safeSend({ event: `${taskName}Error`, data: reject })
                         : null
                 )
-        );
+    );
 
-        try {
-            await safeSend({ event: "connected", data: {} });
-            await Promise.allSettled(notifiers);
-            await safeSend({ event: "done", data: {} });
-        } finally {
-            reply.sse.close();
-            contextMap.delete(req);
-        }
+    try {
+        await safeSend({ event: "connected", data: {} });
+        await Promise.allSettled(notifiers);
+        await safeSend({ event: "done", data: {} });
+    } finally {
+        reply.sse.close();
+        contextMap.delete(req);
     }
+};

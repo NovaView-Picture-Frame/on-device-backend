@@ -1,9 +1,5 @@
-import {
-    buildPre,
-    buildBase,
-    type TaskEventsGetter
-} from '../buildTaskEventsHandler';
-import { cropTasksMap } from '../../services/images';
+import { buildPre, buildBase, type TaskEventsGetter } from "../buildTaskEventsHandler";
+import { cropTasksMap } from "../../services/images";
 
 const getTaskEvents: TaskEventsGetter = taskId => {
     const tasks = cropTasksMap.get(taskId);
@@ -12,14 +8,18 @@ const getTaskEvents: TaskEventsGetter = taskId => {
     return {
         crop: tasks.tasks.crop.then(
             region => ({ region }),
-            () => { throw { message: "Failed to create cropped image" } }
+            () => {
+                throw { message: "Failed to create cropped image" };
+            },
         ),
         persist: tasks.tasks.persist.then(
             () => null,
-            () => { throw { message: "Failed to persist image data" } }
+            () => {
+                throw { message: "Failed to persist image data" };
+            },
         ),
-    }
-}
+    };
+};
 
 export const cropEventsHandler = {
     pre: buildPre(getTaskEvents),

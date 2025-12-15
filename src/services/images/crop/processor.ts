@@ -1,18 +1,14 @@
-import sharp from 'sharp';
+import sharp from "sharp";
 
-import { appConfig } from '../../../config';
-import type { ExtractOffsetUpdate } from '../../../models/images';
+import { appConfig } from "../../../config";
+import type { ExtractOffsetUpdate } from "../../../models/images";
 
 export const resizeAndExtract = (input: {
-    record: ExtractOffsetUpdate,
-    src: string,
-    dest: string,
+    record: ExtractOffsetUpdate;
+    src: string;
+    dest: string;
 }) => sharp(input.src)
-    .resize(
-        appConfig.device.screen.width,
-        appConfig.device.screen.height,
-        { fit: 'outside'},
-    )
+    .resize(appConfig.device.screen.width, appConfig.device.screen.height, { fit: "outside" })
     .extract({
         left: input.record.extractRegion.left,
         top: input.record.extractRegion.top,
