@@ -1,13 +1,16 @@
-import { WebSocket } from "ws";
 import { randomBytes, type UUID } from "crypto";
 
 import { appConfig } from "../../../config";
 import { buildScheduleMessage } from "./buildSchedule";
 import { reducer } from "./reducer";
 import type { State, Event, Action } from "./types";
-import type { Order, OrderSwitchMode } from "../../../models/carousel";
+import type { Order, OrderSwitchMode, ScheduleMessage } from "../../../models/carousel";
 
-const clientsMap = new Map<UUID, WebSocket>();
+interface Listener {
+    (message: ScheduleMessage): void;
+}
+
+const listeners = new Map<UUID, Listener>();
 
 let state: State = {
     phase: "idle",
@@ -16,9 +19,12 @@ let state: State = {
 
 const generateSeed = () => randomBytes(32);
 
-const send = (ws: WebSocket, text: string) => {
-    if (ws.readyState !== WebSocket.OPEN) return;
-    ws.send(text);
+const emit = (listener: Listener, message: ScheduleMessage) => {
+    try {
+        listener(message);
+    } catch (err) {
+        console.error("Carousel listener error:", err);
+    }
 };
 
 const sendSchedule = (handledAt: Date, action: Action) => {
@@ -26,19 +32,18 @@ const sendSchedule = (handledAt: Date, action: Action) => {
         throw new Error("Unexpected action: running in non-running state.");
 
     const message = buildScheduleMessage(state, handledAt);
-    const text = JSON.stringify(message);
 
     switch (action.type) {
         case "SEND_TO_ONE": {
-            const ws = clientsMap.get(action.deviceId);
-            if (!ws) throw new Error(`No WebSocket found for deviceId: ${action.deviceId}`);
+            const listener = listeners.get(action.id);
+            if (!listener) throw new Error(`No listener found for id: ${action.id}`);
 
-            send(ws, text);
+            emit(listener, message);
             break;
         }
 
         case "BROADCAST":
-            for (const ws of clientsMap.values()) send(ws, text);
+            for (const listener of listeners.values()) emit(listener, message);
             break;
     }
 };
@@ -46,11 +51,7 @@ const sendSchedule = (handledAt: Date, action: Action) => {
 const dispatch = (event: Event) => {
     const handledAt = new Date();
 
-    const { nextState, action } = reducer({
-        state,
-        event,
-        handledAt,
-    });
+    const { nextState, action } = reducer({ state, event, handledAt });
 
     state = nextState;
     if (action) sendSchedule(handledAt, action);
@@ -58,23 +59,13 @@ const dispatch = (event: Event) => {
 
 export const activate = () => dispatch(
     state.order === "random"
-        ? {
-            type: "ACTIVATE",
-            order: "random",
-            seed: generateSeed(),
-        }
-        : {
-            type: "ACTIVATE",
-            order: state.order,
-        },
+        ? { type: "ACTIVATE", order: "random", seed: generateSeed() }
+        : { type: "ACTIVATE", order: state.order },
 );
 
 export const deactivate = () => dispatch({ type: "DEACTIVATE" });
 
-export const requestSchedule = (deviceId: UUID) => dispatch({
-    type: "REQUEST_SCHEDULE",
-    deviceId,
-});
+export const requestSchedule = (id: UUID) => dispatch({ type: "REQUEST_SCHEDULE", id });
 
 export const switchOrder = (order: Order, mode: OrderSwitchMode) => {
     if (state.phase === "idle") {
@@ -84,38 +75,32 @@ export const switchOrder = (order: Order, mode: OrderSwitchMode) => {
 
     dispatch(
         order === "random"
-            ? {
-                type: "SWITCH_ORDER",
-                mode,
-                order,
-                seed: generateSeed(),
-            }
-            : {
-                type: "SWITCH_ORDER",
-                mode,
-                order,
-            },
+            ? { type: "SWITCH_ORDER", mode, order, seed: generateSeed()}
+            : { type: "SWITCH_ORDER", mode, order },
     );
 };
 
 export const onImagesChanged = () => dispatch({ type: "IMAGES_CHANGED" });
 
-export const handleConnected = (deviceId: UUID, ws: WebSocket) => {
-    clientsMap.set(deviceId, ws);
+export const handleConnected = (id: UUID, listener: Listener) => {
+    listeners.set(id, listener);
 
     if (state.phase === "idle") {
         activate();
-        console.log("WebSocket Activated");
+        console.log("Carousel Activated");
     }
-    console.log("WebSocket connected for device: ", deviceId);
+    console.log("Listener added: ", id);
+
+    return () => handleClosed(id, listener);
 };
 
-export const handleClosed = (deviceId: UUID, ws: WebSocket) => {
-    if (ws !== clientsMap.get(deviceId)) return;
-    clientsMap.delete(deviceId);
-    console.log("WebSocket closed for device: ", deviceId);
+export const handleClosed = (id: UUID, listener: Listener) => {
+    if (listener !== listeners.get(id)) return;
 
-    if (clientsMap.size !== 0) return;
+    listeners.delete(id);
+    console.log("Listener removed: ", id);
+
+    if (listeners.size !== 0) return;
     deactivate();
-    console.log("WebSocket Deactivated");
+    console.log("Carousel Deactivated");
 };

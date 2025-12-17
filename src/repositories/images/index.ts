@@ -6,6 +6,6 @@ export {
     deleteById,
 } from "./crud";
 
-export { querySingle, queryList } from "./query";
+export { querySingle, queryList, queryByIds } from "./query";
 
 export { listIdUnordered, listIdByCreated, listIdByTaken } from "./listId";

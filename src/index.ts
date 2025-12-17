@@ -2,16 +2,16 @@ import { fastify } from "fastify";
 import { exiftool } from "exiftool-vendored";
 
 import { errorHandler } from "./middleware/errorHandler";
-import { httpRoutes, sseRoutes, rawHttpRoutes } from "./http/routers";
-import { wsRoutes } from "./ws/routers";
+import { httpRoutes, rawHttpRoutes, sseRoutes } from "./http/routes";
+import { wsRoutes } from "./ws/routes";
 import { appConfig } from "./config";
 
 const app = fastify();
 
 app.setErrorHandler(errorHandler);
 app.register(httpRoutes);
-app.register(sseRoutes);
 app.register(rawHttpRoutes);
+app.register(sseRoutes);
 app.register(wsRoutes);
 
 let closing = false;

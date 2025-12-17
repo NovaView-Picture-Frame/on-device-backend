@@ -50,10 +50,7 @@ export const reducer = (input: {
 
             return {
                 nextState: state,
-                action: {
-                    type: "SEND_TO_ONE",
-                    deviceId: event.deviceId,
-                },
+                action: { type: "SEND_TO_ONE", id: event.id },
             };
 
         case "SET_ORDER":

@@ -1,7 +1,8 @@
 import { db } from "../../../db";
 import { buildSelector } from "./selector";
 
-import type { ImageRecord, Selection, ImageRecordDB } from "../../../models/images";
+import type { ImageRecord, ImageRecordDB } from "../../../models/images";
+import type { Selection } from "../../../graphql/models/images";
 
 export const querySingle = (id: ImageRecord["id"], selection: Selection) => {
     const stmt = db.prepare<ImageRecordDB["id"], string>(/* sql */ `
@@ -37,5 +38,20 @@ export const queryList = (input: {
         size: input.size,
         cursor: input.cursor,
     });
+    return JSON.parse(`[${results.join(",")}]`);
+};
+
+export const queryByIds = (ids: ImageRecord["id"][], selection: Selection) => {
+    if (ids.length === 0) return [];
+
+    const placeholders = Array(ids.length).fill("?").join(", ");
+
+    const stmt = db.prepare<number[], string>(/* sql */ `
+        SELECT ${buildSelector(selection)}
+        FROM images
+        WHERE id IN (${placeholders})
+    `).pluck();
+
+    const results = stmt.all(...ids);
     return JSON.parse(`[${results.join(",")}]`);
 };

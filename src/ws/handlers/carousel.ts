@@ -1,13 +1,13 @@
 import { z } from "zod";
 import type { UUID } from "node:crypto";
-import type { WebSocket, RawData } from "ws";
+import { WebSocket, type RawData } from "ws";
 import type { FastifyRequest } from "fastify";
 
 import { HttpBadRequestError } from "../../middleware/errorHandler";
 import { appConfig } from "../../config";
 import { setupHeartbeat } from "../heartbeat";
 import { handleConnected, handleClosed, requestSchedule } from "../../services/images/carousel";
-import { ClientMessageSchema } from "../../models/carousel";
+import { ClientMessageSchema, type ScheduleMessage } from "../../models/carousel";
 
 interface Context {
     deviceId: UUID;
@@ -38,6 +38,11 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
         },
     });
 
+    const listener = (message: ScheduleMessage) => {
+        if (ws.readyState !== WebSocket.OPEN) return;
+        ws.send(JSON.stringify(message));
+    };
+
     ws.on("message", (raw: RawData) => {
         try {
             const message = ClientMessageSchema.parse(JSON.parse(raw.toString()));
@@ -62,9 +67,9 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
     });
 
     ws.on("close", () => {
-        handleClosed(context.deviceId, ws);
+        handleClosed(context.deviceId, listener);
         contextMap.delete(req);
     });
 
-    handleConnected(context.deviceId, ws);
+    handleConnected(context.deviceId, listener);
 };
