@@ -3,11 +3,11 @@ import fs from "node:fs/promises";
 import sharp from "sharp";
 import type { UUID } from "node:crypto";
 
-import { geocoding, saveStream, insertAndMove } from "./persist";
+import { geocoding, saveStream, insertAndLink } from "./effects";
 import { appConfig, paths } from "../../../config";
-import { getMetadata, resizeToCover, resizeToInside } from "./processor";
+import { getMetadata, resizeToCover, resizeToInside } from "./render";
 import { extractHashAndMetadata } from "./inspect";
-import { onImagesChanged } from "../carousel";
+import { notifyImagesChanged } from "../carousel";
 import { ignoreErrorCodes } from "../../../utils/ignoreErrorCodes";
 
 export { InvalidBufferError } from "./errors";
@@ -15,19 +15,19 @@ export { InvalidBufferError } from "./errors";
 interface Tasks {
     readonly lookupPlace: ReturnType<typeof geocoding>;
     readonly saveOriginal: ReturnType<typeof saveStream>;
-    readonly crop: Promise<Parameters<typeof insertAndMove>[0]["extractRegion"]>;
+    readonly crop: Promise<Parameters<typeof insertAndLink>[0]["extractRegion"]>;
     readonly optimize: ReturnType<typeof resizeToInside>;
-    readonly persist: ReturnType<typeof insertAndMove>;
+    readonly persist: ReturnType<typeof insertAndLink>;
 }
 
-export const tasksMap = new Map<UUID, Tasks>();
+export const uploadTasksById = new Map<UUID, Tasks>();
 
-export const uploadProcessor = (input: {
-    id: UUID;
+export const uploadImage = (input: {
+    taskId: UUID;
     stream: Readable;
     signal: AbortSignal;
 }) => {
-    const { id, stream, signal } = input;
+    const { taskId: id, stream, signal } = input;
 
     const originalTmp = `${paths.originals._tmp}/${id}`;
     const croppedTmp = `${paths.cropped._tmp}/${id}`;
@@ -49,7 +49,7 @@ export const uploadProcessor = (input: {
 
     const lookupPlace = hashAndMetadata.then(({ metadata: { GPSLatitude, GPSLongitude } }) => {
         if (GPSLatitude === undefined || GPSLongitude === undefined) return null;
-        return geocoding({ lat: GPSLatitude, long: GPSLongitude, signal });
+        return geocoding({ lat: GPSLatitude, lng: GPSLongitude, signal });
     });
 
     const crop = Promise.all([
@@ -76,7 +76,7 @@ export const uploadProcessor = (input: {
     });
 
     const persist = Promise.all([hashAndMetadata, lookupPlace, crop, optimize, saveOriginal]).then(
-        ([{ hash, metadata }, place, extractRegion]) => insertAndMove({
+        ([{ hash, metadata }, place, extractRegion]) => insertAndLink({
             originalTmp,
             croppedTmp,
             optimizedTmp,
@@ -87,13 +87,13 @@ export const uploadProcessor = (input: {
         })
     );
 
-    persist.then(() => onImagesChanged());
+    persist.then(notifyImagesChanged);
 
     const tasks = { lookupPlace, saveOriginal, crop, optimize, persist };
-    tasksMap.set(id, tasks);
+    uploadTasksById.set(id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
-        setTimeout(() => tasksMap.delete(id), appConfig.runtime.tasks_results_ttl_ms);
+        setTimeout(() => uploadTasksById.delete(id), appConfig.runtime.tasks_results_ttl_ms);
 
         await Promise.all(ignoreErrorCodes(
             [originalTmp, croppedTmp, optimizedTmp].map(fs.unlink),

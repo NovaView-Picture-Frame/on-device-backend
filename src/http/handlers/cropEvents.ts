@@ -1,8 +1,8 @@
 import { buildPre, buildBase, type TaskEventsGetter } from "../buildTaskEventsHandler";
-import { cropTasksMap } from "../../services/images";
+import { cropTasksById } from "../../services/images";
 
 const getTaskEvents: TaskEventsGetter = taskId => {
-    const tasks = cropTasksMap.get(taskId);
+    const tasks = cropTasksById.get(taskId);
     if (!tasks) return;
 
     return {

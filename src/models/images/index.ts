@@ -8,3 +8,5 @@ export type {
     ExtractRegionRecordDB,
     ExtractOffsetUpdateDB,
 } from "./repository";
+
+export type { Selection } from "./selection";

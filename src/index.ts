@@ -2,7 +2,7 @@ import { fastify } from "fastify";
 import { exiftool } from "exiftool-vendored";
 
 import { errorHandler } from "./middleware/errorHandler";
-import { httpRoutes, rawHttpRoutes, sseRoutes } from "./http/routes";
+import { httpRoutes, binaryRoutes, sseRoutes } from "./http/routes";
 import { wsRoutes } from "./ws/routes";
 import { appConfig } from "./config";
 
@@ -10,7 +10,7 @@ const app = fastify();
 
 app.setErrorHandler(errorHandler);
 app.register(httpRoutes);
-app.register(rawHttpRoutes);
+app.register(binaryRoutes);
 app.register(sseRoutes);
 app.register(wsRoutes);
 

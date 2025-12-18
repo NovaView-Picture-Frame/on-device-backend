@@ -1,4 +1,4 @@
-import { createHash } from "crypto";
+import { createHash } from "node:crypto";
 
 import { appConfig } from "../../../config";
 import type { Slot } from "../../../models/carousel";

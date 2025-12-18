@@ -18,7 +18,7 @@ export const httpRoutes = (fastify: FastifyInstance) => {
     fastify.post("/graphql", graphqlHandler);
 };
 
-export const rawHttpRoutes = (fastify: FastifyInstance) => {
+export const binaryRoutes = (fastify: FastifyInstance) => {
     fastify.addContentTypeParser("*", (_, payload, done) => done(null, payload));
 
     fastify.post("/upload", uploadHandler);

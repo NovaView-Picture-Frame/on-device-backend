@@ -2,9 +2,9 @@ import { z } from "zod";
 import type { FastifyRequest } from "fastify";
 
 import { HttpBadRequestError, HttpNotFoundError } from "../../middleware/errorHandler";
-import { getExtractRegionRecordById } from "../../repositories/images";
+import { findExtractRegionRecordById } from "../../services/images";
 import { appConfig } from "../../config";
-import { cropProcessor } from "../../services/images";
+import { cropImage } from "../../services/images";
 
 const paramsSchema = z.object({
     id: z.coerce.number().int().positive(),
@@ -40,7 +40,7 @@ export const cropHandler = (req: FastifyRequest) => {
     const bodyResult = bodySchema.safeParse(req.body);
     if (!bodyResult.success) throw new HttpBadRequestError("Invalid request body");
 
-    const extractRegionRecord = getExtractRegionRecordById(paramsResult.data.id);
+    const extractRegionRecord = findExtractRegionRecordById(paramsResult.data.id);
     if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
     const left = toOffset({
@@ -65,7 +65,7 @@ export const cropHandler = (req: FastifyRequest) => {
     return {
         data: {
             type: "processing",
-            taskId: cropProcessor({
+            taskId: cropImage({
                 current: extractRegionRecord,
                 left,
                 top,

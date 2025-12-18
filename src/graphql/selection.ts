@@ -1,20 +1,22 @@
 import { getDeepResolvingFields, type ResolverPayload } from "@gqloom/core";
 
-import type { Selection } from "./models/images";
+import type { Selection } from "../models/images";
 
-export const parseSelection = (payload: ResolverPayload): Selection => {
-    const rootMap = getDeepResolvingFields(payload);
+export const parseSelection = (payload: ResolverPayload, root: string = ""): Selection => {
+    const resolvedFields = getDeepResolvingFields(payload);
 
-    const rootSet = rootMap.get("")?.requestedFields;
-    if (!rootSet) throw new Error("Unexpected error: rootSet does not exist.");
+    const rootField = resolvedFields.get(root)?.requestedFields;
+    if (!rootField) throw new Error("Root field not found in selection.");
 
     return Object.fromEntries(
-        Array.from(rootSet, field => {
-            const childSet = rootMap.get(field)?.requestedFields;
+        Array.from(rootField, field => {
+            const path = root ? `${root}.${field}` : field;
+            const nestedField = resolvedFields.get(path)?.requestedFields;
+
             return [
                 field,
-                childSet
-                    ? Array.from(childSet)
+                nestedField
+                    ? Array.from(nestedField)
                     : "include",
             ]
         })

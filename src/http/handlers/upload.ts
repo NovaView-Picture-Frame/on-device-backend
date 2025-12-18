@@ -6,8 +6,8 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 
 import { appConfig } from "../../config";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
-import { getExtractRegionRecordByHash } from "../../repositories/images";
-import { uploadProcessor, InvalidBufferError } from "../../services/images";
+import { findExtractRegionRecordByHash } from "../../services/images";
+import { uploadImage, InvalidBufferError } from "../../services/images";
 import { createMaxSizeTransform, MaxSizeError } from "../../services/images/upload/transform";
 import type { ExtractRegionRecord } from "../../models/images";
 
@@ -34,7 +34,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
 
     const headerHash = headerResult.data["content-hash"];
     if (headerHash) {
-        const extractRegionRecord = getExtractRegionRecordByHash(headerHash);
+        const extractRegionRecord = findExtractRegionRecordByHash(headerHash);
 
         if (extractRegionRecord) {
             respondExisting(reply, extractRegionRecord);
@@ -53,8 +53,8 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
 
     const taskId = randomUUID();
     const tee = new PassThrough();
-    const hashAndMetadata = uploadProcessor({
-        id: taskId,
+    const hashAndMetadata = uploadImage({
+        taskId: taskId,
         stream: tee,
         signal,
     });
@@ -62,7 +62,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
 
     hashAndMetadata.then(
         ({ hash }) => {
-            const extractRegionRecord = getExtractRegionRecordByHash(hash);
+            const extractRegionRecord = findExtractRegionRecordByHash(hash);
             if (!extractRegionRecord) return;
 
             existingController.abort();

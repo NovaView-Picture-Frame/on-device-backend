@@ -1,8 +1,8 @@
 import { buildPre, buildBase, type TaskEventsGetter } from "../buildTaskEventsHandler";
-import { uploadTasksMap } from "../../services/images";
+import { uploadTasksById } from "../../services/images";
 
 const getTaskEvents: TaskEventsGetter = taskId => {
-    const tasks = uploadTasksMap.get(taskId);
+    const tasks = uploadTasksById.get(taskId);
     if (!tasks) return;
 
     return {

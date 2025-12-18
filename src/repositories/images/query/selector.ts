@@ -1,4 +1,4 @@
-import type { Selection } from "../../../graphql/models/images";
+import type { Selection } from "../../../models/images";
 
 export const buildSelector = (selection: Selection) => {
     const fields = [

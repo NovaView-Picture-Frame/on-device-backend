@@ -23,13 +23,13 @@ const nominatimSchema = z.object({
 
 export const geocoding = async (input: {
     lat: number;
-    long: number;
+    lng: number;
     signal: AbortSignal;
 }) => {
     const baseUrl = "https://nominatim.openstreetmap.org/reverse";
     const params = new URLSearchParams({
         lat: input.lat.toString(),
-        lon: input.long.toString(),
+        lon: input.lng.toString(),
         zoom: "10",
         addressdetails: "0",
         format: "jsonv2",
@@ -60,7 +60,7 @@ export const saveStream = async (input: {
     return { path: input.path, size: sink.bytesWritten };
 };
 
-export const insertAndMove = async (input: {
+export const insertAndLink = async (input: {
     originalTmp: string;
     croppedTmp: string;
     optimizedTmp: string;
@@ -72,14 +72,14 @@ export const insertAndMove = async (input: {
     const { id, created } = upsert(input);
 
     if (created) {
-        const moves: [string, string][] = [
+        const links: [string, string][] = [
             [input.originalTmp, `${paths.originals._base}/${id}`],
             [input.croppedTmp, `${paths.cropped._base}/${id}`],
             [input.optimizedTmp, `${paths.optimized._base}/${id}`],
         ];
 
         await Promise.all(ignoreErrorCodes(
-            moves.map(move => fs.link(...move)),
+            links.map(link => fs.link(...link)),
             "EEXIST",
         ));
     }

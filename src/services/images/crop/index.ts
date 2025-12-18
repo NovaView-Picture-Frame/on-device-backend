@@ -1,9 +1,10 @@
 import { randomUUID, type UUID } from "node:crypto";
 import fs from "node:fs/promises";
 
-import { updateAndMove } from "./persist";
+import { updateAndMove } from "./effects";
 import { appConfig, paths } from "../../../config";
-import { resizeAndExtract } from "./processor";
+import { resizeAndExtract } from "./render";
+import { notifyImagesChanged } from "../carousel";
 import { ignoreErrorCodes } from "../../../utils/ignoreErrorCodes";
 import type { ExtractOffsetUpdate, ExtractRegionRecord } from "../../../models/images";
 
@@ -17,12 +18,12 @@ interface Tasks {
     readonly persist: ReturnType<typeof updateAndMove>;
 }
 
-export const tasksMap = new Map<UUID, {
+export const cropTasksById = new Map<UUID, {
     key: ReturnType<typeof getTaskKey> | null;
     readonly tasks: Tasks;
 }>();
 
-export const cropProcessor = (input: {
+export const cropImage = (input: {
     current: ExtractRegionRecord;
     left: ExtractRegionRecord["extractRegion"]["left"];
     top: ExtractRegionRecord["extractRegion"]["top"];
@@ -36,7 +37,7 @@ export const cropProcessor = (input: {
     };
 
     const taskKey = getTaskKey(next);
-    for (const [existingTaskId, existingEntry] of tasksMap.entries())
+    for (const [existingTaskId, existingEntry] of cropTasksById.entries())
         if (existingEntry.key === taskKey) return existingTaskId;
 
     const taskId = randomUUID();
@@ -52,13 +53,15 @@ export const cropProcessor = (input: {
         updateAndMove({ record: next, croppedTmp, cropped: `${paths.cropped._base}/${next.id}` }),
     );
 
+    persist.then(notifyImagesChanged);
+
     const tasks = { crop, persist };
-    tasksMap.set(taskId, { key: taskKey, tasks});
+    cropTasksById.set(taskId, { key: taskKey, tasks});
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
-        const entry = tasksMap.get(taskId);
+        const entry = cropTasksById.get(taskId);
         if (entry) entry.key = null;
-        setTimeout(() => tasksMap.delete(taskId), appConfig.runtime.tasks_results_ttl_ms);
+        setTimeout(() => cropTasksById.delete(taskId), appConfig.runtime.tasks_results_ttl_ms);
 
         await ignoreErrorCodes(fs.unlink(croppedTmp), "ENOENT");
     });

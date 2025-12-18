@@ -6,7 +6,7 @@ import type { FastifyRequest } from "fastify";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
 import { appConfig } from "../../config";
 import { setupHeartbeat } from "../heartbeat";
-import { handleConnected, handleClosed, requestSchedule } from "../../services/images/carousel";
+import { subscribeSchedule, requestSchedule } from "../../services/images/carousel";
 import { ClientMessageSchema, type ScheduleMessage } from "../../models/carousel";
 
 interface Context {
@@ -17,7 +17,7 @@ const headerSchema = z.object({ "device-id": z.uuidv4().pipe(z.custom<UUID>()) }
 
 const contextMap = new WeakMap<FastifyRequest, Context>();
 
-export const carouselUpgradeHandler = async (req: FastifyRequest) => {
+export const carouselPreValidation = async (req: FastifyRequest) => {
     const headerResult = headerSchema.safeParse(req.headers);
     if (!headerResult.success) throw new HttpBadRequestError("Invalid headers");
 
@@ -66,10 +66,10 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
         }
     });
 
+    const unsubscribe = subscribeSchedule(context.deviceId, listener);
+
     ws.on("close", () => {
-        handleClosed(context.deviceId, listener);
+        unsubscribe();
         contextMap.delete(req);
     });
-
-    handleConnected(context.deviceId, listener);
 };

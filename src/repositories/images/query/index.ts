@@ -1,8 +1,7 @@
 import { db } from "../../../db";
 import { buildSelector } from "./selector";
 
-import type { ImageRecord, ImageRecordDB } from "../../../models/images";
-import type { Selection } from "../../../graphql/models/images";
+import type { ImageRecord, ImageRecordDB, Selection } from "../../../models/images";
 
 export const querySingle = (id: ImageRecord["id"], selection: Selection) => {
     const stmt = db.prepare<ImageRecordDB["id"], string>(/* sql */ `

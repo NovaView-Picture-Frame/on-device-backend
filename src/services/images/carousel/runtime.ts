@@ -1,4 +1,4 @@
-import { randomBytes, type UUID } from "crypto";
+import { randomBytes, type UUID } from "node:crypto";
 
 import { appConfig } from "../../../config";
 import { buildScheduleMessage } from "./buildSchedule";
@@ -17,9 +17,7 @@ let state: State = {
     order: appConfig.services.carousel.default_order,
 };
 
-const generateSeed = () => randomBytes(32);
-
-const emit = (listener: Listener, message: ScheduleMessage) => {
+const pushSchedule = (listener: Listener, message: ScheduleMessage) => {
     try {
         listener(message);
     } catch (err) {
@@ -27,7 +25,7 @@ const emit = (listener: Listener, message: ScheduleMessage) => {
     }
 };
 
-const sendSchedule = (handledAt: Date, action: Action) => {
+const dispatchSchedule = (handledAt: Date, action: Action) => {
     if (state.phase !== "running")
         throw new Error("Unexpected action: running in non-running state.");
 
@@ -38,63 +36,53 @@ const sendSchedule = (handledAt: Date, action: Action) => {
             const listener = listeners.get(action.id);
             if (!listener) throw new Error(`No listener found for id: ${action.id}`);
 
-            emit(listener, message);
+            pushSchedule(listener, message);
             break;
         }
 
         case "BROADCAST":
-            for (const listener of listeners.values()) emit(listener, message);
+            for (const listener of listeners.values()) pushSchedule(listener, message);
             break;
     }
 };
 
-const dispatch = (event: Event) => {
+const dispatchEvent = (event: Event) => {
     const handledAt = new Date();
 
     const { nextState, action } = reducer({ state, event, handledAt });
 
     state = nextState;
-    if (action) sendSchedule(handledAt, action);
+    if (action) dispatchSchedule(handledAt, action);
 };
 
-export const activate = () => dispatch(
+const generateSeed = () => randomBytes(32);
+
+export const activate = () => dispatchEvent(
     state.order === "random"
         ? { type: "ACTIVATE", order: "random", seed: generateSeed() }
         : { type: "ACTIVATE", order: state.order },
 );
 
-export const deactivate = () => dispatch({ type: "DEACTIVATE" });
+export const deactivate = () => dispatchEvent({ type: "DEACTIVATE" });
 
-export const requestSchedule = (id: UUID) => dispatch({ type: "REQUEST_SCHEDULE", id });
+export const requestSchedule = (id: UUID) => dispatchEvent({ type: "REQUEST_SCHEDULE", id });
 
 export const switchOrder = (order: Order, mode: OrderSwitchMode) => {
     if (state.phase === "idle") {
-        dispatch({ type: "SET_ORDER", order });
+        dispatchEvent({ type: "SET_ORDER", order });
         return;
     }
 
-    dispatch(
+    dispatchEvent(
         order === "random"
             ? { type: "SWITCH_ORDER", mode, order, seed: generateSeed()}
             : { type: "SWITCH_ORDER", mode, order },
     );
 };
 
-export const onImagesChanged = () => dispatch({ type: "IMAGES_CHANGED" });
+export const notifyImagesChanged = () => dispatchEvent({ type: "IMAGES_CHANGED" });
 
-export const handleConnected = (id: UUID, listener: Listener) => {
-    listeners.set(id, listener);
-
-    if (state.phase === "idle") {
-        activate();
-        console.log("Carousel Activated");
-    }
-    console.log("Listener added: ", id);
-
-    return () => handleClosed(id, listener);
-};
-
-export const handleClosed = (id: UUID, listener: Listener) => {
+const unsubscribeSchedule = (id: UUID, listener: Listener) => {
     if (listener !== listeners.get(id)) return;
 
     listeners.delete(id);
@@ -103,4 +91,16 @@ export const handleClosed = (id: UUID, listener: Listener) => {
     if (listeners.size !== 0) return;
     deactivate();
     console.log("Carousel Deactivated");
+};
+
+export const subscribeSchedule = (id: UUID, listener: Listener) => {
+    listeners.set(id, listener);
+
+    if (state.phase === "idle") {
+        activate();
+        console.log("Carousel Activated");
+    }
+    console.log("Listener added: ", id);
+
+    return () => unsubscribeSchedule(id, listener);
 };

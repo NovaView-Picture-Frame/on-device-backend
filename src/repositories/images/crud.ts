@@ -23,7 +23,7 @@ const getByHashStmt = db.prepare<ImageRecordDB["hash"], ExtractRegionRecordDB>(/
     WHERE hash = ?
 `);
 
-export const getExtractRegionRecordByHash = (
+export const findExtractRegionRecordByHash = (
     hash: ImageRecord["hash"],
 ): ExtractRegionRecord | null => {
     const record = getByHashStmt.get(hash);
@@ -41,7 +41,7 @@ const getByIdStmt = db.prepare<ImageRecordDB["id"], ExtractRegionRecordDB>(/* sq
     WHERE id = ?
 `);
 
-export const getExtractRegionRecordById = (id: ImageRecord["id"]): ExtractRegionRecord | null => {
+export const findExtractRegionRecordById = (id: ImageRecord["id"]): ExtractRegionRecord | null => {
     const record = getByIdStmt.get(id);
     return record ? toExtractRegionRecord(record) : null;
 };
@@ -77,7 +77,7 @@ export const upsert = db.transaction((input: Image) => {
     const id = insertStmt.get(toInsert(input));
     if (id !== undefined) return { id, created: true };
 
-    const record = getExtractRegionRecordByHash(input.hash);
+    const record = findExtractRegionRecordByHash(input.hash);
     if (record) return { id: record.id, created: false };
 
     throw new DatabaseError();

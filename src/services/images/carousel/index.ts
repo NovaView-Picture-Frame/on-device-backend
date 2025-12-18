@@ -3,7 +3,6 @@ export {
     deactivate,
     requestSchedule,
     switchOrder,
-    onImagesChanged,
-    handleConnected,
-    handleClosed,
+    notifyImagesChanged,
+    subscribeSchedule,
 } from "./runtime";

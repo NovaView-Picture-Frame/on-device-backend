@@ -1,5 +1,15 @@
-export { uploadProcessor, InvalidBufferError, tasksMap as uploadTasksMap } from "./upload";
+export { uploadImage, InvalidBufferError, uploadTasksById } from "./upload";
 
-export { cropProcessor, tasksMap as cropTasksMap } from "./crop";
+export { getOptimizedImage } from "./preview";
 
-export { deleteProcessor } from "./delete";
+export { cropImage, cropTasksById } from "./crop";
+
+export { deleteImage } from "./delete";
+
+export {
+    findExtractRegionRecordByHash,
+    findExtractRegionRecordById,
+    querySingle,
+    queryList,
+    queryByIds,
+} from "../../repositories/images";

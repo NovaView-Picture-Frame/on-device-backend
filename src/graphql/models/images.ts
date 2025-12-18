@@ -2,19 +2,8 @@ import { z } from "zod";
 import { asField } from "@gqloom/zod";
 import { GraphQLNonNull, GraphQLID } from "graphql";
 
-import { imageRecordSchema, type ImageRecord } from "./base";
-
-type ZodPartial<T> = Partial<{
-    [P in keyof T]: T[P] | undefined;
-}>;
-
-type Field<T> = T extends object ? (keyof T)[] : "include";
-
-type ImageRecordFieldMap = {
-    [K in keyof ImageRecord]: Field<NonNullable<ImageRecord[K]>>;
-};
-
-export type Selection = ZodPartial<ImageRecordFieldMap>;
+import type { ZodPartial } from "../../utils/zodPartial";
+import { imageRecordSchema, type ImageRecord } from "../../models/images";
 
 interface ImageQueryRaw extends Omit<ImageRecord, "extractRegion" | "place"> {
     extractRegion: ZodPartial<ImageRecord["extractRegion"]>;
