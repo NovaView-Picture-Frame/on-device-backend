@@ -10,8 +10,8 @@ export const argsSchema = z.tuple([
 export const configSchema = z.object({
     device: z.object({
         screen: z.object({
-            width: z.number().int().positive(),
-            height: z.number().int().positive(),
+            width: z.int().positive(),
+            height: z.int().positive(),
         }),
     }),
 

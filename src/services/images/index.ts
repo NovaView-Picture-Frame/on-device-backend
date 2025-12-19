@@ -1,4 +1,10 @@
-export { uploadImage, InvalidBufferError, uploadTasksById } from "./upload";
+export {
+    createMaxSizeTransform,
+    uploadImage,
+    uploadTasksById,
+    InvalidBufferError,
+    MaxSizeError,
+} from "./upload";
 
 export { getOptimizedImage } from "./preview";
 

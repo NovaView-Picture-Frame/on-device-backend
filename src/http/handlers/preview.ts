@@ -15,7 +15,7 @@ export const previewHandler = async (req: FastifyRequest, reply: FastifyReply) =
     const image = await getOptimizedImage(paramsResult.data.id);
     if (!image) throw new HttpNotFoundError("Image not found");
 
-    reply.header("Content-Length", image.size.toString());
+    reply.header("Content-Length", image.size);
     reply.type(image.mime);
     return image.stream;
 };

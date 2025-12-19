@@ -1,10 +1,10 @@
 import { createHash } from "node:crypto";
 
 import { appConfig } from "../../../config";
-import type { Slot } from "../../../models/carousel";
+import type { SlotImage, Slot } from "../../../models/carousel";
 
 interface BaseInput {
-    ids: number[];
+    images: SlotImage[];
     startTime: Date;
     start: number;
     length: number;
@@ -17,11 +17,11 @@ type RandomOption =
 type GetSlotsInput = BaseInput & RandomOption;
 
 const getRound = (input: {
-    ids: number[];
+    images: SlotImage[];
     index: number;
     seed: Buffer;
 }) => {
-    const getKey = (id: typeof input.ids[number]) =>
+    const getKey = (id: typeof input.images[number]) =>
         createHash("sha256")
             .update(input.seed)
             .update(":")
@@ -30,7 +30,7 @@ const getRound = (input: {
             .update(String(id))
             .digest();
 
-    return input.ids
+    return input.images
         .map(id => ({
             id,
             key: getKey(id),
@@ -42,33 +42,33 @@ const getRound = (input: {
 const buildSlot = (input: {
     index: number;
     startTime: Date;
-    id: number;
+    image: SlotImage;
 }): Slot => ({
     id: `slot-${input.index}`,
     startTime: new Date(
         input.startTime.getTime() + input.index * appConfig.services.carousel.default_interval_ms,
     ),
-    payload: { id: input.id },
+    image: input.image,
 });
 
-export const getSlots = (input: GetSlotsInput) => {
-    const { ids, startTime, start, length, random, seed } = input;
+export const listSlots = (input: GetSlotsInput) => {
+    const { images, startTime, start, length, random, seed } = input;
 
     if (start < 0 || length < 0)
         throw new Error(`Invalid arguments: "start" and "length" must be non-negative.`);
 
-    const idsLength = ids.length;
-    if (idsLength === 0) return [];
+    const imagesLength = images.length;
+    if (imagesLength === 0) return [];
 
     if (random) {
-        const startRound = ~~(start / idsLength);
-        const startIndex = start % idsLength;
+        const startRound = ~~(start / imagesLength);
+        const startIndex = start % imagesLength;
         const endIndex = startIndex + length;
-        const roundCount = Math.ceil(endIndex / idsLength);
+        const roundCount = Math.ceil(endIndex / imagesLength);
 
         const rounds = Array.from({ length: roundCount }, (_, offset) =>
             getRound({
-                ids,
+                images,
                 index: startRound + offset,
                 seed,
             }),
@@ -77,22 +77,22 @@ export const getSlots = (input: GetSlotsInput) => {
         return rounds
             .flat()
             .slice(startIndex, endIndex)
-            .map((id, offset) => buildSlot({
+            .map((image, offset) => buildSlot({
                 index: start + offset,
                 startTime,
-                id,
+                image,
             }));
     } else {
         return Array.from({ length }, (_, offset) => {
             const index = start + offset;
-            const id = ids[index % idsLength];
-            if (id === undefined)
-                throw new Error(`Unexpected error: No ID found at index ${index}.`);
+            const image = images[index % imagesLength];
+            if (image === undefined)
+                throw new Error(`Unexpected error: No image found at index ${index}.`);
 
             return buildSlot({
                 index,
                 startTime,
-                id,
+                image,
             });
         });
     }

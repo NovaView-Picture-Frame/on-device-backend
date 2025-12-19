@@ -2,12 +2,12 @@ import { randomBytes, type UUID } from "node:crypto";
 
 import { appConfig } from "../../../config";
 import { buildScheduleMessage } from "./buildSchedule";
-import { reducer } from "./reducer";
-import type { State, Event, Action } from "./types";
-import type { Order, OrderSwitchMode, ScheduleMessage } from "../../../models/carousel";
+import { reducer } from "../domain/reducer";
+import type { State, Event, Action } from "../domain/types";
+import type { Order, OrderSwitchMode, NewSchedule } from "../../../models/carousel";
 
 interface Listener {
-    (message: ScheduleMessage): void;
+    (message: NewSchedule): void;
 }
 
 const listeners = new Map<UUID, Listener>();
@@ -17,7 +17,7 @@ let state: State = {
     order: appConfig.services.carousel.default_order,
 };
 
-const pushSchedule = (listener: Listener, message: ScheduleMessage) => {
+const pushSchedule = (listener: Listener, message: NewSchedule) => {
     try {
         listener(message);
     } catch (err) {

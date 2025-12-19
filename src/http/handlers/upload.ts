@@ -6,9 +6,13 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 
 import { appConfig } from "../../config";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
-import { findExtractRegionRecordByHash } from "../../services/images";
-import { uploadImage, InvalidBufferError } from "../../services/images";
-import { createMaxSizeTransform, MaxSizeError } from "../../services/images/upload/transform";
+import {
+    findExtractRegionRecordByHash,
+    createMaxSizeTransform,
+    uploadImage,
+    InvalidBufferError,
+    MaxSizeError,
+} from "../../services/images";
 import type { ExtractRegionRecord } from "../../models/images";
 
 const headerSchema = z.object({

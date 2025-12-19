@@ -2,7 +2,7 @@ import { z } from "zod";
 import { asField } from "@gqloom/zod";
 import { GraphQLNonNull, GraphQLID } from "graphql";
 
-import type { ZodPartial } from "../../utils/zodPartial";
+import type { ZodPartial } from "../../utils/zod";
 import { imageRecordSchema, type ImageRecord } from "../../models/images";
 
 interface ImageQueryRaw extends Omit<ImageRecord, "extractRegion" | "place"> {

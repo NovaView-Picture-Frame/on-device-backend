@@ -1,9 +1,9 @@
 import { appConfig } from "../../../config";
-import { getIds } from "./getIds";
-import { getSlots } from "./getSlots";
+import { listSlotImages } from "./listSlotImages";
+import { listSlots } from "./listSlots";
 
-import type { ScheduleMessage } from "../../../models/carousel";
-import type { State } from "./types";
+import type { NewSchedule } from "../../../models/carousel";
+import type { State } from ".././domain/types";
 
 const getStartIndex = (now: Date, startTime: Date) => {
     const elapsed = now.getTime() - startTime.getTime();
@@ -15,24 +15,24 @@ const getStartIndex = (now: Date, startTime: Date) => {
 export const buildScheduleMessage = (
     state: Extract<State, { phase: "running" }>,
     now: Date,
-): ScheduleMessage => {
+): NewSchedule => {
     const { startTime } = state;
     const startIndex = getStartIndex(now, startTime);
 
     const baseInput = {
-        ids: getIds(state.order),
+        images: listSlotImages(state.order),
         startTime,
         start: startIndex,
         length: appConfig.services.carousel.schedule_window_size,
     };
 
     const slots = state.order === "random"
-        ? getSlots({
+        ? listSlots({
             ...baseInput,
             random: true,
             seed: state.seed,
         })
-        : getSlots({
+        : listSlots({
             ...baseInput,
             random: false,
         });

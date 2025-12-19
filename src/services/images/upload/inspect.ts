@@ -2,13 +2,13 @@ import { exiftool, ExifDate, ExifTime, ExifDateTime } from "exiftool-vendored";
 import type { Metadata } from "sharp";
 
 import { InvalidBufferError } from "./errors";
-import { imageRecordSchema, type Image } from "../../../models/images";
+import { imageRecordSchema, type NewImage } from "../../../models/images";
 
 const formatTimestamp = (input: string | number | ExifDate | ExifTime | ExifDateTime) =>
     input instanceof ExifDate || input instanceof ExifTime || input instanceof ExifDateTime
         ? input.toExifString()
         : typeof input === "number"
-            ? input.toString()
+            ? String(input)
             : input;
 
 const hasOwn = <
@@ -36,8 +36,8 @@ export const extractHashAndMetadata = async (input: {
     size: number;
     meta: Metadata;
 }): Promise<{
-    hash: Image["hash"];
-    metadata: Image["metadata"];
+    hash: NewImage["hash"];
+    metadata: NewImage["metadata"];
 }> => {
     const {
         ImageDataHash,

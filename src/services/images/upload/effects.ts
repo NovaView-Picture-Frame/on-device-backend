@@ -28,14 +28,14 @@ export const geocoding = async (input: {
 }) => {
     const baseUrl = "https://nominatim.openstreetmap.org/reverse";
     const params = new URLSearchParams({
-        lat: input.lat.toString(),
-        lon: input.lng.toString(),
+        lat: String(input.lat),
+        lon: String(input.lng),
         zoom: "10",
         addressdetails: "0",
         format: "jsonv2",
     });
 
-    const res = await fetch(`${baseUrl}?${params.toString()}`, {
+    const res = await fetch(`${baseUrl}?${params}`, {
         headers: {
             "User-Agent": appConfig.external.nominatim.user_agent,
             "Accept-Language": "en",

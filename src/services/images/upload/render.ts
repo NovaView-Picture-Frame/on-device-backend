@@ -1,9 +1,7 @@
 import type { Sharp } from "sharp";
 
-import { InvalidBufferError } from "./errors";
+import { StreamAbortedError, InvalidBufferError } from "./errors";
 import { appConfig } from "../../../config";
-
-class StreamAbortedError extends Error {}
 
 const abortableSharp = async <T>(input: {
     sharpInstance: Sharp;

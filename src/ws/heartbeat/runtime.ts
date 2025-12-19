@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { WebSocket } from "ws";
+import type { WebSocket } from "ws";
 
 import { reducer } from "./reducer";
 import type { State, Event, Action, OnOkInput, OnFailInput } from "./types";
@@ -133,19 +133,14 @@ export const setupHeartbeat = (input: {
         }
     };
 
-    const onPong = (data: Buffer) => {
-        if (state.phase !== "running" || state.sub !== "waitingPong") return;
-
-        dispatch({ type: "PONG", heartbeatTag: data });
-    };
+    const onPong = (data: Buffer) => dispatch({ type: "PONG", heartbeatTag: data });
 
     ws.on("pong", onPong);
     ws.once("close", stop);
     ws.once("error", stop);
 
     intervalTimer = setInterval(() => {
-        if (state.phase !== "running" || state.sub !== "idle" || ws.readyState !== WebSocket.OPEN)
-            return;
+        if (state.phase !== "running" || state.sub !== "idle") return;
 
         dispatch({ type: "TICK", heartbeatTag: randomBytes(16) });
     }, intervalMs);

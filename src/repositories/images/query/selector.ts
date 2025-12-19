@@ -44,6 +44,8 @@ export const buildSelector = (selection: Selection) => {
                 )}) END`,
             ]
             : []),
+
+        ...(selection.revision ? [`'revision', _revision`] : []),
     ];
 
     return `json_object(${fields.join(", ")})`;

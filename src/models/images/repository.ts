@@ -1,6 +1,6 @@
-import type { Image, ExtractRegionRecord } from "./base";
+import type { NewImage, ExtractRegionRecord, SlotImage } from "./base";
 
-export interface ImageInsert {
+export interface NewImageDB {
     hash: string;
     extract_region_left: number;
     extract_region_top: number;
@@ -12,25 +12,7 @@ export interface ImageInsert {
     place_full_name: string | null;
 }
 
-export interface ImageRecordDB extends ImageInsert {
-    id: number;
-}
-
-export type ExtractRegionRecordDB = Pick<ImageRecordDB,
-    | "id"
-    | "extract_region_left"
-    | "extract_region_top"
-    | "extract_region_width"
-    | "extract_region_height"
->;
-
-export type ExtractOffsetUpdateDB = Pick<ImageRecordDB,
-    | "id"
-    | "extract_region_left"
-    | "extract_region_top"
->;
-
-export const toInsert = (input: Image): ImageInsert => ({
+export const toNewImageDB = (input: NewImage): NewImageDB => ({
     hash: input.hash,
     extract_region_left: input.extractRegion.left,
     extract_region_top: input.extractRegion.top,
@@ -52,6 +34,28 @@ export const toInsert = (input: Image): ImageInsert => ({
     ),
 });
 
+export interface ImageRecordDB extends NewImageDB {
+    id: number;
+    _taken_at: string | null;
+    _place_exists: 0 | 1;
+    created_at: string;
+    _revision: number;
+}
+
+export type ExtractRegionRecordDB = Pick<ImageRecordDB,
+    | "id"
+    | "extract_region_left"
+    | "extract_region_top"
+    | "extract_region_width"
+    | "extract_region_height"
+>;
+
+export type ExtractOffsetUpdateDB = Pick<ImageRecordDB,
+    | "id"
+    | "extract_region_left"
+    | "extract_region_top"
+>;
+
 export const toExtractRegionRecord = (input: ExtractRegionRecordDB): ExtractRegionRecord => ({
     id: input.id,
     extractRegion: {
@@ -60,4 +64,11 @@ export const toExtractRegionRecord = (input: ExtractRegionRecordDB): ExtractRegi
         width: input.extract_region_width,
         height: input.extract_region_height,
     },
+});
+
+export type SlotImageDB = Pick<ImageRecordDB, "id" | "_revision">;
+
+export const toSlotImage = (input: SlotImageDB): SlotImage => ({
+    id: input.id,
+    revision: input._revision,
 });

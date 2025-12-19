@@ -16,12 +16,12 @@ db.exec(/* sql */ `
         extract_region_width   INTEGER  NOT NULL                    CHECK(extract_region_width > 0),
         extract_region_height  INTEGER  NOT NULL                    CHECK(extract_region_height > 0),
 
-        metadata_jsonb         BLOB     NOT NULL                    CHECK(json_valid(metadata_jsonb, 8) AND json_type(metadata_jsonb) = "object" AND json(metadata_jsonb) != "{}"),
+        metadata_jsonb         BLOB     NOT NULL                    CHECK(json_valid(metadata_jsonb, 8) AND json_type(metadata_jsonb) = 'object' AND json(metadata_jsonb) != '{}'),
         _taken_at              TEXT AS (
             datetime(
-                replace(substr(json_extract(metadata_jsonb, "$.DateTimeOriginal"), 1, 10), ":", "-") 
-                || " " ||
-                substr(json_extract(metadata_jsonb, "$.DateTimeOriginal"), 12)
+                replace(substr(json_extract(metadata_jsonb, '$.DateTimeOriginal'), 1, 10), ':', '-') 
+                || ' ' ||
+                substr(json_extract(metadata_jsonb, '$.DateTimeOriginal'), 12)
             )
         ) STORED,
 
@@ -33,6 +33,7 @@ db.exec(/* sql */ `
         ) STORED,
 
         created_at             TEXT     NOT NULL                    DEFAULT CURRENT_TIMESTAMP,
+        _revision              INTEGER  NOT NULL                    DEFAULT 1,
 
         CHECK(extract_region_left = 0 OR extract_region_top = 0),
         CHECK(extract_region_width = ${appConfig.device.screen.width} OR extract_region_height = ${appConfig.device.screen.height}),
@@ -50,6 +51,15 @@ db.exec(/* sql */ `
             )
         )
     ) STRICT;
+`);
+
+db.exec(/* sql */ `
+    CREATE TRIGGER IF NOT EXISTS images_revision_increment
+    AFTER UPDATE ON images
+    FOR EACH ROW
+    BEGIN
+        UPDATE images SET _revision = OLD._revision + 1 WHERE id = NEW.id;
+    END;
 `);
 
 db.pragma("journal_mode = WAL");

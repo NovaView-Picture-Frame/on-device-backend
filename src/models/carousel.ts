@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import type { ImageRecord } from "./images";
+
 export const orderSchema = z.enum([
     "random",
     "createdAsc",
@@ -10,23 +12,24 @@ export const orderSchema = z.enum([
 
 export type Order = z.infer<typeof orderSchema>;
 
-export const orderSwitchModeSchema = z.enum(["restart", "continue"]);
+export type OrderSwitchMode = "restart" | "continue";
 
-export type OrderSwitchMode = z.infer<typeof orderSwitchModeSchema>;
+export type SlotImage = Pick<ImageRecord, "id" | "revision">;
 
 export interface Slot {
     id: string;
     startTime: Date;
-    payload: {
-        id: number;
-    };
+    image: SlotImage;
 }
 
-export interface ScheduleMessage {
+export interface NewSchedule {
     type: "newSchedule";
     acceptableDelay: number;
     slots: Slot[];
 }
+
+export type CarouselServerMessage =
+    | NewSchedule;
 
 export const ClientMessageSchema = z.discriminatedUnion("type", [
     z.object({

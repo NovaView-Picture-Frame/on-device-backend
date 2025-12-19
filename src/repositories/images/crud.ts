@@ -1,12 +1,12 @@
 import { db } from "../../db";
-import { toExtractRegionRecord, toInsert } from "../../models/images";
+import { toNewImageDB, toExtractRegionRecord } from "../../models/images";
 import { DatabaseError } from "./errors";
 import type {
     ImageRecord,
-    Image,
+    NewImage,
     ExtractRegionRecord,
     ExtractOffsetUpdate,
-    ImageInsert,
+    NewImageDB,
     ImageRecordDB,
     ExtractRegionRecordDB,
     ExtractOffsetUpdateDB,
@@ -46,7 +46,7 @@ export const findExtractRegionRecordById = (id: ImageRecord["id"]): ExtractRegio
     return record ? toExtractRegionRecord(record) : null;
 };
 
-const insertStmt = db.prepare<ImageInsert, ImageRecordDB["id"]>(/* sql */`
+const insertStmt = db.prepare<NewImageDB, ImageRecordDB["id"]>(/* sql */`
     INSERT INTO images (
         hash,
         extract_region_left,
@@ -73,8 +73,8 @@ const insertStmt = db.prepare<ImageInsert, ImageRecordDB["id"]>(/* sql */`
     RETURNING id
 `).pluck();
 
-export const upsert = db.transaction((input: Image) => {
-    const id = insertStmt.get(toInsert(input));
+export const upsert = db.transaction((input: NewImage) => {
+    const id = insertStmt.get(toNewImageDB(input));
     if (id !== undefined) return { id, created: true };
 
     const record = findExtractRegionRecordByHash(input.hash);

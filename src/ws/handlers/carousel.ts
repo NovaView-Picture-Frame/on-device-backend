@@ -3,17 +3,18 @@ import type { UUID } from "node:crypto";
 import { WebSocket, type RawData } from "ws";
 import type { FastifyRequest } from "fastify";
 
+import { uuidSchema } from "../../utils/zod";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
 import { appConfig } from "../../config";
 import { setupHeartbeat } from "../heartbeat";
-import { subscribeSchedule, requestSchedule } from "../../services/images/carousel";
-import { ClientMessageSchema, type ScheduleMessage } from "../../models/carousel";
+import { subscribeSchedule, requestSchedule } from "../../services/carousel";
+import { ClientMessageSchema, type NewSchedule } from "../../models/carousel";
 
 interface Context {
     deviceId: UUID;
 }
 
-const headerSchema = z.object({ "device-id": z.uuidv4().pipe(z.custom<UUID>()) });
+const headerSchema = z.object({ "device-id": uuidSchema });
 
 const contextMap = new WeakMap<FastifyRequest, Context>();
 
@@ -26,7 +27,7 @@ export const carouselPreValidation = async (req: FastifyRequest) => {
 
 export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
     const context = contextMap.get(req);
-    if (!context) throw new Error("Context not found for WebSocket");
+    if (!context) throw new Error("Context not found for request");
 
     setupHeartbeat({
         ws,
@@ -38,14 +39,14 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
         },
     });
 
-    const listener = (message: ScheduleMessage) => {
+    const listener = (message: NewSchedule) => {
         if (ws.readyState !== WebSocket.OPEN) return;
         ws.send(JSON.stringify(message));
     };
 
     ws.on("message", (raw: RawData) => {
         try {
-            const message = ClientMessageSchema.parse(JSON.parse(raw.toString()));
+            const message = ClientMessageSchema.parse(JSON.parse(String(raw)));
 
             switch (message.type) {
                 case "requestSchedule":
@@ -68,8 +69,23 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
 
     const unsubscribe = subscribeSchedule(context.deviceId, listener);
 
-    ws.on("close", () => {
-        unsubscribe();
-        contextMap.delete(req);
-    });
+    let cleaned = false;
+    const cleanUp = () => {
+        if (cleaned) return;
+        cleaned = true;
+
+        ws.off("close", cleanUp);
+        ws.off("error", cleanUp);
+
+        try {
+            unsubscribe();
+        } catch (err) {
+            console.warn("Cleanup failed:", err);
+        } finally {
+            contextMap.delete(req);
+        }
+    };
+
+    ws.once("close", cleanUp);
+    ws.once("error", cleanUp);
 };

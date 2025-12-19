@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { UUID } from "node:crypto";
 import type { FastifyRequest, FastifyReply } from "fastify";
 
+import { uuidSchema } from "../utils/zod";
 import { HttpBadRequestError, HttpNotFoundError } from "../middleware/errorHandler";
 
 interface TaskEvents {
@@ -17,7 +18,7 @@ interface Context {
 }
 
 const paramsSchema = z.object({
-    taskId: z.uuidv4().pipe(z.custom<UUID>()),
+    taskId: uuidSchema,
 });
 
 const contextMap = new WeakMap<FastifyRequest, Context>();

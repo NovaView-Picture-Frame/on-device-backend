@@ -1,12 +1,13 @@
 export { imageRecordSchema } from "./base";
-export type { ImageRecord, Image, ExtractRegionRecord, ExtractOffsetUpdate } from "./base";
+export type { ImageRecord, NewImage, ExtractRegionRecord, ExtractOffsetUpdate } from "./base";
 
-export { toInsert, toExtractRegionRecord } from "./repository";
+export { toNewImageDB, toExtractRegionRecord, toSlotImage } from "./repository";
 export type {
-    ImageInsert,
+    NewImageDB,
     ImageRecordDB,
     ExtractRegionRecordDB,
     ExtractOffsetUpdateDB,
+    SlotImageDB,
 } from "./repository";
 
 export type { Selection } from "./selection";

@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 
 import { deleteById } from "../../repositories/images";
-import { notifyImagesChanged } from "./carousel";
+import { notifyImagesChanged } from "../carousel";
 import { ignoreErrorCodes } from "../../utils/ignoreErrorCodes";
 import { paths } from "../../config";
 
