@@ -8,7 +8,7 @@ import { HttpBadRequestError } from "../../middleware/errorHandler";
 import { appConfig } from "../../config";
 import { setupHeartbeat } from "../heartbeat";
 import { subscribeSchedule, requestSchedule } from "../../services/carousel";
-import { ClientMessageSchema, type NewSchedule } from "../../models/carousel";
+import { ClientMessageSchema, type CarouselServerMessage } from "../../models/carousel";
 
 interface Context {
     deviceId: UUID;
@@ -27,19 +27,22 @@ export const carouselPreValidation = async (req: FastifyRequest) => {
 
 export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
     const context = contextMap.get(req);
-    if (!context) throw new Error("Context not found for request");
+    if (!context) throw new Error("Cxontext not found for request");
 
     setupHeartbeat({
         ws,
         intervalMs: appConfig.runtime.websocket_heartbeat_interval_ms,
         timeoutMs: appConfig.runtime.websocket_heartbeat_timeout_ms,
-        onFail: ({ reason }) => {
-            console.log(`Heartbeat failed (${reason}) for device: ${context.deviceId}`);
-            ws.terminate();
+        onFail: ({ reason, consecutive }) => {
+            console.log(`Heartbeat failed (${reason}), consecutive: ${consecutive}, device: ${context.deviceId}`);
+            if (consecutive >= appConfig.runtime.websocket_heartbeat_retries) {
+                console.log(`Terminating connection for device: ${context.deviceId}`);
+                ws.terminate();
+            }
         },
     });
 
-    const listener = (message: NewSchedule) => {
+    const listener = (message: CarouselServerMessage) => {
         if (ws.readyState !== WebSocket.OPEN) return;
         ws.send(JSON.stringify(message));
     };

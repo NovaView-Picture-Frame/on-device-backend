@@ -25,6 +25,7 @@ export const configSchema = z.object({
         tasks_results_ttl_ms: z.int().positive(),
         websocket_heartbeat_interval_ms: z.int().positive(),
         websocket_heartbeat_timeout_ms: z.int().positive(),
+        websocket_heartbeat_retries: z.int().nonnegative(),
     }),
 
     services: z.object({

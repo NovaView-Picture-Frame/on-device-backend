@@ -3,7 +3,7 @@ import { z } from "zod";
 import { GraphQLError } from "graphql";
 
 import { imageQuerySchema } from "../models/images";
-import { querySingle, queryList } from "../../services/images"; 
+import { querySingle, queryList, queryByIds } from "../../services/images"; 
 import { parseSelection } from "../selection";
 import { appConfig } from "../../config";
 
@@ -30,4 +30,12 @@ export const imagesResolver = resolver({
 
             return queryList({ size, selection: parseSelection(payload), cursor: cursor ?? null });
         }),
+
+    imagesByIds: query(z.array(imageQuerySchema.nullable()))
+        .input({ ids: z.array(z.int().positive()).min(1) })
+        .resolve(({ ids }, payload) => {
+            if (!payload) throw new GraphQLError("Unexpected error: payload is undefined.");
+
+            return queryByIds(ids, parseSelection(payload));
+        })
 });

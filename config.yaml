@@ -12,6 +12,7 @@ runtime:
   tasks_results_ttl_ms: 600000
   websocket_heartbeat_interval_ms: 30000
   websocket_heartbeat_timeout_ms: 10000
+  websocket_heartbeat_retries: 2
 
 services:
   upload:

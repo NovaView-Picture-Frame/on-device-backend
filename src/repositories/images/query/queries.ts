@@ -43,13 +43,26 @@ export const queryList = (input: {
 export const queryByIds = (ids: ImageRecord["id"][], selection: Selection) => {
     if (ids.length === 0) return [];
 
-    const placeholders = Array(ids.length).fill("?").join(", ");
+    const values = ids.reduce((acc, _, index) => {
+        const entry = `(?, ${index})`;
+        return acc + (index ? ", " : "") + entry;
+    }, "");
 
     const stmt = db.prepare<number[], string>(/* sql */ `
-        SELECT ${buildSelector(selection)}
-        FROM images
-        WHERE id IN (${placeholders})
-    `).pluck();
+        WITH requested(request_id, ord) AS (
+            VALUES ${values}
+        )
+        SELECT
+            CASE
+                WHEN images.id IS NULL THEN 'null'
+                ELSE ${buildSelector(selection)}
+            END
+        FROM requested
+        LEFT JOIN images
+            ON images.id = requested.request_id
+        ORDER BY requested.ord
+    `)
+    .pluck();
 
     const results = stmt.all(...ids);
     return JSON.parse(`[${results.join(",")}]`);

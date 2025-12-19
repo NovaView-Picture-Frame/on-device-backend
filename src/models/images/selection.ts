@@ -1,5 +1,5 @@
 import type { ImageRecord } from "./base";
-import type { ZodPartial } from "../../utils/zodPartial";
+import type { ZodPartial } from "../../utils/zod";
 
 type Field<T> = T extends object ? (keyof T)[] : "include";
 
