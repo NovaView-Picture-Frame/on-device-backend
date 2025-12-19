@@ -1,7 +1,7 @@
 import type { Sharp } from "sharp";
 
 import { StreamAbortedError, InvalidBufferError } from "./errors";
-import { appConfig } from "../../../config";
+import { config } from "../../../config";
 
 const abortableSharp = async <T>(input: {
     sharpInstance: Sharp;
@@ -38,7 +38,7 @@ export const resizeToCover = async (input: {
     sharpInstance: input.sharpInstance,
     signal: input.signal,
     run: sharp => sharp
-        .resize(appConfig.device.screen.width, appConfig.device.screen.height, {
+        .resize(config.device.screen.width, config.device.screen.height, {
             fit: "cover",
             position: "entropy",
         })
@@ -56,8 +56,8 @@ export const resizeToInside = async (input: {
     signal: input.signal,
     run: sharp => sharp
         .resize(
-            appConfig.services.preview.max_width,
-            appConfig.services.preview.max_height,
+            config.services.preview.max_width,
+            config.services.preview.max_height,
             { fit: "inside", withoutEnlargement: true },
         )
         .keepIccProfile()

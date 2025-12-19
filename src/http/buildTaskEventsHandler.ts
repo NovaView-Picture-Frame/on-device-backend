@@ -17,7 +17,7 @@ interface Context {
     taskEvents: TaskEvents;
 }
 
-const paramsSchema = z.object({
+const paramsSchema = z.strictObject({
     taskId: uuidSchema,
 });
 

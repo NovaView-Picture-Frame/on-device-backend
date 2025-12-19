@@ -89,5 +89,8 @@ export const reducer = (input: {
                 nextState: state,
                 action: { type: "BROADCAST" },
             };
+
+        default:
+            throw event satisfies never;
     }
 };

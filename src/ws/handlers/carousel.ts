@@ -5,10 +5,10 @@ import type { FastifyRequest } from "fastify";
 
 import { uuidSchema } from "../../utils/zod";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
-import { appConfig } from "../../config";
+import { config } from "../../config";
 import { setupHeartbeat } from "../heartbeat";
 import { subscribeSchedule, requestSchedule } from "../../services/carousel";
-import { ClientMessageSchema, type CarouselServerMessage } from "../../models/carousel";
+import { CarouselClientMessageSchema, type CarouselServerMessage } from "../../models/carousel";
 
 interface Context {
     deviceId: UUID;
@@ -31,11 +31,11 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
 
     setupHeartbeat({
         ws,
-        intervalMs: appConfig.runtime.websocket_heartbeat_interval_ms,
-        timeoutMs: appConfig.runtime.websocket_heartbeat_timeout_ms,
+        intervalMs: config.runtime.websocket_heartbeat_interval_ms,
+        timeoutMs: config.runtime.websocket_heartbeat_timeout_ms,
         onFail: ({ reason, consecutive }) => {
             console.log(`Heartbeat failed (${reason}), consecutive: ${consecutive}, device: ${context.deviceId}`);
-            if (consecutive >= appConfig.runtime.websocket_heartbeat_retries) {
+            if (consecutive >= config.runtime.websocket_heartbeat_retries) {
                 console.log(`Terminating connection for device: ${context.deviceId}`);
                 ws.terminate();
             }
@@ -49,7 +49,7 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
 
     ws.on("message", (raw: RawData) => {
         try {
-            const message = ClientMessageSchema.parse(JSON.parse(String(raw)));
+            const message = CarouselClientMessageSchema.parse(JSON.parse(String(raw)));
 
             switch (message.type) {
                 case "requestSchedule":
@@ -64,6 +64,9 @@ export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
                         `Preload complete: ${message.payload.id} at ${message.payload.timeStamp.toISOString()} (device: ${context.deviceId})`,
                     );
                     break;
+
+                default:
+                    message satisfies never;
             }
         } catch {
             ws.send(JSON.stringify({ type: "error", message: "Invalid message" }));

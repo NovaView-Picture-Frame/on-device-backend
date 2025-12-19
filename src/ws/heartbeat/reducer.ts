@@ -77,5 +77,8 @@ export const reducer = (input: {
                 nextState: { phase: "stopped" },
                 actions: [{ type: "CLEANUP" }],
             }
+
+        default:
+            throw event satisfies never;
     }
 };

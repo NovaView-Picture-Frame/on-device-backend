@@ -5,7 +5,7 @@ import { GraphQLError } from "graphql";
 import { imageQuerySchema } from "../models/images";
 import { querySingle, queryList, queryByIds } from "../../services/images"; 
 import { parseSelection } from "../selection";
-import { appConfig } from "../../config";
+import { config } from "../../config";
 
 export const imagesResolver = resolver({
     image: query(imageQuerySchema.nullable())
@@ -21,8 +21,8 @@ export const imagesResolver = resolver({
             size: z
                 .int()
                 .positive()
-                .max(appConfig.services.query.max_page_size)
-                .default(appConfig.services.query.default_page_size),
+                .max(config.services.query.max_page_size)
+                .default(config.services.query.default_page_size),
             cursor: z.int().positive().optional(),
         })
         .resolve(({ size, cursor }, payload) => {

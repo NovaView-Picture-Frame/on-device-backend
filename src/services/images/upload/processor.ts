@@ -4,7 +4,7 @@ import sharp from "sharp";
 import type { UUID } from "node:crypto";
 
 import { geocoding, saveStream, insertAndLink } from "./effects";
-import { appConfig, paths } from "../../../config";
+import { config, paths } from "../../../config";
 import { getMetadata, resizeToCover, resizeToInside } from "./render";
 import { extractHashAndMetadata } from "./inspect";
 import { notifyImagesChanged } from "../../carousel";
@@ -55,8 +55,8 @@ export const uploadImage = (input: {
         resizeToCover({ sharpInstance: transform.clone(), path: croppedTmp, signal }),
     ]).then(([metadata, coverOutput]) => {
         const scale = Math.max(
-            appConfig.device.screen.width / metadata.width,
-            appConfig.device.screen.height / metadata.height,
+            config.device.screen.width / metadata.width,
+            config.device.screen.height / metadata.height,
         );
 
         return {
@@ -91,7 +91,7 @@ export const uploadImage = (input: {
     uploadTasksById.set(id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
-        setTimeout(() => uploadTasksById.delete(id), appConfig.runtime.tasks_results_ttl_ms);
+        setTimeout(() => uploadTasksById.delete(id), config.runtime.tasks_results_ttl_ms);
 
         await Promise.all(ignoreErrorCodes(
             [originalTmp, croppedTmp, optimizedTmp].map(fs.unlink),

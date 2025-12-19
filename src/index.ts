@@ -4,7 +4,7 @@ import { exiftool } from "exiftool-vendored";
 import { errorHandler } from "./middleware/errorHandler";
 import { httpRoutes, binaryRoutes, sseRoutes } from "./http/routes";
 import { wsRoutes } from "./ws/routes";
-import { appConfig } from "./config";
+import { config } from "./config";
 
 const app = fastify();
 
@@ -36,7 +36,7 @@ process.once("SIGINT", () => shutdown("SIGINT"));
 try {
     const versionForWarmup = await exiftool.version();
     console.log(`EXIFTool version ${versionForWarmup} ready for requests`);
-    const address = await app.listen({ port: appConfig.server.port });
+    const address = await app.listen({ port: config.server.port });
     console.log(`Server listening at ${address}`);
 } catch (err) {
     console.error("Error starting server: ", err);

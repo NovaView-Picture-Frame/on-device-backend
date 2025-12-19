@@ -4,7 +4,7 @@ import { pipeline } from "node:stream/promises";
 import { z } from "zod";
 import type { FastifyRequest, FastifyReply } from "fastify";
 
-import { appConfig } from "../../config";
+import { config } from "../../config";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
 import {
     findExtractRegionRecordByHash,
@@ -18,7 +18,7 @@ import type { ExtractRegionRecord } from "../../models/images";
 const headerSchema = z.object({
     "content-type": z.string().regex(/^image\/[^;]+/i).optional(),
     "content-length": z.coerce.number().int().positive().max(
-        appConfig.services.upload.size_limit_bytes
+        config.services.upload.size_limit_bytes
     ).optional(),
     "content-hash": z.string().length(64).regex(/^\p{Hex_Digit}+$/v).optional(),
     "file-name": z.string().max(255).optional(),
@@ -62,7 +62,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
         stream: tee,
         signal,
     });
-    const timer = setTimeout(() => timeoutController.abort(), appConfig.services.upload.timeout_ms);
+    const timer = setTimeout(() => timeoutController.abort(), config.services.upload.timeout_ms);
 
     hashAndMetadata.then(
         ({ hash }) => {
@@ -79,7 +79,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
         await Promise.all([
             pipeline(
                 request.raw,
-                createMaxSizeTransform(appConfig.services.upload.size_limit_bytes),
+                createMaxSizeTransform(config.services.upload.size_limit_bytes),
                 tee,
                 { signal },
             ),
@@ -101,7 +101,7 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
 
         if (err instanceof MaxSizeError)
             throw new HttpBadRequestError(
-                `Max ${appConfig.services.upload.size_limit_bytes} bytes`,
+                `Max ${config.services.upload.size_limit_bytes} bytes`,
             );
 
         if (err instanceof InvalidBufferError)

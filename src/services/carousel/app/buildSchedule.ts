@@ -1,4 +1,4 @@
-import { appConfig } from "../../../config";
+import { config } from "../../../config";
 import { listSlotImages } from "./listSlotImages";
 import { listSlots } from "./listSlots";
 
@@ -9,7 +9,7 @@ const getStartIndex = (now: Date, startTime: Date) => {
     const elapsed = now.getTime() - startTime.getTime();
     if (elapsed < 0) throw new Error("Invalid time: now is before startTime.");
 
-    return ~~(elapsed / appConfig.services.carousel.default_interval_ms);
+    return ~~(elapsed / config.services.carousel.default_interval_ms);
 };
 
 export const buildScheduleMessage = (
@@ -23,7 +23,7 @@ export const buildScheduleMessage = (
         images: listSlotImages(state.order),
         startTime,
         start: startIndex,
-        length: appConfig.services.carousel.schedule_window_size,
+        length: config.services.carousel.schedule_window_size,
     };
 
     const slots = state.order === "random"
@@ -39,7 +39,7 @@ export const buildScheduleMessage = (
 
     return {
         type: "newSchedule",
-        acceptableDelay: appConfig.services.carousel.acceptable_delay_ms,
+        acceptableDelay: config.services.carousel.acceptable_delay_ms,
         slots,
     };
 };

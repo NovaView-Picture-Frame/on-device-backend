@@ -1,6 +1,6 @@
 import { randomBytes, type UUID } from "node:crypto";
 
-import { appConfig } from "../../../config";
+import { config } from "../../../config";
 import { buildScheduleMessage } from "./buildSchedule";
 import { reducer } from "../domain/reducer";
 import type { State, Event, Action } from "../domain/types";
@@ -14,7 +14,7 @@ const listeners = new Map<UUID, Listener>();
 
 let state: State = {
     phase: "idle",
-    order: appConfig.services.carousel.default_order,
+    order: config.services.carousel.default_order,
 };
 
 const pushSchedule = (listener: Listener, message: NewSchedule) => {
@@ -43,6 +43,9 @@ const dispatchSchedule = (handledAt: Date, action: Action) => {
         case "BROADCAST":
             for (const listener of listeners.values()) pushSchedule(listener, message);
             break;
+
+        default:
+            action satisfies never;
     }
 };
 

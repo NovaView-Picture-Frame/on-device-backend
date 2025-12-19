@@ -2,7 +2,7 @@ import { randomUUID, type UUID } from "node:crypto";
 import fs from "node:fs/promises";
 
 import { updateAndMove } from "./effects";
-import { appConfig, paths } from "../../../config";
+import { config, paths } from "../../../config";
 import { resizeAndExtract } from "./render";
 import { notifyImagesChanged } from "../../carousel";
 import { ignoreErrorCodes } from "../../../utils/ignoreErrorCodes";
@@ -61,7 +61,7 @@ export const cropImage = (input: {
     Promise.allSettled(Object.values(tasks)).finally(async () => {
         const entry = cropTasksById.get(taskId);
         if (entry) entry.key = null;
-        setTimeout(() => cropTasksById.delete(taskId), appConfig.runtime.tasks_results_ttl_ms);
+        setTimeout(() => cropTasksById.delete(taskId), config.runtime.tasks_results_ttl_ms);
 
         await ignoreErrorCodes(fs.unlink(croppedTmp), "ENOENT");
     });

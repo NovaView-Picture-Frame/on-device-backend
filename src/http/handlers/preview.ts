@@ -4,7 +4,7 @@ import type { FastifyRequest, FastifyReply } from "fastify";
 import { HttpBadRequestError, HttpNotFoundError } from "../../middleware/errorHandler";
 import { getOptimizedImage } from "../../services/images";
 
-const paramsSchema = z.object({
+const paramsSchema = z.strictObject({
     id: z.coerce.number().int().positive(),
 });
 

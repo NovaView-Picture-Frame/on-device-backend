@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import { z } from "zod";
 import type { Readable } from "node:stream";
 
-import { appConfig, paths } from "../../../config";
+import { config, paths } from "../../../config";
 import { imageRecordSchema } from "../../../models/images";
 import { upsert } from "../../../repositories/images";
 import { ignoreErrorCodes } from "../../../utils/ignoreErrorCodes";
@@ -37,7 +37,7 @@ export const geocoding = async (input: {
 
     const res = await fetch(`${baseUrl}?${params}`, {
         headers: {
-            "User-Agent": appConfig.external.nominatim.user_agent,
+            "User-Agent": config.external.nominatim.user_agent,
             "Accept-Language": "en",
         },
         signal: input.signal,

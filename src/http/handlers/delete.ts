@@ -4,7 +4,7 @@ import type { FastifyRequest } from "fastify";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
 import { deleteImage } from "../../services/images";
 
-const paramsSchema = z.object({
+const paramsSchema = z.strictObject({
     id: z.coerce.number().int().positive(),
 });
 

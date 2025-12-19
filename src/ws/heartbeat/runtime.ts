@@ -130,6 +130,9 @@ export const setupHeartbeat = (input: {
             case "CLEANUP":
                 cleanup();
                 break;
+
+            default:
+                action satisfies never;
         }
     };
 

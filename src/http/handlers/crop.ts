@@ -3,19 +3,18 @@ import type { FastifyRequest } from "fastify";
 
 import { HttpBadRequestError, HttpNotFoundError } from "../../middleware/errorHandler";
 import { findExtractRegionRecordById } from "../../services/images";
-import { appConfig } from "../../config";
+import { config } from "../../config";
 import { cropImage } from "../../services/images";
 
-const paramsSchema = z.object({
+const paramsSchema = z.strictObject({
     id: z.coerce.number().int().positive(),
 });
 
-const bodySchema = z.object({
+const bodySchema =
+    z.strictObject({
         extract_left_ratio: z.coerce.number().min(0).lt(1),
         extract_top_ratio: z.coerce.number().min(0).lt(1),
-    })
-    .strict()
-    .refine(
+    }).refine(
         ({ extract_left_ratio, extract_top_ratio }) =>
             extract_left_ratio === 0 || extract_top_ratio === 0,
     );
@@ -44,13 +43,13 @@ export const cropHandler = (req: FastifyRequest) => {
     if (!extractRegionRecord) throw new HttpNotFoundError("Image not found");
 
     const left = toOffset({
-        size: appConfig.device.screen.width,
+        size: config.device.screen.width,
         ratio: bodyResult.data.extract_left_ratio,
         limit: extractRegionRecord.extractRegion.width,
     });
 
     const top = toOffset({
-        size: appConfig.device.screen.height,
+        size: config.device.screen.height,
         ratio: bodyResult.data.extract_top_ratio,
         limit: extractRegionRecord.extractRegion.height,
     });

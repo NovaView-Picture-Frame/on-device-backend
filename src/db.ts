@@ -1,8 +1,8 @@
 import Database from "better-sqlite3";
 
-import { appConfig, paths } from "./config";
+import { config, paths } from "./config";
 
-export const db = new Database(`${paths._base}/${appConfig.server.database}`, {
+export const db = new Database(`${paths._base}/${config.server.database}`, {
     nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`,
 });
 
@@ -36,10 +36,10 @@ db.exec(/* sql */ `
         _revision              INTEGER  NOT NULL                    DEFAULT 1,
 
         CHECK(extract_region_left = 0 OR extract_region_top = 0),
-        CHECK(extract_region_width = ${appConfig.device.screen.width} OR extract_region_height = ${appConfig.device.screen.height}),
+        CHECK(extract_region_width = ${config.device.screen.width} OR extract_region_height = ${config.device.screen.height}),
         CHECK(
-            extract_region_left + ${appConfig.device.screen.width} <= extract_region_width OR
-            extract_region_top  + ${appConfig.device.screen.height} <= extract_region_height
+            extract_region_left + ${config.device.screen.width} <= extract_region_width OR
+            extract_region_top  + ${config.device.screen.height} <= extract_region_height
         ),
 
         CHECK (
