@@ -21,22 +21,22 @@ const getRound = (input: {
     index: number;
     seed: Buffer;
 }) => {
-    const getKey = (id: typeof input.images[number]) =>
+    const getKey = (image: SlotImage) =>
         createHash("sha256")
             .update(input.seed)
             .update(":")
             .update(String(input.index))
             .update(":")
-            .update(String(id))
+            .update(String(image.id))
             .digest();
 
     return input.images
-        .map(id => ({
-            id,
-            key: getKey(id),
+        .map(image => ({
+            image,
+            key: getKey(image),
         }))
         .sort((a, b) => a.key.compare(b.key))
-        .map(entry => entry.id);
+        .map(entry => entry.image);
 };
 
 const buildSlot = (input: {

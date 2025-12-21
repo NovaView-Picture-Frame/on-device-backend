@@ -1,9 +1,9 @@
 import { randomBytes, type UUID } from "node:crypto";
 
 import { config } from "../../../config";
-import { buildScheduleMessage } from "./buildSchedule";
-import { reducer } from "../domain/reducer";
-import type { State, Event, Action } from "../domain/types";
+import { buildScheduleMessage } from "../scheduleMessage/message";
+import { reducer } from "./reducer";
+import type { State, Event, Action } from "./types";
 import type { Order, OrderSwitchMode, NewSchedule } from "../../../models/carousel";
 
 interface Listener {
@@ -22,21 +22,25 @@ const pushSchedule = (listener: Listener, message: NewSchedule) => {
         listener(message);
     } catch (err) {
         console.error("Carousel listener error:", err);
-    }
+    };
 };
 
 const dispatchSchedule = (handledAt: Date, action: Action) => {
     if (state.phase !== "running")
         throw new Error("Unexpected action: running in non-running state.");
 
-    const message = buildScheduleMessage(state, handledAt);
+    const message = buildScheduleMessage({
+        state,
+        now: handledAt,
+        windowSize: action.type === "SEND_TO_ONE"
+            ? action.windowSize
+            : config.services.carousel.schedule_window_size.broadcast,
+    });
 
     switch (action.type) {
         case "SEND_TO_ONE": {
             const listener = listeners.get(action.id);
-            if (!listener) throw new Error(`No listener found for id: ${action.id}`);
-
-            pushSchedule(listener, message);
+            if (listener) pushSchedule(listener, message);
             break;
         }
 
@@ -60,15 +64,19 @@ const dispatchEvent = (event: Event) => {
 
 const generateSeed = () => randomBytes(32);
 
-export const activate = () => dispatchEvent(
+const activate = () => dispatchEvent(
     state.order === "random"
         ? { type: "ACTIVATE", order: "random", seed: generateSeed() }
         : { type: "ACTIVATE", order: state.order },
 );
 
-export const deactivate = () => dispatchEvent({ type: "DEACTIVATE" });
+const deactivate = () => dispatchEvent({ type: "DEACTIVATE" });
 
-export const requestSchedule = (id: UUID) => dispatchEvent({ type: "REQUEST_SCHEDULE", id });
+export const requestSchedule = (id: UUID, windowSize: number) => dispatchEvent({
+    type: "REQUEST_SCHEDULE",
+    id,
+    windowSize,
+});
 
 export const switchOrder = (order: Order, mode: OrderSwitchMode) => {
     if (state.phase === "idle") {
@@ -89,7 +97,6 @@ const unsubscribeSchedule = (id: UUID, listener: Listener) => {
     if (listener !== listeners.get(id)) return;
 
     listeners.delete(id);
-    console.log("Listener removed: ", id);
 
     if (listeners.size !== 0) return;
     deactivate();
@@ -102,8 +109,7 @@ export const subscribeSchedule = (id: UUID, listener: Listener) => {
     if (state.phase === "idle") {
         activate();
         console.log("Carousel Activated");
-    }
-    console.log("Listener added: ", id);
+    };
 
     return () => unsubscribeSchedule(id, listener);
 };

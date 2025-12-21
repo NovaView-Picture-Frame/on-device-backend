@@ -85,16 +85,22 @@ export const uploadImage = (input: {
         })
     );
 
-    persist.then(notifyImagesChanged);
+    persist.then(() => {
+        try {
+            notifyImagesChanged();
+        } catch (err) {
+            console.error("Error notifying images changed:", err);
+        };
+    });
 
     const tasks = { lookupPlace, saveOriginal, crop, optimize, persist };
     uploadTasksById.set(id, tasks);
 
     Promise.allSettled(Object.values(tasks)).finally(async () => {
-        setTimeout(() => uploadTasksById.delete(id), config.runtime.tasks_results_ttl_ms);
+        setTimeout(() => uploadTasksById.delete(id), config.services.tasks_results_ttl_ms);
 
         await Promise.all(ignoreErrorCodes(
-            [originalTmp, croppedTmp, optimizedTmp].map(fs.unlink),
+            [originalTmp, croppedTmp, optimizedTmp].map(path => fs.unlink(path)),
             "ENOENT",
         ));
     });

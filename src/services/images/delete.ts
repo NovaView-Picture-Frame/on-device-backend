@@ -14,7 +14,7 @@ export const deleteImage = async (id: Parameters<typeof deleteById>[0]) => {
             `${paths.originals._base}/${id}`,
             `${paths.cropped._base}/${id}`,
             `${paths.optimized._base}/${id}`,
-        ].map(fs.unlink),
+        ].map(path => fs.unlink(path)),
         "ENOENT",
     ))
 }

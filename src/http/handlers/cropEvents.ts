@@ -1,4 +1,4 @@
-import { buildPre, buildBase, type TaskEventsGetter } from "../buildTaskEventsHandler";
+import { buildPre, buildBase, type TaskEventsGetter } from "../taskEventsHandler";
 import { cropTasksById } from "../../services/images";
 
 const getTaskEvents: TaskEventsGetter = taskId => {

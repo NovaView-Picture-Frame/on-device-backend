@@ -38,7 +38,7 @@ db.exec(/* sql */ `
         CHECK(extract_region_left = 0 OR extract_region_top = 0),
         CHECK(extract_region_width = ${config.device.screen.width} OR extract_region_height = ${config.device.screen.height}),
         CHECK(
-            extract_region_left + ${config.device.screen.width} <= extract_region_width OR
+            extract_region_left + ${config.device.screen.width} <= extract_region_width AND
             extract_region_top  + ${config.device.screen.height} <= extract_region_height
         ),
 

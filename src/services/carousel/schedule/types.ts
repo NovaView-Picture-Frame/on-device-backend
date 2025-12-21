@@ -13,11 +13,11 @@ export type State =
 export type Event =
     | { type: "ACTIVATE" } & OrderOption
     | { type: "DEACTIVATE" }
-    | { type: "REQUEST_SCHEDULE"; id: UUID }
+    | { type: "REQUEST_SCHEDULE"; id: UUID, windowSize: number }
     | { type: "SET_ORDER"; order: Order }
     | { type: "SWITCH_ORDER"; mode: OrderSwitchMode } & OrderOption
     | { type: "IMAGES_CHANGED" };
 
 export type Action =
-    | { type: "SEND_TO_ONE"; id: UUID }
+    | { type: "SEND_TO_ONE"; id: UUID, windowSize: number }
     | { type: "BROADCAST" };

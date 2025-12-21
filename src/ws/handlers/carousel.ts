@@ -1,20 +1,17 @@
 import { z } from "zod";
 import type { UUID } from "node:crypto";
-import { WebSocket, type RawData } from "ws";
+import { WebSocket} from "ws";
 import type { FastifyRequest } from "fastify";
 
 import { uuidSchema } from "../../utils/zod";
 import { HttpBadRequestError } from "../../middleware/errorHandler";
-import { config } from "../../config";
-import { setupHeartbeat } from "../heartbeat";
-import { subscribeSchedule, requestSchedule } from "../../services/carousel";
-import { CarouselClientMessageSchema, type CarouselServerMessage } from "../../models/carousel";
+import { createCarouselSession } from "../../services/carousel";
 
 interface Context {
-    deviceId: UUID;
+    clientId: UUID;
 }
 
-const headerSchema = z.object({ "device-id": uuidSchema });
+const headerSchema = z.object({ "client-id": uuidSchema });
 
 const contextMap = new WeakMap<FastifyRequest, Context>();
 
@@ -22,76 +19,16 @@ export const carouselPreValidation = async (req: FastifyRequest) => {
     const headerResult = headerSchema.safeParse(req.headers);
     if (!headerResult.success) throw new HttpBadRequestError("Invalid headers");
 
-    contextMap.set(req, { deviceId: headerResult.data["device-id"] });
+    contextMap.set(req, { clientId: headerResult.data["client-id"] });
 };
 
 export const carouselHandler = (ws: WebSocket, req: FastifyRequest) => {
     const context = contextMap.get(req);
-    if (!context) throw new Error("Cxontext not found for request");
+    if (!context) throw new Error("Context not found for request");
 
-    setupHeartbeat({
+    createCarouselSession({
         ws,
-        intervalMs: config.runtime.websocket_heartbeat_interval_ms,
-        timeoutMs: config.runtime.websocket_heartbeat_timeout_ms,
-        onFail: ({ reason, consecutive }) => {
-            console.log(`Heartbeat failed (${reason}), consecutive: ${consecutive}, device: ${context.deviceId}`);
-            if (consecutive >= config.runtime.websocket_heartbeat_retries) {
-                console.log(`Terminating connection for device: ${context.deviceId}`);
-                ws.terminate();
-            }
-        },
+        clientId: context.clientId,
+        onSessionEnd: () => contextMap.delete(req),
     });
-
-    const listener = (message: CarouselServerMessage) => {
-        if (ws.readyState !== WebSocket.OPEN) return;
-        ws.send(JSON.stringify(message));
-    };
-
-    ws.on("message", (raw: RawData) => {
-        try {
-            const message = CarouselClientMessageSchema.parse(JSON.parse(String(raw)));
-
-            switch (message.type) {
-                case "requestSchedule":
-                    requestSchedule(context.deviceId);
-                    console.log(
-                        `Schedule requested at ${new Date().toISOString()} (device: ${context.deviceId})`,
-                    );
-                    break;
-
-                case "preloadComplete":
-                    console.log(
-                        `Preload complete: ${message.payload.id} at ${message.payload.timeStamp.toISOString()} (device: ${context.deviceId})`,
-                    );
-                    break;
-
-                default:
-                    message satisfies never;
-            }
-        } catch {
-            ws.send(JSON.stringify({ type: "error", message: "Invalid message" }));
-        }
-    });
-
-    const unsubscribe = subscribeSchedule(context.deviceId, listener);
-
-    let cleaned = false;
-    const cleanUp = () => {
-        if (cleaned) return;
-        cleaned = true;
-
-        ws.off("close", cleanUp);
-        ws.off("error", cleanUp);
-
-        try {
-            unsubscribe();
-        } catch (err) {
-            console.warn("Cleanup failed:", err);
-        } finally {
-            contextMap.delete(req);
-        }
-    };
-
-    ws.once("close", cleanUp);
-    ws.once("error", cleanUp);
 };

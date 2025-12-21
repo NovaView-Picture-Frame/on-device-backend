@@ -9,10 +9,11 @@ server:
   database: data.sqlite
 
 runtime:
-  tasks_results_ttl_ms: 600000
-  websocket_heartbeat_interval_ms: 30000
-  websocket_heartbeat_timeout_ms: 10000
-  websocket_heartbeat_retries: 2
+  websocket:
+    retries: 2
+    heartbeat:
+      interval_ms: 30000
+      timeout_ms: 10000
 
 services:
   upload:
@@ -20,8 +21,9 @@ services:
     size_limit_bytes: 15728640
 
   query:
-    default_page_size: 50
-    max_page_size: 100
+    page_size:
+      default: 50
+      max: 100
 
   preview:
     max_width: 1920
@@ -31,7 +33,11 @@ services:
     default_order: random
     default_interval_ms: 5000
     acceptable_delay_ms: 2000
-    schedule_window_size: 24
+    schedule_window_size:
+      max_request: 120
+      broadcast: 60
+
+  tasks_results_ttl_ms: 600000
 
 external:
   nominatim:

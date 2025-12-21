@@ -6,8 +6,9 @@ import type { Readable } from "node:stream";
 
 import { config, paths } from "../../../config";
 import { imageRecordSchema } from "../../../models/images";
-import { upsert } from "../../../repositories/images";
+import { upsert, deleteById } from "../../../repositories/images";
 import { ignoreErrorCodes } from "../../../utils/ignoreErrorCodes";
+import { FileSystemError } from "../errors";
 
 type PlaceSchema = ReturnType<typeof imageRecordSchema.shape.place.unwrap>;
 
@@ -78,11 +79,15 @@ export const insertAndLink = async (input: {
             [input.optimizedTmp, `${paths.optimized._base}/${id}`],
         ];
 
-        await Promise.all(ignoreErrorCodes(
-            links.map(link => fs.link(...link)),
-            "EEXIST",
-        ));
-    }
-
+        try {
+            await Promise.all(ignoreErrorCodes(
+                links.map(link => fs.link(...link)),
+                "EEXIST",
+            ));
+        } catch {
+            deleteById(id);
+            throw new FileSystemError("Failed to link image files");
+        };
+    };
     return id;
 };

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { orderSchema } from "../models/carousel";
+import { carouselOrderSchema } from "./shared";
 
 export const argsSchema = z.tuple([
     z.literal("-c"),
@@ -22,10 +22,13 @@ export const configSchema = z.strictObject({
     }),
 
     runtime: z.strictObject({
-        tasks_results_ttl_ms: z.int().positive(),
-        websocket_heartbeat_interval_ms: z.int().positive(),
-        websocket_heartbeat_timeout_ms: z.int().positive(),
-        websocket_heartbeat_retries: z.int().nonnegative(),
+        websocket: z.strictObject({
+            retries: z.int().nonnegative(),
+            heartbeat: z.strictObject({
+                interval_ms: z.int().positive(),
+                timeout_ms: z.int().positive(),
+            }),
+        }),
     }),
 
     services: z.strictObject({
@@ -35,8 +38,10 @@ export const configSchema = z.strictObject({
         }),
 
         query: z.strictObject({
-            default_page_size: z.int().positive(),
-            max_page_size: z.int().positive(),
+            page_size: z.strictObject({
+                default: z.int().positive(),
+                max: z.int().positive(),
+            }).refine(size => size.default <= size.max),
         }),
 
         preview: z.strictObject({
@@ -45,11 +50,16 @@ export const configSchema = z.strictObject({
         }),
 
         carousel: z.strictObject({
-            default_order: orderSchema,
+            default_order: carouselOrderSchema,
             default_interval_ms: z.int().positive(),
             acceptable_delay_ms: z.int().positive(),
-            schedule_window_size: z.int().positive(),
+            schedule_window_size: z.strictObject({
+                max_request: z.int().positive(),
+                broadcast: z.int().positive(),
+            }).refine(size => size.broadcast <= size.max_request),
         }),
+
+        tasks_results_ttl_ms: z.int().positive(),
     }),
 
     external: z.strictObject({

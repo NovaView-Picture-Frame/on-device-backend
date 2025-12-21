@@ -1,1 +1,2 @@
-export { subscribeSchedule, requestSchedule, notifyImagesChanged } from "./app";
+export { createCarouselSession } from "./connection/session";
+export { notifyImagesChanged } from "./schedule/runtime";

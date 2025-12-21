@@ -3,7 +3,7 @@ import { listSlotImages } from "./listSlotImages";
 import { listSlots } from "./listSlots";
 
 import type { NewSchedule } from "../../../models/carousel";
-import type { State } from ".././domain/types";
+import type { State } from "../schedule/types";
 
 const getStartIndex = (now: Date, startTime: Date) => {
     const elapsed = now.getTime() - startTime.getTime();
@@ -12,10 +12,12 @@ const getStartIndex = (now: Date, startTime: Date) => {
     return ~~(elapsed / config.services.carousel.default_interval_ms);
 };
 
-export const buildScheduleMessage = (
+export const buildScheduleMessage = (input: {
     state: Extract<State, { phase: "running" }>,
     now: Date,
-): NewSchedule => {
+    windowSize: number,
+}): NewSchedule => {
+    const { state, now, windowSize } = input;
     const { startTime } = state;
     const startIndex = getStartIndex(now, startTime);
 
@@ -23,7 +25,7 @@ export const buildScheduleMessage = (
         images: listSlotImages(state.order),
         startTime,
         start: startIndex,
-        length: config.services.carousel.schedule_window_size,
+        length: windowSize,
     };
 
     const slots = state.order === "random"

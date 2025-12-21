@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import type { WebSocket } from "ws";
 
 import { reducer } from "./reducer";
+import type { DropLastArg } from "../../utils/dropLastArg";
 import type { State, Event, Action, OnOkInput, OnFailInput } from "./types";
 
 export const setupHeartbeat = (input: {
@@ -13,7 +14,7 @@ export const setupHeartbeat = (input: {
 }) => {
     const { ws, intervalMs, timeoutMs, onOk, onFail } = input;
 
-    let state: State = { phase: "running", sub: "idle", consecutive: 0 };
+    let state: State = { phase: "running", sub: "idle" };
 
     const queue: Event[] = [];
     let intervalTimer: NodeJS.Timeout | null = null;
@@ -36,8 +37,6 @@ export const setupHeartbeat = (input: {
         clearTimeoutTimer();
 
         ws.off("pong", onPong);
-        ws.off("close", stop);
-        ws.off("error", stop);
     };
 
     const dispatch = (event: Event) => {
@@ -66,6 +65,14 @@ export const setupHeartbeat = (input: {
         }
     };
 
+    const pingAsync = (...args: DropLastArg<WebSocket["ping"]>) =>
+        new Promise<void>((resolve, reject) =>
+            ws.ping(...args, err => {
+                if (err) reject(err);
+                else resolve();
+            })
+        );
+
     const stop = () => dispatch({ type: "STOP" });
 
     const exec = (action: Action) => {
@@ -73,15 +80,13 @@ export const setupHeartbeat = (input: {
 
         switch (action.type) {
             case "PING":
-                try {
-                    ws.ping(action.heartbeatTag);
-                } catch {
+                pingAsync(action.heartbeatTag).catch(() =>
                     dispatch({
                         type: "FAIL",
                         reason: "ping_error",
                         heartbeatTag: action.heartbeatTag,
-                    });
-                }
+                    })
+                );
                 break;
 
             case "SET_TIMEOUT":
@@ -102,26 +107,27 @@ export const setupHeartbeat = (input: {
                 break;
 
             case "CALL_OK":
-                Promise.resolve(onOk?.({
-                        ws: ws,
-                        sentAt: action.sentAt,
-                        receivedAt: action.receivedAt,
-                        heartbeatTag: action.heartbeatTag,
-                })).catch(err => {
+                if (!onOk) break;
+
+                Promise.try(onOk, {
+                    ws,
+                    sentAt: action.sentAt,
+                    receivedAt: action.receivedAt,
+                    heartbeatTag: action.heartbeatTag,
+                }).catch(err => {
                     console.error("onOk handler error:", err);
                     stop();
                 });
                 break;
 
             case "CALL_FAIL":
-                Promise.resolve(onFail({
-                    ws: ws,
+                Promise.try(onFail, {
+                    ws,
                     reason: action.reason,
                     at: action.at,
                     sentAt: action.sentAt,
                     heartbeatTag: action.heartbeatTag,
-                    consecutive: action.consecutive,
-                })).catch(err => {
+                }).catch(err => {
                     console.error("onFail handler error:", err);
                     stop();
                 });
@@ -137,10 +143,7 @@ export const setupHeartbeat = (input: {
     };
 
     const onPong = (data: Buffer) => dispatch({ type: "PONG", heartbeatTag: data });
-
     ws.on("pong", onPong);
-    ws.once("close", stop);
-    ws.once("error", stop);
 
     intervalTimer = setInterval(() => {
         if (state.phase !== "running" || state.sub !== "idle") return;

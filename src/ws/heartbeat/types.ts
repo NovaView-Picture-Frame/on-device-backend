@@ -17,7 +17,6 @@ interface OnFail {
     at: Date;
     sentAt: Date;
     heartbeatTag: Buffer;
-    consecutive: number;
 }
 
 export interface OnFailInput extends OnFail {
@@ -29,7 +28,7 @@ type RunningSubState =
     | { sub: "waitingPong"; sentAt: Date; heartbeatTag: Buffer };
 
 export type State =
-    | { phase: "running"; consecutive: number } & RunningSubState
+    | { phase: "running" } & RunningSubState
     | { phase: "stopped" };
 
 export type Event =

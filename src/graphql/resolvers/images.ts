@@ -21,8 +21,8 @@ export const imagesResolver = resolver({
             size: z
                 .int()
                 .positive()
-                .max(config.services.query.max_page_size)
-                .default(config.services.query.default_page_size),
+                .max(config.services.query.page_size.max)
+                .default(config.services.query.page_size.default),
             cursor: z.int().positive().optional(),
         })
         .resolve(({ size, cursor }, payload) => {
@@ -32,7 +32,12 @@ export const imagesResolver = resolver({
         }),
 
     imagesByIds: query(z.array(imageQuerySchema.nullable()))
-        .input({ ids: z.array(z.int().positive()).min(1) })
+        .input({
+            ids: z
+                .array(z.int().positive())
+                .min(1)
+                .max(config.services.carousel.schedule_window_size.max_request),
+        })
         .resolve(({ ids }, payload) => {
             if (!payload) throw new GraphQLError("Unexpected error: payload is undefined.");
 

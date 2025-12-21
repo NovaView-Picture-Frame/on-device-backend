@@ -18,7 +18,6 @@ export const reducer = (input: {
                     sub: "waitingPong",
                     sentAt: handledAt,
                     heartbeatTag: event.heartbeatTag,
-                    consecutive: state.consecutive,
                 },
                 actions: [
                     { type: "SET_TIMEOUT", heartbeatTag: event.heartbeatTag },
@@ -34,7 +33,6 @@ export const reducer = (input: {
                 nextState: {
                     phase: "running",
                     sub: "idle",
-                    consecutive: 0,
                 },
                 actions: [
                     { type: "CLEAR_TIMEOUT" },
@@ -51,12 +49,10 @@ export const reducer = (input: {
             if (state.sub !== "waitingPong" || !state.heartbeatTag.equals(event.heartbeatTag))
                 return { nextState: state };
 
-            const consecutive = state.consecutive + 1;
             return {
                 nextState: {
                     phase: "running",
                     sub: "idle",
-                    consecutive,
                 },
                 actions: [
                     { type: "CLEAR_TIMEOUT" },
@@ -66,7 +62,6 @@ export const reducer = (input: {
                         at: handledAt,
                         sentAt: state.sentAt,
                         heartbeatTag: state.heartbeatTag,
-                        consecutive,
                     },
                 ],
             };

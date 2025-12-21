@@ -1,4 +1,4 @@
-import { z } from "zod";
+import type { z } from "zod";
 import { asField } from "@gqloom/zod";
 import { GraphQLNonNull, GraphQLID } from "graphql";
 
