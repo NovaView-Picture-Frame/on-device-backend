@@ -12,8 +12,8 @@ const paramsSchema = z.strictObject({
 
 const bodySchema =
     z.strictObject({
-        extract_left_ratio: z.coerce.number().min(0).lt(1),
-        extract_top_ratio: z.coerce.number().min(0).lt(1),
+        extract_left_ratio: z.number().min(0).max(1),
+        extract_top_ratio: z.number().min(0).max(1),
     }).refine(
         ({ extract_left_ratio, extract_top_ratio }) =>
             extract_left_ratio === 0 || extract_top_ratio === 0,
@@ -24,7 +24,7 @@ const toOffset = (input: {
     ratio: number;
     limit: number;
 }): number => {
-    const offset = ~~(input.size * input.ratio);
+    const offset = ~~(input.limit * input.ratio);
     if (input.size + offset > input.limit) throw new HttpBadRequestError(
         "Offset out of bounds"
     );

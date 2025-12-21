@@ -99,16 +99,16 @@ export const uploadHandler = async (request: FastifyRequest, reply: FastifyReply
 
         taskController.abort();
 
-        if (err instanceof MaxSizeError)
-            throw new HttpBadRequestError(
-                `Max ${config.services.upload.size_limit_bytes} bytes`,
-            );
+        if (err instanceof MaxSizeError) throw new HttpBadRequestError(
+            `Max ${config.services.upload.size_limit_bytes} bytes`,
+        );
 
-        if (err instanceof InvalidBufferError)
-            throw new HttpBadRequestError("Invalid image buffer");
+        if (err instanceof InvalidBufferError) throw new HttpBadRequestError(
+            "Invalid image buffer"
+        );
 
         throw err;
     } finally {
         clearTimeout(timer);
-    }
+    };
 };

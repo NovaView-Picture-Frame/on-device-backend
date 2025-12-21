@@ -53,13 +53,16 @@ export const cropImage = (input: {
         updateAndMove({ record: next, croppedTmp, cropped: `${paths.cropped._base}/${next.id}` }),
     );
 
-    persist.then(() => {
-        try {
-            notifyImagesChanged();
-        } catch (err) {
-            console.error("Error notifying images changed:", err);
-        };
-    });
+    persist.then(
+        () => {
+            try {
+                notifyImagesChanged();
+            } catch (err) {
+                console.error("Error notifying images changed:", err);
+            };
+        },
+        () => {},
+    );
 
     const tasks = { crop, persist };
     cropTasksById.set(taskId, { key: taskKey, tasks});

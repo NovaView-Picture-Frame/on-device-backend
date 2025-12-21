@@ -10,7 +10,7 @@ export const createCarouselChannel = (
 ) => {
     const unsubscribeSchedule = subscribeSchedule(clientId, message => dispatchMessage(message));
 
-    const onMessage = (message: CarouselClientMessage) => {
+    const onClientMessage = (message: CarouselClientMessage) => {
         switch (message.type) {
             case "requestSchedule":
                 requestSchedule(clientId, message.windowSize);
@@ -38,5 +38,5 @@ export const createCarouselChannel = (
         };
     };
 
-    return { onMessage, dispose };
+    return { onClientMessage, dispose };
 };

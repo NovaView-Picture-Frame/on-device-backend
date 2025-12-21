@@ -5,7 +5,7 @@ import { config, carouselOrderSchema } from "../../config";
 export const carouselClientMessageSchema = z.discriminatedUnion("type", [
     z.strictObject({
         type: z.literal("requestSchedule"),
-        windowSize: z.number().int().positive().max(
+        windowSize: z.int().positive().max(
             config.services.carousel.schedule_window_size.max_request,
         ),
     }),
