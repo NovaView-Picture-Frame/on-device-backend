@@ -1,6 +1,6 @@
 import { promisify } from "node:util";
 import type { UUID } from "node:crypto";
-import type { WebSocket } from "ws";
+import type { WebSocket, RawData } from "ws";
 
 import { createThresholdTrigger } from "../../../utils/thresholdTrigger";
 import { config } from "../../../config";
@@ -27,28 +27,28 @@ export const createCarouselSession = (input: {
             console.error(`Sending message failed for client: '${clientId}':`, err);
         });
 
-    const { onMessage, dispose } = createCarouselChannel(
+    const { onClientMessage, dispose } = createCarouselChannel(
         clientId,
         (message: CarouselServerMessage) => send(message),
     );
 
-    ws.on("message", raw => {
+    const onClose = () => cleanup();
+    const onError = () => cleanup(true);
+    const onMessage = (raw: RawData) => {
         reset();
-
         try {
             const rawMessage = JSON.parse(String(raw));
             const message = carouselClientMessageSchema.parse(rawMessage);
-            onMessage(message);
+            onClientMessage(message);
         } catch (err) {
             console.error(`Invalid message from client: '${clientId}':`, err);
             send({ type: "error", message: "Invalid message" });
         };
-    })
+    };
 
-    const onClose = () => cleanup();
-    const onError = () => cleanup(true);
     ws.once("close", onClose);
     ws.once("error", onError);
+    ws.on("message", onMessage);
 
     const stopHeartbeat = setupHeartbeat({
         ws,
@@ -66,9 +66,9 @@ export const createCarouselSession = (input: {
         if (cleaned) return;
         cleaned = true;
 
-        ws.off("message", onMessage);
         ws.off("close", onClose);
         ws.off("error", onError);
+        ws.off("message", onMessage);
         if (isError) ws.terminate();
 
         try {

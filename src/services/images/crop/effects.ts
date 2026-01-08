@@ -9,4 +9,4 @@ export const updateAndMove = (input: {
     cropped: string
 }) => updateOffset(input.record)
     ? fs.rename(input.croppedTmp, input.cropped)
-    : Promise.resolve();
+    : Promise.reject();

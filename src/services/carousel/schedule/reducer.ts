@@ -90,7 +90,9 @@ export const reducer = (input: {
                 action: { type: "BROADCAST" },
             };
 
-        default:
-            throw event satisfies never;
+        default: {
+            const exhaustive: never = event;
+            throw new Error(`Unhandled event: ${exhaustive}`);
+        }
     }
 };

@@ -54,16 +54,24 @@ export const uploadImage = (input: {
         sharpMetadata,
         resizeToCover({ sharpInstance: transform.clone(), path: croppedTmp, signal }),
     ]).then(([metadata, coverOutput]) => {
-        const scale = Math.max(
-            config.device.screen.width / metadata.width,
-            config.device.screen.height / metadata.height,
-        );
+        const widthRatio = config.device.screen.width / metadata.width;
+        const heightRatio = config.device.screen.height / metadata.height;
+
+        const { width, height} = widthRatio > heightRatio
+            ? {
+                width: config.device.screen.width,
+                height: Math.round(metadata.height * widthRatio),
+            }
+            : {
+                width: Math.round(metadata.width * heightRatio),
+                height: config.device.screen.height,
+            };
 
         return {
             left: Math.abs(coverOutput.cropOffsetLeft ?? 0),
             top: Math.abs(coverOutput.cropOffsetTop ?? 0),
-            width: Math.round(metadata.width * scale),
-            height: Math.round(metadata.height * scale),
+            width,
+            height,
         };
     });
 
@@ -85,13 +93,16 @@ export const uploadImage = (input: {
         })
     );
 
-    persist.then(() => {
-        try {
-            notifyImagesChanged();
-        } catch (err) {
-            console.error("Error notifying images changed:", err);
-        };
-    });
+    persist.then(
+        () => {
+            try {
+                notifyImagesChanged();
+            } catch (err) {
+                console.error("Error notifying images changed:", err);
+            };
+        },
+        () => {},
+    );
 
     const tasks = { lookupPlace, saveOriginal, crop, optimize, persist };
     uploadTasksById.set(id, tasks);

@@ -73,7 +73,9 @@ export const reducer = (input: {
                 actions: [{ type: "CLEANUP" }],
             }
 
-        default:
-            throw event satisfies never;
+        default: {
+            const exhaustive: never = event;
+            throw new Error(`Unhandled event: ${exhaustive}`);
+        }
     }
 };

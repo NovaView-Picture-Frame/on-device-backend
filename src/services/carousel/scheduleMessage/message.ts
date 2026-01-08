@@ -7,9 +7,7 @@ import type { State } from "../schedule/types";
 
 const getStartIndex = (now: Date, startTime: Date) => {
     const elapsed = now.getTime() - startTime.getTime();
-    if (elapsed < 0) throw new Error("Invalid time: now is before startTime.");
-
-    return ~~(elapsed / config.services.carousel.default_interval_ms);
+    return ~~(Math.max(0, elapsed) / config.services.carousel.default_interval_ms);
 };
 
 export const buildScheduleMessage = (input: {
