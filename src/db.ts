@@ -3,7 +3,9 @@ import Database from "better-sqlite3";
 import { config, paths } from "./config";
 
 export const db = new Database(`${paths._base}/${config.server.database}`, {
-    nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`,
+    ...process.env["NODE_ENV"] !== "development" && {
+        nativeBinding: `${import.meta.dirname}/node_modules/better-sqlite3/better_sqlite3.node`
+    },
 });
 
 db.exec(/* sql */ `

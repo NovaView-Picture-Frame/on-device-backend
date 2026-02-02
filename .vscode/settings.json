@@ -3,5 +3,4 @@
     "npm.scriptExplorerExclude": [
         "postinstall",
     ],
-    "editor.defaultFormatter": "oxc.oxc-vscode"
 }
